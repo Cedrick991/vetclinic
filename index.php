@@ -21,6 +21,6 @@ define('PUBLIC_PATH', BASE_PATH . '/public');
 define('SRC_PATH', BASE_PATH . '/src');
 
 // Simple routing - redirect to homepage
-header('Location: public/index.html');
+header('Location: index.html');
 exit();
 ?>

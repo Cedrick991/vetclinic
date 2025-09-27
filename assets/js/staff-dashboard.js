@@ -1,4 +1,4 @@
-/**
+so/**
  * Staff Dashboard JavaScript
  * Handles staff-specific functionality for the veterinary clinic management system
  */

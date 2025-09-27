@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tattoo Veterinary Clinic</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css">
   <meta name="description" content="Tattoo Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
 </head>
 <body>
   <!-- Header -->
   <header>
     <div class="logo">
-      <img src="../assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
+      <img src="assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
       <span class="clinic-name">TATTOO<br>VETERINARY CLINIC</span>
     </div>
     <nav>
@@ -31,9 +31,9 @@
 
   <!-- Hero Section -->
   <section class="hero">
-    <img src="../assets/images/dogandcat.png" alt="Dog and Cat" class="hero-pets">
+    <img src="assets/images/dogandcat.png" alt="Dog and Cat" class="hero-pets">
     <div class="hero-text">
-      <img src="../assets/images/textdogandcat.png" alt="Book a check up for your fur baby today!">
+      <img src="assets/images/textdogandcat.png" alt="Book a check up for your fur baby today!">
     </div>
     <div class="btn-wrapper">
       <button class="booking-btn" onclick="showBookingModal()">
@@ -46,7 +46,7 @@
     <h2>OUR SERVICES</h2>
     <div class="services-container">
       <div class="services-img">
-        <img src="../assets/images/catsolohehe.png" alt="Cat">
+        <img src="assets/images/catsolohehe.png" alt="Cat">
       </div>
       <div class="service-list">
         <span><i class="service-icon">🐕</i> BASIC OBEDIENCE TRAINING</span>
@@ -110,7 +110,7 @@
 
     <div class="schedule-container">
       <div class="schedule-left">
-        <img src="../assets/images/logoo.jpg" alt="Clinic Logo">
+        <img src="assets/images/logoo.jpg" alt="Clinic Logo">
         <p>At Tattao Veterinary Clinic, we offer the <strong>best care</strong> for your fur babies. 
         Promoting <strong>Responsible Pet Ownership</strong> by providing your pet care needs at a reasonable price.</p>
         
@@ -140,19 +140,19 @@
     <div class="categories">
       <!-- Food -->
       <div class="category">
-        <img src="../assets/images/food.png" alt="Food for Pets">
+        <img src="assets/images/food.png" alt="Food for Pets">
         <h3>FOOD FOR<br>YOUR PETS</h3>
       </div>
 
       <!-- Grooming -->
       <div class="category">
-        <img src="../assets/images/grooming.png" alt="Grooming Supplies">
+        <img src="assets/images/grooming.png" alt="Grooming Supplies">
         <h3>GROOMING<br>SUPPLIES</h3>
       </div>
 
       <!-- Accessories -->
       <div class="category">
-        <img src="../assets/images/collar.png" alt="Collars and Accessories">
+        <img src="assets/images/collar.png" alt="Collars and Accessories">
         <h3>AND<br>ACCESSORIES</h3>
       </div>
     </div>
@@ -162,7 +162,7 @@
   <footer>
     <div class="footer-container">
       <div class="footer-logo">
-        <img src="../assets/images/logoo.jpg" alt="Logo">
+        <img src="assets/images/logoo.jpg" alt="Logo">
         <span>Tattoo Veterinary Clinic</span>
       </div>
       <span class="footer-tagline">We offer the best care for your fur babies</span>
@@ -648,7 +648,7 @@
       // Get CSRF token
       async function getCSRFToken() {
         try {
-          const response = await fetch('../api/vet_api.php', {
+          const response = await fetch('api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'get_csrf_token' })
@@ -1422,7 +1422,7 @@
       }
 
       try {
-          const response = await fetch('../api/vet_api.php', {
+          const response = await fetch('api/vet_api.php', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -1510,7 +1510,7 @@
       
       window.loadAllAppointments = async () => {
         try {
-          const response = await fetch('../api/vet_api.php', {
+          const response = await fetch('api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'get_all_appointments', limit: 50 })
@@ -1610,7 +1610,7 @@
         if (!newStatus) return;
         
         try {
-          const response = await fetch('../api/vet_api.php', {
+          const response = await fetch('api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

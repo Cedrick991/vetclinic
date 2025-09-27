@@ -1,0 +1,5 @@
+# Ignore logs
+logs/
+
+# Ignore PHP error logs specifically
+*.log
