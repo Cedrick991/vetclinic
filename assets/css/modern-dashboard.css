@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #4A90E2 0%, #2C5282 100%);
+    background: #f0f2f5;
     min-height: 100vh;
     color: #ffffff;
     overflow-x: hidden;
@@ -348,8 +348,8 @@ body {
 
 /* Dashboard Cards */
 .dashboard-card {
-    background: #1A365D;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 15px;
     padding: 25px;
     transition: all 0.3s ease;
@@ -374,7 +374,7 @@ body {
 .card-title {
     font-size: 16px;
     font-weight: 600;
-    color: #ffffff;
+    color: #2C5282;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -388,14 +388,14 @@ body {
 .card-value {
     font-size: 36px;
     font-weight: 800;
-    color: #ffffff;
+    color: #2C5282;
     margin-bottom: 8px;
     line-height: 1;
 }
 
 .card-subtitle {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
+    color: #666666;
     margin: 0;
 }
 
