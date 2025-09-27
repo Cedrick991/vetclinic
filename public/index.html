@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tattoo Veterinary Clinic</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <meta name="description" content="Tattoo Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <img src="../assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
+      <span class="clinic-name">TATTOO<br>VETERINARY CLINIC</span>
+    </div>
+    <nav>
+      <a href="#services"><i class="icon"></i> SERVICES</a>
+      <a href="#" onclick="showBookingModal()"><i class="icon"></i> BOOKING</a>
+      <a href="#contact"><i class="icon"></i> CONTACT US</a>
+      <a href="#store"><i class="icon"></i> STORE</a>
+    </nav>
+
+
+    <div class="auth-links">
+      <a href="#" onclick="showLoginModal()"><i class="icon">🔐</i> LOG-IN</a>
+      <a href="#" onclick="showRegisterModal()"><i class="icon">📝</i> SIGN-UP</a>
+    </div>
+  </header>
+
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <img src="../assets/images/dogandcat.png" alt="Dog and Cat" class="hero-pets">
+    <div class="hero-text">
+      <img src="../assets/images/textdogandcat.png" alt="Book a check up for your fur baby today!">
+    </div>
+    <div class="btn-wrapper">
+      <button class="booking-btn" onclick="showBookingModal()">
+        <i class="icon">🗓️</i> BOOK APPOINTMENT
+      </button>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services" id="services">
+    <h2>OUR SERVICES</h2>
+    <div class="services-container">
+      <div class="services-img">
+        <img src="../assets/images/catsolohehe.png" alt="Cat">
+      </div>
+      <div class="service-list">
+        <span><i class="service-icon">🐕</i> BASIC OBEDIENCE TRAINING</span>
+        <span><i class="service-icon">🐍</i> DEWORMING</span>
+        <span><i class="service-icon">📶</i> MICROCHIP IMPLANTING</span>
+        <span><i class="service-icon">💉</i> VACCINATION</span>
+        <span><i class="service-icon">🏠</i> PET BOARDING</span>
+        <span><i class="service-icon">🦇</i> EXTERNAL PARASITE PREVENTION</span>
+        <span><i class="service-icon">🕊️</i> EUTHANASIA</span>
+        <span><i class="service-icon">🚑</i> COMPREHENSIVE GENERAL CHECK UP</span>
+        <span><i class="service-icon">✂️</i> GROOMING</span>
+        <span><i class="service-icon">🦷</i> DENTAL SURGERY</span>
+        <span><i class="service-icon">🏥</i> SURGERY</span>
+        <span><i class="service-icon">🏡</i> HOME SERVICE BY APPOINTMENT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact" id="contact">
+    <h2>CONTACT US</h2>
+    <div class="contact-info">
+      <div class="contact-details">
+        <div class="contact-item"><div class="icon">📧</div><p>tattaoveterinaryclinic@gmail.com</p></div>
+        <div class="contact-item"><div class="icon facebook"><strong>f</strong></div><p>Tattao Veterinary Clinic</p></div>
+        <div class="contact-item"><div class="icon">📞</div><p>0917 519 4639</p></div>
+        <div class="contact-item"><div class="icon">📞</div><p>0975 339 7908</p></div>
+        <div class="contact-item"><div class="icon">📍</div><p>ZONE 2 NATIONAL HIGHWAY, ALIMANAO,<br>PENABLANCA, CAGAYAN</p></div>
+      </div>
+
+      <div class="contact-right">
+        <div class="map-container">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3802.1335095384566!2d121.75943667463251!3d17.643834595367945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x338585bde16554ff%3A0xb5df81d15287ff9a!2sTattao%20Veterinary%20Clinic!5e0!3m2!1sen!2sph!4v1757403955285!5m2!1sen!2sph" 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Tattao Veterinary Clinic Location Map"
+            aria-label="Google Maps showing the location of Tattao Veterinary Clinic">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Schedule Section -->
+  <section class="schedule">
+    <div class="hours">
+      <div class="day-box">MONDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box">TUESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box">WEDNESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box">THURSDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box">FRIDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box">SATURDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+      <div class="day-box closed">SUNDAY<br><span>CLOSED</span></div>
+    </div>
+
+    <div class="schedule-container">
+      <div class="schedule-left">
+        <img src="../assets/images/logoo.jpg" alt="Clinic Logo">
+        <p>At Tattao Veterinary Clinic, we offer the <strong>best care</strong> for your fur babies. 
+        Promoting <strong>Responsible Pet Ownership</strong> by providing your pet care needs at a reasonable price.</p>
+        
+        <div class="footer-social">
+          <a href="https://www.facebook.com/share/16H1LSHgNL/" target="_blank" rel="noopener noreferrer" title="Visit our Facebook page">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </a>
+          <a href="mailto:tattaoveterinaryclinic@gmail.com" title="Send us an email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+    </div>
+     </div>
+   </section>
+
+  <!-- Store Section -->
+  <section class="store-section" id="store">
+    <h2>STORE</h2>
+    <p>THE TATTAO VETERINARY CLINIC OFFERS</p>
+
+    <div class="categories">
+      <!-- Food -->
+      <div class="category">
+        <img src="../assets/images/food.png" alt="Food for Pets">
+        <h3>FOOD FOR<br>YOUR PETS</h3>
+      </div>
+
+      <!-- Grooming -->
+      <div class="category">
+        <img src="../assets/images/grooming.png" alt="Grooming Supplies">
+        <h3>GROOMING<br>SUPPLIES</h3>
+      </div>
+
+      <!-- Accessories -->
+      <div class="category">
+        <img src="../assets/images/collar.png" alt="Collars and Accessories">
+        <h3>AND<br>ACCESSORIES</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">
+        <img src="../assets/images/logoo.jpg" alt="Logo">
+        <span>Tattoo Veterinary Clinic</span>
+      </div>
+      <span class="footer-tagline">We offer the best care for your fur babies</span>
+      <span class="footer-bottom">2024 © Robinsons Galleria, Ampatuan, Cotabato, Clayton | Accent Log In | OPAC GUI Portal | OAI-PMH Service</span>
+    </div>
+  </footer>
+
+  <!-- Modal Dialogs -->
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('loginModal')">&times;</span>
+      <h2><i class="modal-icon">🔐</i> Login to Your Account</h2>
+      <form id="loginForm">
+        <label for="login_email" class="sr-only">Email Address</label>
+        <input type="email" id="login_email" name="email" placeholder="✉️ Email" title="Enter your email address" required>
+
+        <div class="password-container">
+          <label for="login_password" class="sr-only">Password</label>
+          <input type="password" id="login_password" name="password" placeholder="🔒 Password" title="Enter your password" required>
+          <span class="password-toggle" onclick="togglePasswordVisibility('loginForm')" title="Toggle password visibility" aria-label="Show/hide password">👁️</span>
+        </div>
+        <button type="submit"><i class="btn-icon">🔓</i> LOGIN</button>
+      </form>
+      <p>Don't have an account? <a href="#" onclick="showRegisterModal()">Register here</a></p>
+      <p><a href="#" onclick="showForgotPasswordModal()" style="color: #3498db; text-decoration: none;">Forgot your password?</a></p>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('registerModal')">&times;</span>
+      <h2 id="registerTitle"><i class="modal-icon">📝</i> Create Your Account</h2>
+      <form id="registerForm">
+        
+        <label for="register_first_name" class="sr-only">First Name</label>
+        <input type="text" id="register_first_name" name="first_name" placeholder="👤 First Name" title="Enter your first name" required>
+        
+        <label for="register_last_name" class="sr-only">Last Name</label>
+        <input type="text" id="register_last_name" name="last_name" placeholder="👥 Last Name" title="Enter your last name" required>
+        
+        <label for="register_email" class="sr-only">Email Address</label>
+        <input type="email" id="register_email" name="email" placeholder="✉️ Email" title="Enter your email address" required>
+        
+        <label for="register_phone" class="sr-only">Phone Number</label>
+        <input type="tel" id="register_phone" name="phone" placeholder="📱 Phone Number" title="Enter your phone number" required>
+        
+        <div class="password-container">
+          <label for="register_password" class="sr-only">Password</label>
+          <input type="password" id="register_password" name="password" placeholder="🔒 Password (min 8 chars)" title="Enter a password with at least 8 characters" required minlength="8">
+          <span class="password-toggle" onclick="togglePasswordVisibility('registerForm')" title="Toggle password visibility" aria-label="Show/hide password">👁️</span>
+        </div>
+        
+        <div class="password-strength">
+          <div class="pw-strength-bar" id="registerPwBar"></div>
+          <div class="pw-strength-text" id="registerPwText">Password strength: -</div>
+          <div class="pw-requirements" id="registerPwReq"></div>
+        </div>
+        
+        <label for="register_address" class="sr-only">Address (Optional)</label>
+        <input type="text" id="register_address" name="address" placeholder="🏠 Address (optional)" title="Enter your address (optional)">
+
+        <button type="submit" id="registerBtn">✅ CREATE ACCOUNT</button>
+      </form>
+      <p>Already have an account? <a href="#" onclick="showLoginModal()">Login here</a></p>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
+      <h2><i class="modal-icon">🔑</i> Reset Your Password</h2>
+      <form id="forgotPasswordForm">
+        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+          Enter your email address and we'll send you a link to reset your password.
+        </p>
+        <label for="forgot_email" class="sr-only">Email Address</label>
+        <input type="email" id="forgot_email" name="email" placeholder="✉️ Email Address" title="Enter your email address to reset password" required>
+        <button type="submit"><i class="btn-icon">📧</i> SEND RESET LINK</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px;">
+        Remember your password? <a href="#" onclick="showLoginModal(); closeModal('forgotPasswordModal');">Login here</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal" style="display: none;">
+    <div class="modal-content booking-modal">
+      <span class="close" onclick="closeModal('bookingModal')">&times;</span>
+      <h2 id="bookingModalTitle"><i class="modal-icon">📅</i> Book an Appointment</h2>
+      
+      <!-- Login Required Message -->
+      <div id="loginRequiredMessage" style="display: none; text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(255,153,0,0.15), rgba(255,215,0,0.15)); border: 2px solid rgba(255,153,0,0.3); border-radius: 15px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div style="font-size: 60px; margin-bottom: 15px;">🔐</div>
+        <h2 style="color: #e67e22; margin-bottom: 15px; font-size: 24px;">Login Required</h2>
+        <p style="color: #8b5a00; font-size: 16px; margin-bottom: 25px; line-height: 1.5;">You need to log in to your account to book an appointment for your pet.</p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+          <button onclick="showLoginModal(); closeModal('bookingModal');" style="background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='#3498db'"><i class="btn-icon">🔐</i> Login Now</button>
+          <button onclick="showRegisterModal(); closeModal('bookingModal');" style="background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#219a52'" onmouseout="this.style.background='#27ae60'"><i class="btn-icon">📝</i> Register Now</button>
+        </div>
+        <p style="color: #95a5a6; font-size: 14px; margin-top: 20px; margin-bottom: 0;">Don't have an account? Registration is quick and easy!</p>
+      </div>
+      
+      <!-- Booking Form -->
+      <form id="bookingForm" style="display: none;">
+        <div class="form-group">
+          <label for="booking_service"><i class="form-icon">🏥</i> Select Service:</label>
+          <select id="booking_service" name="service_id" title="Select a veterinary service" aria-label="Select a veterinary service" required>
+            <option value="">Loading services...</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="booking_pet"><i class="form-icon">🐶</i> Select Pet:</label>
+          <select id="booking_pet" name="pet_id" title="Select your pet" aria-label="Select your pet" required>
+            <option value="">Loading pets...</option>
+          </select>
+          <button type="button" onclick="showAddPetForm()" title="Add a new pet" style="background: #4169e1; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px;"><i class="btn-icon">🐶</i> Add New Pet</button>
+        </div>
+        
+        <div class="form-group">
+          <label for="booking_date"><i class="form-icon">📅</i> Appointment Date:</label>
+          <input type="date" id="booking_date" name="appointment_date" title="Select appointment date" required min="" />
+        </div>
+        
+        <div class="form-group">
+          <label for="booking_time"><i class="form-icon">⏰</i> Appointment Time:</label>
+          <select id="booking_time" name="appointment_time" title="Select appointment time" aria-label="Select appointment time" required>
+            <option value="">Select date first</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="booking_notes"><i class="form-icon">📝</i> Notes (Optional):</label>
+          <textarea id="booking_notes" name="notes" rows="3" placeholder="💬 Any special instructions or concerns..." title="Enter any special instructions or concerns"></textarea>
+        </div>
+        
+        <button type="submit"><i class="btn-icon">🗓️</i> Book Appointment</button>
+      </form>
+      
+      <!-- Add Pet Form (Hidden) -->
+      <div id="addPetForm" style="display: none; border-top: 1px solid rgba(255,215,0,0.3); padding-top: 20px; margin-top: 20px;">
+        <h3 style="color: #ffd700;"><i class="form-icon">🐾</i> Add New Pet</h3>
+        <div class="form-row">
+          <label for="petName" class="sr-only">Pet Name</label>
+          <input type="text" id="petName" placeholder="🏷️ Pet Name" title="Enter your pet's name" required />
+          
+          <label for="petSpecies" class="sr-only">Pet Species</label>
+          <select id="petSpecies" title="Select your pet's species" aria-label="Select pet species" required>
+            <option value="">🐾 Select Species</option>
+            <option value="Dog">🐶 Dog</option>
+            <option value="Cat">🐱 Cat</option>
+            <option value="Bird">🐦 Bird</option>
+            <option value="Rabbit">🐰 Rabbit</option>
+            <option value="Other">🐾 Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="petBreed" class="sr-only">Pet Breed (Optional)</label>
+          <input type="text" id="petBreed" placeholder="🧬 Breed (Optional)" title="Enter your pet's breed (optional)" />
+
+          <label for="petBirthdate" class="sr-only">Pet Birthdate</label>
+          <input type="date" id="petBirthdate" placeholder="🎂 Birthdate" title="Select your pet's birthdate" max="" />
+        </div>
+        <div class="form-row">
+          <label for="petGender" class="sr-only">Pet Gender</label>
+          <select id="petGender" title="Select your pet's gender" aria-label="Select pet gender" required>
+            <option value="">⚔️ Select Gender</option>
+            <option value="Male">♂️ Male</option>
+            <option value="Female">♀️ Female</option>
+          </select>
+          
+          <label for="petWeight" class="sr-only">Pet Weight</label>
+          <input type="number" id="petWeight" placeholder="⚖️ Weight (kg)" title="Enter your pet's weight in kilograms" step="0.1" min="0" />
+        </div>
+        
+        <label for="petColor" class="sr-only">Pet Color (Optional)</label>
+        <input type="text" id="petColor" placeholder="🎨 Color (Optional)" title="Enter your pet's color (optional)" />
+        <div style="margin-top: 15px;">
+          <button type="button" onclick="addPet()"><i class="btn-icon">➕</i> Add Pet</button>
+          <button type="button" onclick="hideAddPetForm()" style="background: #666;"><i class="btn-icon">❌</i> Cancel</button>
+        </div>
+      </div>
+      
+      <!-- Staff Dashboard (Hidden by default) -->
+      <div id="staffDashboard" style="display: none;">
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+          <h3 style="color: #ffd700; margin: 0;">📋 Appointment Management Dashboard</h3>
+          <div>
+            <button onclick="loadAllAppointments()" style="background: #4169e1; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-right: 10px;"><i class="btn-icon">🔄</i> Refresh</button>
+            <select id="statusFilter" onchange="filterAppointments()" style="padding: 8px; border-radius: 5px;">
+              <option value="">All Appointments</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        
+        <div id="appointmentsList" style="max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 15px;">
+          <p style="text-align: center; color: #666;">Loading appointments...</p>
+        </div>
+        
+        <div style="margin-top: 15px; text-align: center;">
+          <p style="color: #888; font-size: 14px;">💡 Click on appointments to update their status</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast"></div>
+
+  <style>
+    /* Screen reader only labels */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    
+    /* Password visibility toggle styles */
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .password-container input[type="password"],
+    .password-container input[type="text"] {
+      width: 100%;
+      padding-right: 45px; /* Make room for the eye icon */
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 18px;
+      color: #666;
+      transition: color 0.3s ease;
+      z-index: 10;
+    }
+    
+    .password-toggle:hover {
+      color: #4169e1;
+    }
+    
+    .password-toggle.visible {
+      color: #4169e1;
+    }
+    
+    /* Universal Icon Styles */
+    .icon, .service-icon, .modal-icon, .btn-icon, .form-icon, .social-icon, .signup-icon {
+      display: inline-block;
+      margin-right: 8px;
+      font-style: normal;
+      font-size: 1.2em;
+      vertical-align: middle;
+      transition: all 0.3s ease;
+    }
+    
+    /* Navigation Icons */
+    nav a .icon {
+      font-size: 1.1em;
+      margin-right: 6px;
+    }
+    
+    /* Service Icons */
+    .service-icon {
+      font-size: 1.3em;
+      margin-right: 10px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .service-list span:hover .service-icon {
+      transform: scale(1.2);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+    
+    /* Modal Icons */
+    .modal-icon {
+      font-size: 1.4em;
+      margin-right: 10px;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* Button Icons */
+    .btn-icon {
+      font-size: 1.1em;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    
+    /* Form Icons */
+    .form-icon {
+      font-size: 1.1em;
+      margin-right: 6px;
+      color: #4169e1;
+    }
+    
+    /* Social Icons */
+    .social-icon {
+      font-size: 1.2em;
+      margin-right: 6px;
+    }
+    
+    /* Signup Section Icon */
+    .signup-icon {
+      font-size: 1.3em;
+      margin-right: 8px;
+      color: #ffd700;
+    }
+    
+    /* Contact Icons Enhancement */
+    .contact-item .icon {
+      font-size: 1.4em;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      min-height: 40px;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+    
+    /* Hero Button Icon */
+    .booking-btn .icon {
+      font-size: 1.2em;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Auth Links Icons */
+    .auth-links a .icon {
+      font-size: 1em;
+      margin-right: 5px;
+    }
+    
+    /* Responsive Icon Adjustments */
+    @media (max-width: 768px) {
+      .icon, .service-icon, .modal-icon, .btn-icon, .form-icon {
+        font-size: 1em;
+        margin-right: 6px;
+      }
+      
+      .service-icon {
+        font-size: 1.1em;
+      }
+      
+      .modal-icon {
+        font-size: 1.2em;
+      }
+      
+      .contact-item .icon {
+        font-size: 1.2em;
+        min-width: 35px;
+        min-height: 35px;
+      }
+    }
+
+    /* Password strength meter */
+    .password-strength { margin-top: 6px; }
+    .pw-strength-bar { height: 8px; border-radius: 6px; background: #eee; position: relative; overflow: hidden; }
+    .pw-strength-bar::after { content: ''; display: block; height: 100%; width: 0%; background: #e74c3c; transition: width 0.3s ease, background 0.3s ease; }
+    .pw-strength-text { font-size: 12px; color: #666; margin-top: 6px; }
+    .pw-requirements { font-size: 12px; color: #8b5a00; margin-top: 4px; }
+    .pw-ok { color: #27ae60; }
+    .pw-bad { color: #e74c3c; }
+
+    /* Store Section Styles */
+    .store-section {
+      text-align: center;
+      padding: 40px 20px;
+      background: #27406b;
+    }
+
+    .store-section h2 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: white;
+    }
+
+    .store-section p {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #d1d5db;
+    }
+
+    .categories {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .category {
+      background: #3a588c;
+      border-radius: 12px;
+      padding: 20px;
+      width: 250px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .category:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .category img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+
+    .category h3 {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .categories {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+  </style>
+
+  <script>
+    // Global CSRF token
+    let csrfToken = '';
+
+    // Modern JavaScript with reduced redundancy
+    document.addEventListener('DOMContentLoaded', async function () {
+      // Get CSRF token first
+      await getCSRFToken();
+
+      // Check login status on page load and update UI
+      checkLoginStatusOnLoad();
+      
+      // Smooth scrolling for nav links
+      document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function (e) {
+          const href = this.getAttribute('href');
+          if (href && href.startsWith('#') && href.length > 1) {
+            e.preventDefault();
+            const targetSection = document.querySelector(href);
+            if (targetSection) {
+              targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        });
+      });
+      
+      // Get CSRF token
+      async function getCSRFToken() {
+        try {
+          const response = await fetch('../api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_csrf_token' })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            csrfToken = result.data.csrf_token;
+          } else {
+            console.error('Failed to get CSRF token:', result.message);
+          }
+        } catch (error) {
+          console.error('Error getting CSRF token:', error);
+        }
+      }
+
+      // Helper function for API calls with CSRF token
+      async function apiCall(payload) {
+        // Add CSRF token to payload for state-changing actions
+        const csrfActions = ['register', 'login', 'logout', 'book_appointment', 'add_pet', 'update_appointment_status', 'add_to_cart', 'place_order', 'update_staff_profile', 'change_staff_password'];
+        if (csrfActions.includes(payload.action)) {
+          payload.csrf_token = csrfToken;
+        }
+
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        return await response.json();
+      }
+
+      // Check login status on page load and update UI accordingly
+      async function checkLoginStatusOnLoad() {
+        try {
+          const result = await apiCall({ action: 'get_user_info' });
+          
+          if (result.success && result.data.logged_in) {
+            // User is logged in, update UI
+            const user = result.data.user;
+            const userType = result.data.user_type;
+            
+            updateUIForLoggedInUser(user, userType);
+            
+            // Update booking buttons text for staff users
+            if (userType === 'staff') {
+              const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
+              bookingBtns.forEach(btn => {
+                if (btn.tagName === 'A') {
+                  btn.innerHTML = '<i class="icon">📊</i> DASHBOARD';
+                } else {
+                  btn.innerHTML = '<i class="icon">📊</i> STAFF DASHBOARD';
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error checking login status on load:', error);
+        }
+      }
+
+      // Global modal functions
+      window.showLoginModal = () => openModal('loginModal');
+      window.showRegisterModal = () => openModal('registerModal');
+      window.showForgotPasswordModal = () => openModal('forgotPasswordModal');
+      window.showBookingModal = () => {
+        // Always open the booking modal, let initializeBookingModal handle login checking
+        openModal('bookingModal');
+        initializeBookingModal();
+      };
+      window.closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) {
+          modal.style.display = 'none';
+        }
+      };
+
+      function openModal(id) {
+        document.getElementById(id)?.style.setProperty('display', 'flex');
+      }
+
+      // Enhanced toast notification system with icons
+      window.toast = function(message, type = 'success') {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        
+        // Add appropriate icons based on type
+        const icons = {
+          success: '✅',
+          error: '❌', 
+          warning: '⚠️',
+          info: 'ℹ️'
+        };
+        
+        const icon = icons[type] || icons.info;
+        el.innerHTML = `<span style="margin-right: 8px; font-size: 18px;">${icon}</span>${message}`;
+        
+        // Apply classes and show
+        el.className = `toast show ${type}`;
+        
+        // Auto-hide after 4 seconds with smooth animation
+        setTimeout(() => { 
+          el.classList.remove('show');
+          // Reset after animation completes
+          setTimeout(() => {
+            el.className = 'toast';
+            el.innerHTML = '';
+          }, 400);
+        }, 4000);
+      };
+
+      // Password visibility toggle function
+      window.togglePasswordVisibility = (formId) => {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        
+        const passwordInput = form.querySelector('input[name="password"]');
+        const toggleButton = form.querySelector('.password-toggle');
+        
+        if (!passwordInput || !toggleButton) return;
+        
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          toggleButton.innerHTML = '🙈'; // See-no-evil monkey (hidden state)
+          toggleButton.classList.add('visible');
+        } else {
+          passwordInput.type = 'password';
+          toggleButton.innerHTML = '👁️'; // Eye (visible state)
+          toggleButton.classList.remove('visible');
+        }
+      };
+
+      // Update Register Form UI (now always client)
+      window.updateRegisterForm = () => {
+        const title = document.getElementById('registerTitle');
+        const btn = document.getElementById('registerBtn');
+        title.innerHTML = '<i class="modal-icon">🐶</i> Create Your Account';
+        btn.innerHTML = '<i class="btn-icon">✅</i> CREATE ACCOUNT';
+      };
+
+      // Initialize register form state
+      updateRegisterForm();
+      
+      // Set minimum date to today
+      const dateInput = document.querySelector('input[name="appointment_date"]');
+      if (dateInput) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.min = tomorrow.toISOString().split('T')[0];
+        
+        // Add event listener for date changes
+        dateInput.addEventListener('change', loadAvailableTimeSlots);
+      }
+      
+      // Add booking form handler
+      document.getElementById('bookingForm').addEventListener('submit', handleBooking);
+      
+      // Initialize booking modal
+      async function initializeBookingModal() {
+        // Check if user is logged in
+        try {
+          const result = await apiCall({ action: 'get_user_info' });
+          
+          if (result.success && result.data.logged_in) {
+            const userType = result.data.user_type;
+            
+            // Hide login required message
+            document.getElementById('loginRequiredMessage').style.display = 'none';
+            
+            if (userType === 'staff') {
+              // Show staff dashboard
+              document.getElementById('bookingForm').style.display = 'none';
+              document.getElementById('addPetForm').style.display = 'none';
+              showStaffDashboard();
+            } else {
+              // Show client booking form
+              document.getElementById('bookingForm').style.display = 'block';
+              hideStaffDashboard();
+              
+              // Load services and pets for clients
+              await loadServices();
+              await loadUserPets();
+            }
+          } else {
+            // User not logged in
+            document.getElementById('loginRequiredMessage').style.display = 'block';
+            document.getElementById('bookingForm').style.display = 'none';
+            hideStaffDashboard();
+          }
+        } catch (error) {
+          console.error('Error checking login status:', error);
+          document.getElementById('loginRequiredMessage').style.display = 'block';
+          document.getElementById('bookingForm').style.display = 'none';
+          hideStaffDashboard();
+        }
+      }
+      
+      // Load services
+      async function loadServices() {
+        try {
+          const result = await apiCall({ action: 'get_services' });
+          const serviceSelect = document.querySelector('select[name="service_id"]');
+
+          if (result.success && result.data) {
+            serviceSelect.innerHTML = '<option value="">Select a service</option>';
+            result.data.forEach(service => {
+              const option = document.createElement('option');
+              option.value = service.service_id;
+              // Show service name and description if available
+              const description = service.description ? ` - ${service.description}` : '';
+              option.textContent = `${service.service_name}${description}`;
+              serviceSelect.appendChild(option);
+            });
+          } else {
+            serviceSelect.innerHTML = '<option value="">No services available</option>';
+          }
+        } catch (error) {
+          console.error('Error loading services:', error);
+        }
+      }
+      
+      // Load user pets
+      async function loadUserPets() {
+        try {
+          const result = await apiCall({ action: 'get_client_pets' });
+          const petSelect = document.querySelector('select[name="pet_id"]');
+          
+          if (result.success && result.data && result.data.length > 0) {
+            petSelect.innerHTML = '<option value="">Select a pet</option>';
+            result.data.forEach(pet => {
+              const option = document.createElement('option');
+              option.value = pet.pet_id;
+              option.textContent = `${pet.pet_name} (${pet.species})`;
+              petSelect.appendChild(option);
+            });
+            
+            // Hide the "no pets" message if it exists
+            const noPetsMsg = document.getElementById('noPetsMessage');
+            if (noPetsMsg) noPetsMsg.style.display = 'none';
+          } else {
+            petSelect.innerHTML = '<option value="">No pets registered</option>';
+            
+            // Show helpful message about adding pets
+            showNoPetsMessage();
+          }
+        } catch (error) {
+          console.error('Error loading pets:', error);
+          const petSelect = document.querySelector('select[name="pet_id"]');
+          petSelect.innerHTML = '<option value="">Error loading pets</option>';
+          toast('Failed to load your pets. Please refresh and try again.', 'error');
+        }
+      }
+      
+      // Show message when user has no pets
+      function showNoPetsMessage() {
+        let noPetsMsg = document.getElementById('noPetsMessage');
+        if (!noPetsMsg) {
+          noPetsMsg = document.createElement('div');
+          noPetsMsg.id = 'noPetsMessage';
+          noPetsMsg.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 15px 0;';
+          noPetsMsg.innerHTML = `
+            <h4 style="margin: 0 0 10px 0; color: #856404;">🐾 No Pets Registered</h4>
+            <p style="margin: 0 0 10px 0;">You need to add at least one pet before booking an appointment.</p>
+          `;
+          
+          // Insert after the pet selection field
+          const petSelect = document.querySelector('select[name="pet_id"]');
+          petSelect.parentNode.insertBefore(noPetsMsg, petSelect.nextSibling);
+        }
+        noPetsMsg.style.display = 'block';
+      }
+      
+      // Load available time slots for selected date
+      async function loadAvailableTimeSlots() {
+        const dateInput = document.querySelector('input[name="appointment_date"]');
+        const timeSelect = document.querySelector('select[name="appointment_time"]');
+        const selectedDate = dateInput.value;
+        
+        if (!selectedDate) {
+          timeSelect.innerHTML = '<option value="">Select date first</option>';
+          return;
+        }
+        
+        try {
+          const result = await apiCall({
+            action: 'get_available_times',
+            date: selectedDate
+          });
+          
+          if (result.success && result.data && result.data.length > 0) {
+            timeSelect.innerHTML = '<option value="">Select a time</option>';
+            result.data.forEach(time => {
+              const option = document.createElement('option');
+              option.value = time;
+              option.textContent = formatTime(time);
+              timeSelect.appendChild(option);
+            });
+          } else {
+            timeSelect.innerHTML = '<option value="">No available time slots</option>';
+          }
+        } catch (error) {
+          console.error('Error loading time slots:', error);
+          timeSelect.innerHTML = '<option value="">Error loading times</option>';
+        }
+      }
+      
+      // Format time for display (12-hour format)
+      function formatTime(time) {
+        const [hours, minutes] = time.split(':');
+        const hour12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hour12}:${minutes} ${ampm}`;
+      }
+      
+      // Handle booking form submission
+      async function handleBooking(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        const bookingData = {
+          action: 'book_appointment',
+          service_id: formData.get('service_id'),
+          pet_id: formData.get('pet_id'),
+          appointment_date: formData.get('appointment_date'),
+          appointment_time: formData.get('appointment_time'),
+          notes: formData.get('notes') || ''
+        };
+        
+        // Enhanced booking validation with debugging
+        console.log('Booking validation debug:');
+        console.log('service_id:', JSON.stringify(bookingData.service_id));
+        console.log('pet_id:', JSON.stringify(bookingData.pet_id));
+        console.log('appointment_date:', JSON.stringify(bookingData.appointment_date));
+        console.log('appointment_time:', JSON.stringify(bookingData.appointment_time));
+        
+        const missingBookingFields = [];
+        if (!bookingData.service_id) missingBookingFields.push('Service');
+        if (!bookingData.pet_id) missingBookingFields.push('Pet');
+        if (!bookingData.appointment_date) missingBookingFields.push('Date');
+        if (!bookingData.appointment_time) missingBookingFields.push('Time');
+        
+        if (missingBookingFields.length > 0) {
+          const errorMsg = `Please fill in all required fields. Missing: ${missingBookingFields.join(', ')}`;
+          console.log('Booking validation failed:', errorMsg);
+          toast(errorMsg, 'error');
+          return;
+        }
+        
+        // Check if pet selection is valid (not the placeholder option)
+        const petSelect = document.querySelector('select[name="pet_id"]');
+        const selectedOption = petSelect.options[petSelect.selectedIndex];
+        if (!selectedOption || selectedOption.textContent.includes('No pets registered') || selectedOption.textContent.includes('Error loading pets')) {
+          toast('Please select a valid pet or add a new pet first.', 'error');
+          showAddPetForm();
+          return;
+        }
+        
+        try {
+          const result = await apiCall(bookingData);
+          
+          if (result.success) {
+            toast('Appointment booked successfully!', 'success');
+            closeModal('bookingModal');
+            form.reset();
+          } else {
+            // Handle specific error messages
+            if (result.message && result.message.includes('Invalid pet selection')) {
+              toast('The selected pet is not valid for your account. Please select a different pet or add a new one.', 'error');
+              // Reload pets to refresh the list
+              await loadUserPets();
+              showAddPetForm();
+            } else {
+              toast(result.message || 'Failed to book appointment.', 'error');
+            }
+          }
+        } catch (error) {
+          console.error('Booking error:', error);
+          toast('Connection error. Please try again.', 'error');
+        }
+      }
+      
+      // Show add pet form with enhanced UX
+      window.showAddPetForm = () => {
+        const addPetForm = document.getElementById('addPetForm');
+        
+        // Show the form
+        addPetForm.style.display = 'block';
+        
+        // Add a subtle animation
+        addPetForm.style.opacity = '0';
+        addPetForm.style.transform = 'translateY(-10px)';
+        addPetForm.style.transition = 'all 0.3s ease';
+        
+        // Trigger the animation
+        setTimeout(() => {
+          addPetForm.style.opacity = '1';
+          addPetForm.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Smooth scroll to the add pet form
+        setTimeout(() => {
+          addPetForm.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+          
+          // Focus on the first input field for better UX
+          const firstInput = document.getElementById('petName');
+          if (firstInput) {
+            firstInput.focus();
+          }
+        }, 100);
+      };
+      
+      // Hide add pet form with smooth animation
+      window.hideAddPetForm = () => {
+        const addPetForm = document.getElementById('addPetForm');
+        
+        // Add hide animation
+        addPetForm.style.opacity = '0';
+        addPetForm.style.transform = 'translateY(-10px)';
+        
+        // Hide the form after animation
+        setTimeout(() => {
+          addPetForm.style.display = 'none';
+          
+          // Clear form fields
+          document.getElementById('petName').value = '';
+          document.getElementById('petSpecies').value = '';
+          document.getElementById('petBreed').value = '';
+          document.getElementById('petBirthdate').value = '';
+          document.getElementById('petGender').value = '';
+          document.getElementById('petWeight').value = '';
+          document.getElementById('petColor').value = '';
+          
+          // Reset styles for next show
+          addPetForm.style.opacity = '';
+          addPetForm.style.transform = '';
+          addPetForm.style.transition = '';
+        }, 300);
+      };
+      
+      // Add new pet
+      window.addPet = async () => {
+        const petData = {
+          action: 'add_pet',
+          pet_name: document.getElementById('petName').value.trim(),
+          species: document.getElementById('petSpecies').value,
+          breed: document.getElementById('petBreed').value.trim(),
+          birthdate: document.getElementById('petBirthdate').value,
+          gender: document.getElementById('petGender').value,
+          weight: parseFloat(document.getElementById('petWeight').value) || null,
+          color: document.getElementById('petColor').value.trim()
+        };
+
+        // Validation
+        if (!petData.pet_name || !petData.species || !petData.gender) {
+          toast('Please fill in pet name, species, and gender.', 'error');
+          return;
+        }
+
+        try {
+          const result = await apiCall(petData);
+
+          if (result.success) {
+            toast('Pet added successfully!', 'success');
+            hideAddPetForm();
+            // Reload pets in the select dropdown
+            await loadUserPets();
+          } else {
+            toast(result.message || 'Failed to add pet.', 'error');
+          }
+        } catch (error) {
+          console.error('Add pet error:', error);
+          toast('Connection error. Please try again.', 'error');
+        }
+      };
+
+      // Email validation function
+      window.validateEmail = (email) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+      };
+
+      // Real-time email validation for all email inputs
+      document.querySelectorAll('input[type="email"]').forEach(emailInput => {
+        // Skip if feedback already exists
+        if (emailInput.nextSibling && emailInput.nextSibling.classList && emailInput.nextSibling.classList.contains('email-feedback')) {
+          return;
+        }
+        
+        const feedback = document.createElement('div');
+        feedback.className = 'email-feedback';
+        feedback.style.cssText = 'font-size: 12px; margin-top: 5px; transition: all 0.3s ease;';
+        emailInput.parentNode.insertBefore(feedback, emailInput.nextSibling);
+
+        emailInput.addEventListener('input', function() {
+          const email = this.value.trim();
+          const isValid = validateEmail(email);
+          
+          if (email === '') {
+            feedback.textContent = '';
+            feedback.style.color = '';
+            this.style.borderColor = '';
+          } else if (isValid) {
+            feedback.textContent = '✓ Valid email format';
+            feedback.style.color = '#4CAF50';
+            this.style.borderColor = '#4CAF50';
+          } else {
+            feedback.textContent = '✗ Please enter a valid email address';
+            feedback.style.color = '#f44336';
+            this.style.borderColor = '#f44336';
+          }
+        });
+
+        // Validate on blur (when user leaves the field)
+        emailInput.addEventListener('blur', function() {
+          const email = this.value.trim();
+          if (email !== '' && !validateEmail(email)) {
+            toast('Please enter a valid email address', 'error');
+          }
+        });
+      });
+
+      // Password strength utilities
+      function evaluatePasswordStrength(pwd) {
+        const length = pwd.length;
+        const hasUpper = /[A-Z]/.test(pwd);
+        const hasLower = /[a-z]/.test(pwd);
+        const hasDigit = /\d/.test(pwd);
+        const hasSymbol = /[^A-Za-z0-9]/.test(pwd);
+
+        let score = 0;
+        if (length >= 8) score++;
+        if (length >= 12) score++;
+        if (hasUpper && hasLower) score++;
+        if (hasDigit) score++;
+        if (hasSymbol) score++;
+        if (score > 4) score = 4;
+
+        let label = 'Weak', color = '#e74c3c', width = '25%';
+        if (score === 2) { label = 'Fair'; color = '#f39c12'; width = '50%'; }
+        else if (score === 3) { label = 'Good'; color = '#3498db'; width = '75%'; }
+        else if (score === 4) { label = 'Strong'; color = '#27ae60'; width = '100%'; }
+
+        const missing = [];
+        if (length < 8) missing.push('at least 8 characters');
+        if (!hasUpper) missing.push('an uppercase letter');
+        if (!hasLower) missing.push('a lowercase letter');
+        if (!hasDigit) missing.push('a number');
+        if (!hasSymbol) missing.push('a symbol');
+
+        return { score, label, color, width, missing };
+      }
+
+      function updateStrengthUI(prefix, result) {
+        const bar = document.getElementById(prefix + 'PwBar');
+        const text = document.getElementById(prefix + 'PwText');
+        const req = document.getElementById(prefix + 'PwReq');
+        if (bar) bar.style.setProperty('--pw-color', result.color);
+        if (bar) bar.style.setProperty('--pw-width', result.width);
+        if (bar) bar.style.background = '#eee';
+        if (bar) bar.style.position = 'relative';
+        if (bar) {
+          // Simulate ::after effect by inner div to avoid CSS pseudo limitation from JS
+          if (!bar.firstChild) {
+            const inner = document.createElement('div');
+            inner.style.height = '100%';
+            inner.style.width = result.width;
+            inner.style.background = result.color;
+            inner.style.transition = 'width 0.3s ease, background 0.3s ease';
+            bar.appendChild(inner);
+          } else {
+            bar.firstChild.style.width = result.width;
+            bar.firstChild.style.background = result.color;
+          }
+        }
+        if (text) text.textContent = 'Password strength: ' + result.label;
+        if (req) {
+          if (result.missing.length === 0) {
+            req.textContent = 'Looks good: meets all requirements.';
+            req.className = 'pw-requirements pw-ok';
+          } else {
+            req.textContent = 'Needs: ' + result.missing.join(', ');
+            req.className = 'pw-requirements pw-bad';
+          }
+        }
+      }
+
+      function wirePasswordStrength(formId, prefix) {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        const pwd = form.querySelector('input[name="password"]');
+        if (!pwd) return;
+        const update = () => updateStrengthUI(prefix, evaluatePasswordStrength(pwd.value));
+        pwd.addEventListener('input', update);
+        // Initialize on load
+        update();
+      }
+
+      // Wire up strength meters
+      wirePasswordStrength('registerForm', 'register');
+      wirePasswordStrength('signupForm', 'signup');
+
+      // Form handlers with PHP API integration
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('registerForm').addEventListener('submit', handleRegister);
+      document.getElementById('signupForm').addEventListener('submit', handleRegister); // Footer signup
+      document.getElementById('forgotPasswordForm').addEventListener('submit', handleForgotPassword);
+      document.getElementById('bookingForm').addEventListener('submit', handleBooking);
+      
+      // Add change listener for date input to load available times
+      document.querySelector('input[name="appointment_date"]')?.addEventListener('change', loadAvailableTimeSlots);
+      
+      async function handleLogin(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        
+        if (!validateEmail(email)) {
+          toast('Please enter a valid email address.', 'error');
+          return;
+        }
+        
+        if (!password) {
+          toast('Please enter your password.', 'error');
+          return;
+        }
+        
+        try {
+          const result = await apiCall({
+            action: 'login',
+            email: email,
+            password: password
+          });
+          
+          if (result.success) {
+            toast('Login successful! Redirecting...', 'success');
+
+            // Redirect to appropriate dashboard
+            if (result.redirect && result.redirect !== 'undefined' && result.redirect !== 'null') {
+              setTimeout(() => {
+                console.log('Redirecting to:', result.redirect);
+                window.location.href = result.redirect;
+              }, 1500);
+            } else {
+              console.log('No redirect provided, staying on homepage');
+              closeModal('loginModal');
+              updateUIForLoggedInUser(result.user, result.user.type);
+
+              // Update booking buttons text for staff users
+              if (result.user.type === 'staff') {
+                const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
+                bookingBtns.forEach(btn => {
+                  if (btn.tagName === 'A') {
+                    btn.innerHTML = '<i class="icon">📊</i> DASHBOARD';
+                  } else {
+                    btn.innerHTML = '<i class="icon">📊</i> STAFF DASHBOARD';
+                  }
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          toast('Connection error. Please check your server.', 'error');
+        }
+      }
+      
+      async function handleRegister(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const firstName = form.first_name.value.trim();
+        const lastName = form.last_name.value.trim();
+        const email = form.email.value.trim();
+        const phone = form.phone.value.trim();
+        const password = form.password.value;
+        const address = form.address?.value.trim() || '';
+        const userType = 'client'; // Always register as client
+        
+        const missingFields = [];
+        if (!firstName) missingFields.push('First Name');
+        if (!lastName) missingFields.push('Last Name');
+        if (!email) missingFields.push('Email');
+        if (!phone) missingFields.push('Phone');
+        if (!password) missingFields.push('Password');
+        
+        if (missingFields.length > 0) {
+          const errorMsg = `Please fill in all required fields. Missing: ${missingFields.join(', ')}`;
+          toast(errorMsg, 'error');
+          return;
+        }
+        
+        if (!validateEmail(email)) {
+          toast('Please enter a valid email address.', 'error');
+          return;
+        }
+        
+        if (password.length < 8) {
+          toast('Password must be at least 8 characters long.', 'error');
+          return;
+        }
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const hasDigit = /\d/.test(password);
+        const hasSymbol = /[^A-Za-z0-9]/.test(password);
+        if (!(hasUpper && hasLower && hasDigit && hasSymbol)) {
+          toast('Password must include uppercase, lowercase, number, and symbol.', 'error');
+          return;
+        }
+        
+        try {
+          const payload = {
+            action: 'register',
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            phone: phone,
+            password: password,
+            address: address,
+            user_type: userType
+          };
+          
+          const result = await apiCall(payload);
+          
+          if (result.success) {
+            const welcomeMsg = `Registration successful! Welcome ${firstName}! You can now log in with your account.`;
+
+            toast(welcomeMsg, 'success');
+            closeModal('registerModal');
+            form.reset();
+
+            // Reset form state
+            updateRegisterForm();
+
+            // Handle auto-login and redirect to client dashboard
+            if (result.client) {
+              // Redirect to client dashboard
+              setTimeout(() => {
+                window.location.href = 'client.html';
+              }, 1500);
+
+              updateUIForLoggedInUser(result.client, 'client');
+            }
+          } else {
+            toast(result.message || 'Registration failed. Please try again.', 'error');
+          }
+      } catch (error) {
+          console.error('Registration error:', error);
+          toast('Connection error. Please check your server.', 'error');
+      }
+    }
+
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const email = form.email.value.trim();
+
+      if (!email) {
+          toast('Please enter your email address.', 'error');
+          return;
+      }
+
+      try {
+          const response = await fetch('../api/vet_api.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  action: 'request_password_reset',
+                  email: email
+              })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+              toast('Password reset link sent! Please check your email.', 'success');
+              closeModal('forgotPasswordModal');
+              form.reset();
+          } else {
+              toast(result.message || 'Failed to send reset link.', 'error');
+          }
+      } catch (error) {
+          console.error('Forgot password error:', error);
+          toast('Connection error. Please try again.', 'error');
+      }
+    }
+      
+      // Update UI when user logs in
+      function updateUIForLoggedInUser(user, userType) {
+        // Update header auth links
+        const authLinks = document.querySelector('.auth-links');
+        if (authLinks) {
+          const userName = user.name || user.first_name || 'User';
+          let welcomeText = `Welcome, ${userName}!`;
+          
+          // Add position for staff users
+          if (userType === 'staff' && user.position) {
+            welcomeText = `Welcome, ${userName} (${user.position})!`;
+          }
+          
+          authLinks.innerHTML = `
+            <span style="color: white; margin-right: 10px;">${welcomeText}</span>
+            <a href="#" onclick="handleLogout()">LOGOUT</a>
+          `;
+        }
+        
+        // Show/hide booking button based on user type
+        const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
+        bookingBtns.forEach(btn => {
+          if (userType === 'client') {
+            btn.style.display = 'block';
+          }
+        });
+      }
+      
+      // Logout function
+      window.handleLogout = async () => {
+        try {
+          const result = await apiCall({ action: 'logout' });
+          
+          if (result.success) {
+            toast('Logged out successfully.', 'success');
+            // Reset UI
+            const authLinks = document.querySelector('.auth-links');
+            if (authLinks) {
+              authLinks.innerHTML = `
+                <a href="#" onclick="showLoginModal()"><i class="icon">🔐</i> LOG-IN</a>
+                <a href="#" onclick="showRegisterModal()"><i class="icon">📝</i> SIGN-UP</a>
+              `;
+            }
+          }
+        } catch (error) {
+          console.error('Logout error:', error);
+          toast('Logout failed.', 'error');
+        }
+      };
+
+      // Staff Dashboard Functions
+      window.showStaffDashboard = () => {
+        document.getElementById('bookingModalTitle').innerHTML = '<i class="modal-icon">📊</i> Staff Dashboard - Appointment Management';
+        document.getElementById('staffDashboard').style.display = 'block';
+        loadAllAppointments();
+      };
+      
+      window.hideStaffDashboard = () => {
+        document.getElementById('bookingModalTitle').innerHTML = '<i class="modal-icon">📅</i> Book an Appointment';
+        document.getElementById('staffDashboard').style.display = 'none';
+      };
+      
+      window.loadAllAppointments = async () => {
+        try {
+          const response = await fetch('../api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_all_appointments', limit: 50 })
+          });
+          
+          const result = await response.json();
+          const appointmentsList = document.getElementById('appointmentsList');
+          
+          if (result.success && result.data && result.data.length > 0) {
+            appointmentsList.innerHTML = '';
+            result.data.forEach(appointment => {
+              const appointmentDiv = createAppointmentCard(appointment);
+              appointmentsList.appendChild(appointmentDiv);
+            });
+          } else {
+            appointmentsList.innerHTML = '<p style="text-align: center; color: #666;">No appointments found.</p>';
+          }
+        } catch (error) {
+          console.error('Error loading appointments:', error);
+          document.getElementById('appointmentsList').innerHTML = '<p style="text-align: center; color: #f44336;">Error loading appointments.</p>';
+        }
+      };
+      
+      window.filterAppointments = async () => {
+        const status = document.getElementById('statusFilter').value;
+        try {
+          const payload = { action: 'get_all_appointments', limit: 50 };
+          if (status) payload.status = status;
+          
+          const response = await fetch('../api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          const result = await response.json();
+          const appointmentsList = document.getElementById('appointmentsList');
+          
+          if (result.success && result.data && result.data.length > 0) {
+            appointmentsList.innerHTML = '';
+            result.data.forEach(appointment => {
+              const appointmentDiv = createAppointmentCard(appointment);
+              appointmentsList.appendChild(appointmentDiv);
+            });
+          } else {
+            appointmentsList.innerHTML = '<p style="text-align: center; color: #666;">No appointments found.</p>';
+          }
+        } catch (error) {
+          console.error('Error filtering appointments:', error);
+        }
+      };
+      
+      function createAppointmentCard(appointment) {
+        const div = document.createElement('div');
+        div.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; cursor: pointer; transition: all 0.3s ease;';
+        div.onmouseover = () => div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        div.onmouseout = () => div.style.boxShadow = 'none';
+        
+        const statusColor = {
+          'Pending': '#ff9900',
+          'Confirmed': '#4CAF50', 
+          'In Progress': '#2196F3',
+          'Completed': '#9E9E9E',
+          'Cancelled': '#f44336',
+          'No Show': '#ff5722'
+        }[appointment.status] || '#666';
+        
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="flex: 1;">
+              <h4 style="margin: 0 0 5px 0; color: #333;">${appointment.client_first_name} ${appointment.client_last_name}</h4>
+              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">🐕 ${appointment.pet_name} (${appointment.species})</p>
+              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">👩‍⚕️ ${appointment.service_name}</p>
+              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">📅 ${appointment.appointment_date} at ${formatTime(appointment.appointment_time)}</p>
+              ${appointment.notes ? `<p style="margin: 5px 0; color: #666; font-size: 12px; font-style: italic;">📝 ${appointment.notes}</p>` : ''}
+            </div>
+            <div style="text-align: right;">
+              <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${appointment.status}</span>
+              <div style="margin-top: 10px;">
+                <select onchange="updateAppointmentStatus(${appointment.appointment_id}, this.value)" style="font-size: 12px; padding: 2px;">
+                  <option value="">Change Status</option>
+                  <option value="Confirmed" ${appointment.status === 'Confirmed' ? 'selected' : ''}>Confirm</option>
+                  <option value="In Progress" ${appointment.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                  <option value="Completed" ${appointment.status === 'Completed' ? 'selected' : ''}>Complete</option>
+                  <option value="Cancelled" ${appointment.status === 'Cancelled' ? 'selected' : ''}>Cancel</option>
+                  <option value="No Show" ${appointment.status === 'No Show' ? 'selected' : ''}>No Show</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        return div;
+      }
+      
+      window.updateAppointmentStatus = async (appointmentId, newStatus) => {
+        if (!newStatus) return;
+        
+        try {
+          const response = await fetch('../api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update_appointment_status',
+              appointment_id: appointmentId,
+              status: newStatus
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            toast(`Appointment status updated to ${newStatus}`, 'success');
+            loadAllAppointments(); // Refresh the list
+          } else {
+            toast(result.message || 'Failed to update status', 'error');
+          }
+        } catch (error) {
+          console.error('Error updating status:', error);
+          toast('Connection error. Please try again.', 'error');
+        }
+      };
+      
+      // Click outside modal to close & close mobile nav when clicking outside
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+          e.target.style.display = 'none';
+        }
+        
+      });
+    });
+
+    // Simple store functionality
+  window.filterCategory = function(category) {
+    // Simple toast notification for category selection
+    toast(`You selected: ${category.toUpperCase()} category`, 'info');
+
+    // Here you could add logic to:
+    // - Navigate to a dedicated store page
+    // - Filter products
+    // - Open a modal with category products
+    // - etc.
+  };
+
+  </script>
+</body>
+</html>

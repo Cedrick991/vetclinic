@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="reset-actions">
-            <a href="homepage.html" class="btn btn-secondary">Back to Homepage</a>
+            <a href="index.html" class="btn btn-secondary">Back to Homepage</a>
         </div>
     </div>
 

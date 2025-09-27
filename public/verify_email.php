@@ -124,10 +124,10 @@ if (isset($_GET['token'])) {
 
         <div class="verification-actions">
             <?php if ($messageType === 'success'): ?>
-                <a href="homepage.html" class="btn">Go to Homepage</a>
+                <a href="index.html" class="btn">Go to Homepage</a>
                 <a href="#" onclick="showLoginModal()" class="btn btn-secondary">Login Now</a>
             <?php else: ?>
-                <a href="homepage.html" class="btn">Back to Homepage</a>
+                <a href="index.html" class="btn">Back to Homepage</a>
                 <a href="mailto:support@tattoovet.com" class="btn btn-secondary">Contact Support</a>
             <?php endif; ?>
         </div>
@@ -136,7 +136,7 @@ if (isset($_GET['token'])) {
     <script>
         function showLoginModal() {
             // Redirect to homepage with login modal
-            window.location.href = 'homepage.html?show_login=1';
+            window.location.href = 'index.html?show_login=1';
         }
     </script>
 </body>

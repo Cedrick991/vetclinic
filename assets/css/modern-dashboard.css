@@ -1206,48 +1206,7 @@ body {
     padding: 40px 20px;
 }
 
-/* Activity Items */
-.activity-item {
-    display: flex;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(74, 144, 226, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 15px;
-    color: #4A90E2;
-}
-
-.activity-content {
-    flex: 1;
-}
-
-.activity-content p {
-    margin: 0 0 5px 0;
-    color: #ffffff;
-}
-
-.activity-content small {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 12px;
-}
-
-.activity-status {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
 }
