@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Products</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Test API Products</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Get Products API</h2>
+        <button onclick="testGetProducts()">Test Get Products</button>
+        <div id="productsResult">Click to test the get_products API endpoint.</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Get All Products API (Staff Only)</h2>
+        <button onclick="testGetAllProducts()">Test Get All Products</button>
+        <div id="allProductsResult">Click to test the get_all_products API endpoint.</div>
+    </div>
+
+    <script>
+        async function testGetProducts() {
+            const result = document.getElementById('productsResult');
+
+            try {
+                const response = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_products' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = '<span class="success">✅ API successful! Found ' + data.data.length + ' products.</span>';
+
+                    if (data.data.length > 0) {
+                        let tableHtml = '<h3>Products Found:</h3><table>';
+                        tableHtml += '<tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Image</th></tr>';
+
+                        data.data.forEach(product => {
+                            tableHtml += '<tr>';
+                            tableHtml += '<td>' + product.id + '</td>';
+                            tableHtml += '<td>' + product.name + '</td>';
+                            tableHtml += '<td>' + product.category + '</td>';
+                            tableHtml += '<td>₱' + parseFloat(product.price).toFixed(2) + '</td>';
+                            tableHtml += '<td>' + product.stock + '</td>';
+                            tableHtml += '<td>' + (product.image || 'No image') + '</td>';
+                            tableHtml += '</tr>';
+                        });
+
+                        tableHtml += '</table>';
+                        result.innerHTML += tableHtml;
+                    }
+                } else {
+                    result.innerHTML = '<span class="error">❌ API returned error: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Network error: ' + error.message + '</span>';
+            }
+        }
+
+        async function testGetAllProducts() {
+            const result = document.getElementById('allProductsResult');
+
+            try {
+                const response = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_all_products' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = '<span class="success">✅ API successful! Found ' + data.data.length + ' products.</span>';
+
+                    if (data.data.length > 0) {
+                        let tableHtml = '<h3>All Products Found:</h3><table>';
+                        tableHtml += '<tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Image</th><th>Active</th></tr>';
+
+                        data.data.forEach(product => {
+                            tableHtml += '<tr>';
+                            tableHtml += '<td>' + product.id + '</td>';
+                            tableHtml += '<td>' + product.name + '</td>';
+                            tableHtml += '<td>' + product.category + '</td>';
+                            tableHtml += '<td>₱' + parseFloat(product.price).toFixed(2) + '</td>';
+                            tableHtml += '<td>' + product.stock + '</td>';
+                            tableHtml += '<td>' + (product.image || 'No image') + '</td>';
+                            tableHtml += '<td>' + (product.is_active ? 'Yes' : 'No') + '</td>';
+                            tableHtml += '</tr>';
+                        });
+
+                        tableHtml += '</table>';
+                        result.innerHTML += tableHtml;
+                    }
+                } else {
+                    result.innerHTML = '<span class="error">❌ API returned error: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Network error: ' + error.message + '</span>';
+            }
+        }
+    </script>
+</body>
+</html>

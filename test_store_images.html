@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Store Images</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        .image-test { margin: 10px 0; }
+        .image-test img { max-width: 200px; max-height: 150px; border: 1px solid #ddd; }
+        .product-card { border: 1px solid #ddd; margin: 10px; padding: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Store Images Test</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Category Images</h2>
+        <div class="image-test">
+            <h3>Food Image:</h3>
+            <img src="assets/images/food.png" alt="Food" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="error" style="display: none;">❌ Food image not found</span>
+        </div>
+        <div class="image-test">
+            <h3>Grooming Image:</h3>
+            <img src="assets/images/grooming.png" alt="Grooming" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="error" style="display: none;">❌ Grooming image not found</span>
+        </div>
+        <div class="image-test">
+            <h3>Collar Image:</h3>
+            <img src="assets/images/collar.png" alt="Collar" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span class="error" style="display: none;">❌ Collar image not found</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Product Images</h2>
+        <div id="productImagesTest">
+            <!-- Product images will be loaded here -->
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: API Connection</h2>
+        <button onclick="testAPI()">Test Products API</button>
+        <div id="apiResult">Click to test the products API endpoint.</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Store Page Structure</h2>
+        <button onclick="testStorePage()">Test Store Page</button>
+        <div id="storeResult">Click to test the store page structure.</div>
+    </div>
+
+    <script>
+        // Test API connection
+        async function testAPI() {
+            const result = document.getElementById('apiResult');
+
+            try {
+                const response = await fetch('api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_products' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = '<span class="success">✅ API successful! Found ' + data.data.length + ' products.</span>';
+
+                    // Test product images
+                    const container = document.getElementById('productImagesTest');
+                    container.innerHTML = '<h3>Testing Product Images:</h3>';
+
+                    data.data.slice(0, 3).forEach((product, index) => {
+                        const imagePath = product.image || 'assets/images/logoo.jpg';
+                        const fullPath = imagePath.startsWith('assets/') ? imagePath : 'assets/images/products/' + imagePath;
+
+                        container.innerHTML += `
+                            <div class="product-card">
+                                <h4>${product.name}</h4>
+                                <img src="../${fullPath}" alt="${product.name}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                     onload="this.nextElementSibling.style.display='none';">
+                                <div class="error" style="display: none;">❌ Image not found: ${fullPath}</div>
+                                <p><small>Path: ${fullPath}</small></p>
+                            </div>
+                        `;
+                    });
+                } else {
+                    result.innerHTML = '<span class="error">❌ API returned error: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Network error: ' + error.message + '</span>';
+            }
+        }
+
+        function testStorePage() {
+            const result = document.getElementById('storeResult');
+
+            // Check if store.html exists and has the right structure
+            fetch('public/store.html')
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('Store page not found');
+                })
+                .then(html => {
+                    const hasProductsSection = html.includes('products-section');
+                    const hasProductsGrid = html.includes('products-grid');
+                    const hasJavaScript = html.includes('loadProducts');
+                    const hasCSS = html.includes('homepage.css');
+
+                    const checks = [
+                        { name: 'Products section', passed: hasProductsSection },
+                        { name: 'Products grid', passed: hasProductsGrid },
+                        { name: 'JavaScript functionality', passed: hasJavaScript },
+                        { name: 'CSS styling', passed: hasCSS }
+                    ];
+
+                    let results = '<span class="success">✅ Store page structure test passed!</span><br>';
+                    results += '<ul>';
+                    checks.forEach(check => {
+                        const status = check.passed ? '✅' : '❌';
+                        const color = check.passed ? 'success' : 'error';
+                        results += `<li class="${color}">${status} ${check.name}</li>`;
+                    });
+                    results += '</ul>';
+
+                    result.innerHTML = results;
+                })
+                .catch(error => {
+                    result.innerHTML = '<span class="error">❌ Store page test failed: ' + error.message + '</span>';
+                });
+        }
+
+        // Auto-run some tests
+        document.addEventListener('DOMContentLoaded', function() {
+            testStorePage();
+        });
+    </script>
+</body>
+</html>

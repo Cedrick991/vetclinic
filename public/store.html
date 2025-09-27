@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Store</title>
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="homepage.css">
+</head>
+<body>
+  <!-- Header -->
+  <div class="store-header">
+    <!-- Paw prints on left & right -->
+    <img src="../assets/images/paw print (2).png" alt="Paw Print" class="paw-left">
+    <img src="../assets/images/paw print (2).png" alt="Paw Print" class="paw-right">
+
+    <!-- Title -->
+    <h1>STORE</h1>
+    <p>THE TATTO VETERINARY CLINIC OFFERS</p>
+  </div>
+
+  <!-- Categories -->
+  <div class="store-categories">
+    <!-- Food Category -->
+    <div class="category" onclick="filterCategory('food')">
+      <h3>FOOD FOR<br>YOUR PETS</h3>
+      <img src="../assets/images/food.png" alt="Pet Food" class="food-img">
+    </div>
+
+    <!-- Grooming -->
+    <div class="category" onclick="filterCategory('grooming')">
+      <h3>GROOMING<br>SUPPLIES</h3>
+      <img src="../assets/images/grooming.png" alt="Grooming Supplies" class="grooming-img">
+    </div>
+
+    <!-- Accessories -->
+    <div class="category" onclick="filterCategory('accessories')">
+      <h3>AND<br>ACCESSORIES</h3>
+      <img src="../assets/images/collar.png" alt="Collars" class="accessories-img">
+    </div>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="filter-buttons">
+    <button class="filter-btn all active" onclick="filterCategory('all')">All Products</button>
+    <button class="filter-btn food" onclick="filterCategory('food')">Food</button>
+    <button class="filter-btn grooming" onclick="filterCategory('grooming')">Grooming</button>
+    <button class="filter-btn accessories" onclick="filterCategory('accessories')">Accessories</button>
+  </div>
+
+  <!-- Products Section -->
+  <div class="products-section">
+    <h2>Our Products</h2>
+    <div id="productsContainer" class="products-grid">
+      <!-- Products will be loaded here by JavaScript -->
+    </div>
+    <div id="loading" class="loading">Loading products...</div>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="noProducts" class="no-products" style="display: none;">No products found in this category.</div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    let allProducts = [];
+    let currentFilter = 'all';
+
+    // Load products when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProducts();
+    });
+
+    async function loadProducts() {
+      const container = document.getElementById('productsContainer');
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const noProducts = document.getElementById('noProducts');
+
+      // Show loading
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      noProducts.style.display = 'none';
+      container.innerHTML = '';
+
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_products' })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          allProducts = data.data;
+          displayProducts(allProducts);
+        } else {
+          throw new Error(data.message || 'Failed to load products');
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        error.textContent = 'Failed to load products: ' + error.message;
+        error.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    function displayProducts(products) {
+      const container = document.getElementById('productsContainer');
+      const noProducts = document.getElementById('noProducts');
+
+      if (products.length === 0) {
+        noProducts.style.display = 'block';
+        container.innerHTML = '';
+        return;
+      }
+
+      noProducts.style.display = 'none';
+
+      container.innerHTML = products.map(product => `
+        <div class="product-card" data-category="${product.category}" data-id="${product.id}">
+          <div class="product-image-container">
+            <img src="../${product.image || 'assets/images/logoo.jpg'}"
+                 alt="${product.name}"
+                 class="product-image"
+                 onerror="handleImageError(this, '${product.image || ''}')"
+                 loading="lazy">
+            ${!product.image ? '<div class="product-image-placeholder"><i class="fas fa-image"></i></div>' : ''}
+          </div>
+          <div class="product-info">
+            <div class="product-category">${product.category}</div>
+            <h3 class="product-name">${product.name}</h3>
+            <p class="product-description">${product.description || 'No description available'}</p>
+            <div class="product-price">₱${parseFloat(product.price).toFixed(2)}</div>
+            <div class="product-stock ${getStockClass(product.stock)}">
+              ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+            </div>
+            <button class="add-to-cart-btn" ${product.stock <= 0 ? 'disabled' : ''} onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
+              ${product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getStockClass(stock) {
+      if (stock <= 0) return 'stock-out';
+      if (stock <= 5) return 'stock-low';
+      return 'stock-in';
+    }
+
+    function handleImageError(img, originalImage) {
+      // Hide the broken image
+      img.style.display = 'none';
+
+      // Show placeholder if it exists
+      const container = img.parentElement;
+      const placeholder = container.querySelector('.product-image-placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'flex';
+      }
+
+      // Try alternative image paths if original image failed
+      if (originalImage && originalImage.trim() !== '') {
+        // Try different possible paths
+        const imagePaths = [
+          originalImage,
+          originalImage.replace(/\.(jpg|jpeg|png)$/i, '.jpg'),
+          originalImage.replace(/\.(jpg|jpeg|png)$/i, '.png'),
+          'assets/images/logoo.jpg'
+        ];
+
+        // Remove duplicates
+        const uniquePaths = [...new Set(imagePaths)].filter(path => path && path.trim() !== '');
+
+        let currentIndex = 0;
+
+        function tryNextImage() {
+          if (currentIndex >= uniquePaths.length) {
+            // All paths failed, show placeholder
+            img.style.display = 'none';
+            if (placeholder) {
+              placeholder.style.display = 'flex';
+            }
+            return;
+          }
+
+          const nextPath = '../' + uniquePaths[currentIndex];
+          const testImg = new Image();
+
+          testImg.onload = function() {
+            // Success! Use this image
+            img.src = nextPath;
+            img.style.display = 'block';
+            if (placeholder) {
+              placeholder.style.display = 'none';
+            }
+          };
+
+          testImg.onerror = function() {
+            // Try next path
+            currentIndex++;
+            tryNextImage();
+          };
+
+          testImg.src = nextPath;
+        }
+
+        tryNextImage();
+      }
+    }
+
+    function filterCategory(category) {
+      currentFilter = category;
+
+      // Update active filter button
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.filter-btn.${category}`).classList.add('active');
+
+      // Filter products
+      let filteredProducts = allProducts;
+
+      if (category !== 'all') {
+        filteredProducts = allProducts.filter(product =>
+          product.category.toLowerCase() === category.toLowerCase()
+        );
+      }
+
+      displayProducts(filteredProducts);
+    }
+
+    function addToCart(productId, productName, price) {
+      // Simple cart functionality - you can expand this
+      alert(`${productName} added to cart! (This is a demo - cart functionality would be implemented here)`);
+      console.log('Adding product to cart:', { productId, productName, price });
+    }
+
+    // Add some sample products if API fails (for demo purposes)
+    function addSampleProducts() {
+      const sampleProducts = [
+        {
+          id: 1,
+          name: "Premium Dog Food",
+          description: "High-quality dog food with balanced nutrition",
+          category: "food",
+          price: "1250.00",
+          stock: 15,
+          image: "assets/images/products/product_1_1758624466.jpg"
+        },
+        {
+          id: 2,
+          name: "Cat Grooming Kit",
+          description: "Complete grooming kit for cats",
+          category: "grooming",
+          price: "850.00",
+          stock: 8,
+          image: "assets/images/products/product_7_1758628396.jpg"
+        },
+        {
+          id: 3,
+          name: "Dog Collar",
+          description: "Comfortable and stylish dog collar",
+          category: "accessories",
+          price: "350.00",
+          stock: 25,
+          image: "assets/images/products/product_8_1758629447.jpg"
+        }
+      ];
+
+      allProducts = sampleProducts;
+      displayProducts(sampleProducts);
+    }
+  </script>
+</body>
+</html>

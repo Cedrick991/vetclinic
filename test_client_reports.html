@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Client Reports - Tattao Veterinary Clinic</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .loading { text-align: center; padding: 20px; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,.3); border-radius: 50%; border-top-color: #007bff; animation: spin 1s ease-in-out infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <h1>Test Client Reports Functionality</h1>
+
+  <div class="test-section">
+    <h2>Test 1: API Pet List (Client Access)</h2>
+    <button onclick="testPetListAPI()" class="btn-primary">Test Pet List API</button>
+    <div id="petListResult" class="test-result" style="display: none;"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Generate Pet Report</h2>
+    <div>
+      <label>Pet ID: <input type="number" id="testPetId" placeholder="Enter pet ID" min="1"></label>
+      <button onclick="testGenerateReport()" class="btn-primary">Generate Report</button>
+    </div>
+    <div id="generateReportResult" class="test-result" style="display: none;"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: PDF Generation</h2>
+    <button onclick="testPDFGeneration()" class="btn-success">Test PDF Generation</button>
+    <div id="pdfTestResult" class="test-result" style="display: none;"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Complete Flow</h2>
+    <button onclick="testCompleteFlow()" class="btn-primary">Test Complete Flow</button>
+    <div id="completeFlowResult" class="test-result" style="display: none;"></div>
+  </div>
+
+  <script>
+    // Test functions
+    async function testPetListAPI() {
+      const resultDiv = document.getElementById('petListResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Testing pet list API...</div>';
+
+      try {
+        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          resultDiv.className = 'test-result success';
+          resultDiv.innerHTML = `
+            <strong>✅ Pet List API Test Passed</strong><br>
+            Found ${result.data.length} pets:<br>
+            <ul>
+              ${result.data.map(pet => `<li>${pet.name} (${pet.species} - ${pet.breed || 'Mixed'}) - Owner: ${pet.first_name} ${pet.last_name}</li>`).join('')}
+            </ul>
+          `;
+        } else {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = `<strong>❌ Pet List API Test Failed</strong><br>Error: ${result.message}`;
+        }
+      } catch (error) {
+        resultDiv.className = 'test-result error';
+        resultDiv.innerHTML = `<strong>❌ Pet List API Test Failed</strong><br>Error: ${error.message}`;
+      }
+    }
+
+    async function testGenerateReport() {
+      const petId = document.getElementById('testPetId').value;
+      if (!petId) {
+        alert('Please enter a pet ID');
+        return;
+      }
+
+      const resultDiv = document.getElementById('generateReportResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Generating report...</div>';
+
+      try {
+        const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${petId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          resultDiv.className = 'test-result success';
+          const data = result.data;
+          resultDiv.innerHTML = `
+            <strong>✅ Report Generation Test Passed</strong><br>
+            <strong>Pet:</strong> ${data.pet.name} (${data.pet.species})<br>
+            <strong>Owner:</strong> ${data.owner.name}<br>
+            <strong>Total Appointments:</strong> ${data.statistics.total_appointments}<br>
+            <strong>Last Visit:</strong> ${data.statistics.last_visit || 'None'}<br>
+            <strong>Generated:</strong> ${data.generated_at}
+          `;
+        } else {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = `<strong>❌ Report Generation Test Failed</strong><br>Error: ${result.message}`;
+        }
+      } catch (error) {
+        resultDiv.className = 'test-result error';
+        resultDiv.innerHTML = `<strong>❌ Report Generation Test Failed</strong><br>Error: ${error.message}`;
+      }
+    }
+
+    async function testPDFGeneration() {
+      const resultDiv = document.getElementById('pdfTestResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Testing PDF generation...</div>';
+
+      try {
+        // Load jsPDF library
+        if (typeof window.jspdf === 'undefined') {
+          await loadJSPDFLibrary();
+        }
+
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+          resultDiv.className = 'test-result success';
+          resultDiv.innerHTML = '<strong>✅ PDF Generation Test Passed</strong><br>jsPDF library loaded successfully and is ready for use.';
+        } else {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = '<strong>❌ PDF Generation Test Failed</strong><br>jsPDF library could not be loaded.';
+        }
+      } catch (error) {
+        resultDiv.className = 'test-result error';
+        resultDiv.innerHTML = `<strong>❌ PDF Generation Test Failed</strong><br>Error: ${error.message}`;
+      }
+    }
+
+    async function testCompleteFlow() {
+      const resultDiv = document.getElementById('completeFlowResult');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Testing complete flow...</div>';
+
+      try {
+        // Step 1: Get pet list
+        const petListResponse = await fetch('../api/pet_reports_api.php?action=get_pet_list');
+        const petListResult = await petListResponse.json();
+
+        if (!petListResult.success || petListResult.data.length === 0) {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = '<strong>❌ Complete Flow Test Failed</strong><br>No pets available for testing.';
+          return;
+        }
+
+        // Step 2: Generate report for first pet
+        const firstPet = petListResult.data[0];
+        const reportResponse = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${firstPet.id}`);
+        const reportResult = await reportResponse.json();
+
+        if (!reportResult.success) {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = `<strong>❌ Complete Flow Test Failed</strong><br>Failed to generate report: ${reportResult.message}`;
+          return;
+        }
+
+        // Step 3: Check PDF library
+        if (typeof window.jspdf === 'undefined') {
+          await loadJSPDFLibrary();
+        }
+
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+          resultDiv.className = 'test-result success';
+          resultDiv.innerHTML = `
+            <strong>✅ Complete Flow Test Passed</strong><br>
+            <strong>Pet List:</strong> ${petListResult.data.length} pets found<br>
+            <strong>Report Generated:</strong> Successfully for ${firstPet.name}<br>
+            <strong>PDF Ready:</strong> jsPDF library loaded and ready<br>
+            <strong>Appointments:</strong> ${reportResult.data.statistics.total_appointments} appointments found
+          `;
+        } else {
+          resultDiv.className = 'test-result error';
+          resultDiv.innerHTML = '<strong>❌ Complete Flow Test Failed</strong><br>PDF library not available.';
+        }
+      } catch (error) {
+        resultDiv.className = 'test-result error';
+        resultDiv.innerHTML = `<strong>❌ Complete Flow Test Failed</strong><br>Error: ${error.message}`;
+      }
+    }
+
+    function loadJSPDFLibrary() {
+      return new Promise((resolve, reject) => {
+        if (typeof window.jspdf !== 'undefined') {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+          console.log('jsPDF library loaded successfully');
+          resolve();
+        };
+        script.onerror = () => {
+          console.error('Failed to load jsPDF library');
+          reject(new Error('Failed to load PDF library'));
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    // Auto-run tests on page load
+    window.onload = function() {
+      console.log('Client Reports Test Page Loaded');
+      // Optionally auto-run some tests
+      // testPetListAPI();
+    };
+  </script>
+</body>
+</html>

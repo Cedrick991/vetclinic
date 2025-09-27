@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Add Product</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Test Add Product Functionality</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Check if Add Product Modal Opens</h2>
+        <button onclick="testModalOpen()">Test Modal Opening</button>
+        <p id="modalTestResult">Click the button to test if the modal opens correctly.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Test API Connection</h2>
+        <button onclick="testAPIConnection()">Test API Connection</button>
+        <p id="apiTestResult">Click to test if the API is responding.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Add Test Product</h2>
+        <form id="addProductForm">
+            <input type="text" id="productName" placeholder="Product Name" required>
+            <select id="productCategory" required>
+                <option value="">Select Category</option>
+                <option value="Food">Food</option>
+                <option value="Grooming">Grooming</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Toys">Toys</option>
+                <option value="Medicine">Medicine</option>
+                <option value="Other">Other</option>
+            </select>
+            <input type="number" id="productPrice" placeholder="Price" step="0.01" min="0" required>
+            <input type="number" id="productStock" placeholder="Stock" min="0" value="10" required>
+            <textarea id="productDescription" placeholder="Description" rows="3"></textarea>
+            <br>
+            <button type="submit">Add Test Product</button>
+        </form>
+        <p id="addProductResult">Fill out the form and click to add a test product.</p>
+    </div>
+
+    <script>
+        function testModalOpen() {
+            const result = document.getElementById('modalTestResult');
+
+            if (typeof staffDashboard !== 'undefined' && typeof staffDashboard.openModal === 'function') {
+                try {
+                    staffDashboard.openModal('addProductModal');
+                    result.innerHTML = '<span class="success">✅ Modal opened successfully!</span>';
+                } catch (error) {
+                    result.innerHTML = '<span class="error">❌ Error opening modal: ' + error.message + '</span>';
+                }
+            } else {
+                result.innerHTML = '<span class="error">❌ staffDashboard or openModal function not found</span>';
+            }
+        }
+
+        async function testAPIConnection() {
+            const result = document.getElementById('apiTestResult');
+
+            try {
+                const response = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_all_products' })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        result.innerHTML = '<span class="success">✅ API connection successful! Found ' + data.data.length + ' products.</span>';
+                    } else {
+                        result.innerHTML = '<span class="error">❌ API returned error: ' + data.message + '</span>';
+                    }
+                } else {
+                    result.innerHTML = '<span class="error">❌ API connection failed with status: ' + response.status + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Network error: ' + error.message + '</span>';
+            }
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const result = document.getElementById('addProductResult');
+            const formData = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                stock: parseInt(document.getElementById('productStock').value),
+                description: document.getElementById('productDescription').value
+            };
+
+            try {
+                const response = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'add_product',
+                        ...formData
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = '<span class="success">✅ Product added successfully! ID: ' + data.product_id + '</span>';
+                    this.reset();
+                } else {
+                    result.innerHTML = '<span class="error">❌ Failed to add product: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        });
+
+        // Load staff dashboard script
+        const script = document.createElement('script');
+        script.src = '../assets/js/staff-dashboard.js';
+        script.onload = function() {
+            console.log('Staff dashboard script loaded');
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
