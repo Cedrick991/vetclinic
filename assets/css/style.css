@@ -2394,7 +2394,207 @@ footer {
   min-height: 300px;
 }
 
-.pet-card, .service-card {
+/* Enhanced Pet Card Styles */
+.pet-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 20px;
+  padding: 0;
+  margin: 15px 0;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(59, 130, 246, 0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+.pet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+  transition: height 0.3s ease;
+}
+
+.pet-card:hover::before {
+  height: 8px;
+}
+
+.pet-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.15),
+    0 6px 20px rgba(59, 130, 246, 0.25);
+  border-color: #93c5fd;
+}
+
+.pet-card.selected {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #3b82f6;
+  box-shadow:
+    0 8px 25px rgba(59, 130, 246, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Pet Image Container */
+.pet-image-container {
+  height: 140px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.pet-image-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(96, 165, 250, 0.08) 0%, transparent 50%);
+}
+
+.pet-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.species-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 2px solid #e0e7ff;
+  transition: all 0.3s ease;
+}
+
+.pet-card:hover .species-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow:
+    0 6px 20px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: #93c5fd;
+}
+
+.species-icon-wrapper i {
+  font-size: 28px;
+  color: #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.pet-card:hover .species-icon-wrapper i {
+  color: #60a5fa;
+  transform: scale(1.1);
+}
+
+.pet-species-badge {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Pet Content */
+.pet-content {
+  padding: 20px;
+}
+
+.pet-header {
+  margin-bottom: 15px;
+}
+
+.pet-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.pet-breed {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Pet Details */
+.pet-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.detail-text {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+  flex: 1;
+}
+
+/* Hover Effects */
+.pet-card:hover .detail-icon {
+  color: #60a5fa;
+  transform: scale(1.1);
+}
+
+.pet-card:hover .detail-text {
+  color: #334155;
+}
+
+/* Service Card (for consistency) */
+.service-card {
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid #dbeafe;
   border-radius: 10px;
@@ -2404,12 +2604,12 @@ footer {
   transition: all 0.3s ease;
 }
 
-.pet-card:hover, .service-card:hover {
+.service-card:hover {
   background: rgba(59, 130, 246, 0.2);
   transform: scale(1.02);
 }
 
-.pet-card.selected, .service-card.selected {
+.service-card.selected {
   background: rgba(59, 130, 246, 0.3);
   border-color: #3b82f6;
 }

@@ -1,0 +1,39 @@
+# Enhanced security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Disable directory listings
+Options -Indexes
+
+# Protect database files
+<FilesMatch "\.(db|sqlite|sqlite3)$">
+    Deny from all
+</FilesMatch>
+
+# Allow CORS for API requests
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# PHP error handling
+php_flag display_errors Off
+php_value error_reporting 32767
+php_value error_log "logs/php_errors.log"
+
+# PHP extensions are loaded via php.ini, not .htaccess
+
+# Rewrite rules for clean URLs
+RewriteEngine On
+RewriteBase /
+
+# Don't rewrite files or directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Handle API requests
+RewriteRule ^api/([^/]+)?$ api/$1.php [L,QSA]

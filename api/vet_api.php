@@ -4,6 +4,21 @@
  * Clean implementation for login/registration with safe JSON output
  */
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// CORS Headers
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit(0);
+}
+
 // Error handling: log to file, don’t show in response
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -11,6 +26,19 @@ ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
 
 // Always return JSON
 header('Content-Type: application/json; charset=utf-8');
+
+// Ensure PHP errors are caught and returned as JSON
+function handleError($errno, $errstr, $errfile, $errline) {
+    $error = [
+        'success' => false,
+        'message' => 'PHP Error: ' . $errstr,
+        'file' => basename($errfile),
+        'line' => $errline
+    ];
+    echo json_encode($error);
+    exit(1);
+}
+set_error_handler('handleError');
 
 // Prevent caching
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -51,8 +79,12 @@ try {
         throw new Exception('Action is required');
     }
 
-    // Include database
-    require_once __DIR__ . '/../db/database.php';
+    // Include database with absolute path
+    $dbPath = realpath(__DIR__ . '/../db/database.php');
+    if (!$dbPath) {
+        throw new Exception('Database file not found');
+    }
+    require_once $dbPath;
     $db = getDB();
 
     switch ($action) {

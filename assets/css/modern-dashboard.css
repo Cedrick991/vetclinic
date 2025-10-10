@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f0f2f5;
+    background: linear-gradient(135deg, #4A90E2 0%, #2C5282 100%);
     min-height: 100vh;
     color: #ffffff;
     overflow-x: hidden;
@@ -348,8 +348,8 @@ body {
 
 /* Dashboard Cards */
 .dashboard-card {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #1A365D;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     padding: 25px;
     transition: all 0.3s ease;
@@ -374,7 +374,7 @@ body {
 .card-title {
     font-size: 16px;
     font-weight: 600;
-    color: #2C5282;
+    color: #ffffff;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -388,14 +388,14 @@ body {
 .card-value {
     font-size: 36px;
     font-weight: 800;
-    color: #2C5282;
+    color: #ffffff;
     margin-bottom: 8px;
     line-height: 1;
 }
 
 .card-subtitle {
     font-size: 14px;
-    color: #666666;
+    color: rgba(255, 255, 255, 0.7);
     margin: 0;
 }
 
@@ -694,26 +694,80 @@ body {
     }
 }
 
-@media (max-width: 480px) {
-    .dashboard-content {
-        padding: 15px;
-    }
-    
-    .welcome-title {
-        font-size: 20px;
-    }
-    
-    .dashboard-card {
-        padding: 15px;
-    }
-    
-    .card-value {
-        font-size: 24px;
-    }
-    
-    .content-section {
-        padding: 20px;
-    }
+/* Dashboard Cards */
+
+/* Dashboard Cards */
+
+/* Pet Card Styles */
+.pet-card {
+  background: linear-gradient(145deg, #2C5282, #2B6CB0) !important;
+  color: #fff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+  width: 280px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.pet-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.pet-header {
+  width: 100% !important;
+  height: 180px !important;
+  overflow: hidden !important;
+  background: #1A365D !important;
+}
+
+.pet-photo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.pet-info {
+  padding: 16px 20px !important;
+}
+
+.pet-name {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding-bottom: 6px !important;
+}
+
+.pet-info p {
+  font-size: 0.95rem !important;
+  margin: 6px 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* Pet Card Responsive */
+@media (max-width: 768px) {
+  .pet-card {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+}
+
+/* Pets Grid Layout */
+.pets-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 24px !important;
+  margin-top: 24px !important;
+}
+
+@media (max-width: 768px) {
+  .pets-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    margin-top: 20px !important;
+  }
 }
 
 /* Toast Notifications */
@@ -970,31 +1024,6 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Smaller buttons for product cards */
-.btn-primary.btn-small, .btn-danger.btn-small {
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 6px;
-    min-width: 50px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: #ffffff;
-    border: none;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-    transform: translateY(-1px);
-}
-
 .text-warning {
     color: #f59e0b;
     font-size: 14px;
@@ -1206,16 +1235,53 @@ body {
     padding: 40px 20px;
 }
 
-/* Pet Info */
-.pet-info {
-    margin-top: 15px;
+/* Activity Items */
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.pet-info p {
-    margin: 8px 0;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
+.activity-item:last-child {
+    border-bottom: none;
 }
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(74, 144, 226, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: #4A90E2;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content p {
+    margin: 0 0 5px 0;
+    color: #ffffff;
+}
+
+.activity-content small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+}
+
+.activity-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Dashboard Cards */
 
 /* Order Styles */
 .orders-grid {
@@ -1225,7 +1291,7 @@ body {
 }
 
 .order-card {
-    background: #1A365D;
+    background: #00b4d8;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     padding: 20px;
@@ -1356,7 +1422,7 @@ body {
 }
 
 .product-card {
-    background: #1A365D;
+    background: #00b4d8;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     overflow: hidden;

@@ -230,22 +230,21 @@ class Dashboard {
                 this.updateDashboardCards(dashboardResult.data);
             }
 
-            // Update cards with real data
-            if (petsResult.success && petsResult.data) {
-                this.updateCard('my-pets', petsResult.data.length);
-            }
+            // Recent activity cards removed for client dashboard
+            // if (petsResult.success && petsResult.data) {
+            //     this.updateCard('my-pets', petsResult.data.length);
+            // }
 
-            if (appointmentsResult.success && appointmentsResult.data) {
-                const appointments = appointmentsResult.data;
-                const upcomingCount = appointments.filter(apt =>
-                    new Date(apt.appointment_date) >= new Date() &&
-                    apt.status !== 'cancelled'
-                ).length;
-                this.updateCard('upcoming-appointments', upcomingCount);
-            }
+            // if (appointmentsResult.success && appointmentsResult.data) {
+            //     const appointments = appointmentsResult.data;
+            //     const upcomingCount = appointments.filter(apt =>
+            //         new Date(apt.appointment_date) >= new Date() &&
+            //         apt.status !== 'cancelled'
+            //     ).length;
+            //     this.updateCard('upcoming-appointments', upcomingCount);
+            // }
 
             // Load other sections
-            await this.loadRecentActivity();
             await this.loadPetsSection();
             await this.loadAppointmentsSection();
             await this.loadOrdersSection();
@@ -257,10 +256,11 @@ class Dashboard {
 
     updateDashboardCards(data) {
         if (this.userType === 'client') {
-            this.updateCard('upcoming-appointments', data.upcoming_appointments || 0);
-            this.updateCard('my-pets', data.my_pets || 0);
-            this.updateCard('completed-visits', data.completed_visits || 0);
-            this.updateCard('cart-items', data.cart_items || 0);
+            // Recent activity cards removed for client dashboard
+            // this.updateCard('upcoming-appointments', data.upcoming_appointments || 0);
+            // this.updateCard('my-pets', data.my_pets || 0);
+            // this.updateCard('completed-visits', data.completed_visits || 0);
+            // this.updateCard('cart-items', data.cart_items || 0);
         } else if (this.userType === 'staff') {
             this.updateCard('today-appointments', data.today_appointments || 0);
             this.updateCard('pending-appointments', data.pending_appointments || 0);
@@ -734,6 +734,8 @@ class Dashboard {
                 e.preventDefault();
                 if (form.id === 'addPetForm') {
                     this.handleAddPet(form);
+                } else if (form.id === 'addServiceForm') {
+                    this.handleAddService(form);
                 } else if (form.id === 'editPetForm') {
                     this.handleEditPet(form);
                 } else if (form.id === 'bookingForm') {
@@ -1003,6 +1005,43 @@ class Dashboard {
         } catch (error) {
             console.error('Error adding pet:', error);
             this.showToast('Failed to add pet. Please try again.', 'error');
+        }
+    }
+
+    async handleAddService(form) {
+        try {
+            const formData = new FormData(form);
+            const serviceData = {
+                action: 'add_service',
+                name: formData.get('service_name'),
+                description: formData.get('service_description'),
+                is_active: parseInt(formData.get('service_status'))
+            };
+
+            // Validate required fields
+            if (!serviceData.name || serviceData.name.trim() === '') {
+                this.showToast('Service name is required', 'error');
+                return;
+            }
+
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Service added successfully!', 'success');
+                form.closest('.modal').remove();
+                this.loadDashboardData(); // Refresh dashboard
+            } else {
+                this.showToast(result.message || 'Failed to add service', 'error');
+            }
+        } catch (error) {
+            console.error('Error adding service:', error);
+            this.showToast('Failed to add service. Please try again.', 'error');
         }
     }
 
@@ -1499,53 +1538,6 @@ class Dashboard {
         } catch (error) {
             console.error('Error deleting pet:', error);
             this.showToast('Failed to delete pet. Please try again.', 'error');
-        }
-    }
-
-    async loadRecentActivity() {
-        try {
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_appointments', limit: 5 })
-            });
-
-            const result = await response.json();
-            const recentActivity = document.getElementById('recentActivity');
-            
-            if (result.success && result.data && result.data.length > 0) {
-                recentActivity.innerHTML = result.data.map(appointment => `
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p><strong>${appointment.service_name}</strong> for ${appointment.pet_name}</p>
-                            <small>${appointment.appointment_date} at ${appointment.appointment_time}</small>
-                        </div>
-                        <div class="activity-status status-${appointment.status.toLowerCase()}">
-                            ${appointment.status}
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                recentActivity.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-times"></i>
-                        <h3>No Recent Activity</h3>
-                        <p>Empty Recent Activity</p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error('Failed to load recent activity:', error);
-            const recentActivity = document.getElementById('recentActivity');
-            recentActivity.innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Failed to load recent activity</p>
-                </div>
-            `;
         }
     }
 

@@ -8,29 +8,37 @@
   <meta name="description" content="Tattoo Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="logo">
-      <img src="assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
-      <span class="clinic-name">TATTOO<br>VETERINARY CLINIC</span>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="toggleSidebar();" class="dashboard-link">🏠 Homepage</a>
+    <a href="#services" onclick="scrollToSection('services'); toggleSidebar();">🩺 Services</a>
+    <a href="#contact" onclick="scrollToSection('contact'); toggleSidebar();">📞 Contact Us</a>
+    <a href="#store" onclick="scrollToSection('store'); toggleSidebar();">🛒 Store</a>
+    <a href="#" onclick="handleLogout(); toggleSidebar();" class="logout-sidebar-btn">🚪 Logout</a>
+  </div>
+
+
+  <!-- Fixed Header Bar -->
+  <header class="header-bar">
+    <div class="header-left">
+      <button class="menu-btn" id="menuBtn">&#9776;</button>
+      <div class="logo">
+        <img src="assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
+        <span class="clinic-name">TATTOO<br>VETERINARY CLINIC</span>
+      </div>
     </div>
-    <nav>
-      <a href="#services"><i class="icon"></i> SERVICES</a>
-      <a href="#" onclick="showBookingModal()"><i class="icon"></i> BOOKING</a>
-      <a href="#contact"><i class="icon"></i> CONTACT US</a>
-      <a href="#store"><i class="icon"></i> STORE</a>
-    </nav>
-
-
-    <div class="auth-links">
-      <a href="#" onclick="showLoginModal()"><i class="icon">🔐</i> LOG-IN</a>
-      <a href="#" onclick="showRegisterModal()"><i class="icon">📝</i> SIGN-UP</a>
+    <div class="header-right">
+      <img src="assets/images/logoo.jpg" alt="Profile" class="profile-pic" id="headerProfilePic" style="display: none;">
+      <div class="auth-links" id="authLinks">
+        <a href="#" onclick="showLoginModal()" class="auth-btn">🔐 LOG-IN</a>
+        <a href="#" onclick="showRegisterModal()" class="auth-btn">📝 SIGN-UP</a>
+      </div>
     </div>
   </header>
 
 
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero" style="margin-top: 0; padding-top: 20px;">
     <img src="assets/images/dogandcat.png" alt="Dog and Cat" class="hero-pets">
     <div class="hero-text">
       <img src="assets/images/textdogandcat.png" alt="Book a check up for your fur baby today!">
@@ -39,6 +47,7 @@
       <button class="booking-btn" onclick="showBookingModal()">
         <i class="icon">🗓️</i> BOOK APPOINTMENT
       </button>
+    </div>
   </section>
 
   <!-- Services Section -->
@@ -63,7 +72,7 @@
         <span><i class="service-icon">🏡</i> HOME SERVICE BY APPOINTMENT</span>
       </div>
     </div>
-  </section>
+          </section>
 
   <!-- Contact Section -->
   <section class="contact" id="contact">
@@ -93,8 +102,7 @@
         </div>
       </div>
     </div>
-  </section>
-
+          </section>
 
   <!-- Schedule Section -->
   <section class="schedule">
@@ -156,10 +164,11 @@
         <h3>AND<br>ACCESSORIES</h3>
       </div>
     </div>
-  </section>
+      </div>
+    </section>
 
-  <!-- Footer -->
-  <footer>
+    <!-- Footer -->
+    <footer>
     <div class="footer-container">
       <div class="footer-logo">
         <img src="assets/images/logoo.jpg" alt="Logo">
@@ -276,6 +285,7 @@
           <select id="booking_service" name="service_id" title="Select a veterinary service" aria-label="Select a veterinary service" required>
             <option value="">Loading services...</option>
           </select>
+          <button type="button" onclick="refreshServices()" title="Refresh services" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px;">🔄</button>
         </div>
         
         <div class="form-group">
@@ -383,6 +393,196 @@
   <div id="toast" class="toast"></div>
 
   <style>
+    /* Red Header Bar and Sidebar Styles */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 70px; /* Account for fixed header */
+      left: -250px;
+      width: 250px;
+      height: calc(100vh - 70px); /* Full height minus header */
+      background-color: #1e40af; /* Blue theme sidebar */
+      color: white;
+      transition: 0.3s ease;
+      z-index: 999;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    /* Fixed Header Bar */
+    .header-bar {
+      background-color: #b91c1c; /* Red header bar */
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      height: 70px;
+      box-sizing: border-box;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .menu-btn {
+      font-size: 22px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .menu-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid white;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.1);
+    }
+
+    /* Auth Buttons */
+    .auth-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .auth-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .auth-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Logo in header */
+    .header-left .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-left .logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    .header-left .clinic-name {
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1.2;
+      color: white;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding-left: 30px;
+    }
+
+    .logout-sidebar-btn {
+      background-color: rgba(59, 130, 246, 0.2);
+      color: #60a5fa !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 10px;
+      font-weight: 600;
+      display: none !important;
+    }
+
+    .logout-sidebar-btn:hover {
+      background-color: rgba(59, 130, 246, 0.3) !important;
+      color: #3b82f6 !important;
+      padding-left: 30px;
+    }
+
+    .logout-sidebar-btn.visible {
+      display: block !important;
+    }
+
+    /* Hide logout button when not logged in */
+    body:not(.logged-in) .logout-sidebar-btn {
+      display: none !important;
+    }
+
+    /* Show logout button only when logged in */
+    body.logged-in .logout-sidebar-btn.visible {
+      display: block !important;
+    }
+
+    /* Main Content - Account for fixed header */
+    .content, .hero, .services, .contact, .schedule, .store-section {
+      margin-top: 70px; /* Account for fixed header */
+      padding-top: 20px;
+    }
+
+    /* Close sidebar when clicking outside on mobile */
+    .sidebar.active::before {
+      content: '';
+      position: fixed;
+      top: 70px;
+      left: 250px;
+      width: calc(100vw - 250px);
+      height: calc(100vh - 70px);
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
     /* Screen reader only labels */
     .sr-only {
       position: absolute;
@@ -615,21 +815,165 @@
         flex-direction: column;
         align-items: center;
       }
+
+      /* Mobile header adjustments */
+      .header-bar {
+        padding: 10px 15px;
+      }
+
+      .header-left .clinic-name {
+        font-size: 12px;
+      }
+
+      .auth-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
     }
 
   </style>
 
   <script>
-    // Global CSRF token
+    // Global variables
     let csrfToken = '';
+    let currentUser = null;
+    let currentUserType = null;
+    const API_BASE_URL = 'api/vet_api.php';
+
+    // Profile Picture Management System
+    class ProfilePictureManager {
+      constructor() {
+        this.defaultProfilePic = 'assets/images/logoo.jpg';
+        this.profilePicElement = null;
+        this.initialized = false;
+      }
+
+      // Initialize the profile picture system
+      init() {
+        this.profilePicElement = document.getElementById('headerProfilePic');
+        if (this.profilePicElement) {
+          this.initialized = true;
+          console.log('ProfilePictureManager initialized successfully');
+        } else {
+          console.warn('ProfilePictureManager: Could not find headerProfilePic element');
+        }
+      }
+
+      // Get the correct profile picture path
+      getProfilePicturePath(user) {
+        if (!user) return this.defaultProfilePic;
+
+        // If user has a profile picture, use it
+        if (user.profile_picture && user.profile_picture.trim() !== '' && user.profile_picture !== 'null') {
+          // Handle different profile picture path formats
+          let profilePicPath = user.profile_picture;
+
+          // If path doesn't start with assets/, add it
+          if (!profilePicPath.startsWith('assets/')) {
+            profilePicPath = 'assets/images/profiles/' + profilePicPath;
+          }
+
+          return profilePicPath;
+        }
+
+        // Otherwise use default
+        return this.defaultProfilePic;
+      }
+
+      // Update profile picture with error handling
+      updateProfilePicture(user) {
+        // Re-initialize to get the current profile picture element
+        this.init();
+
+        if (!this.initialized || !this.profilePicElement) {
+          console.warn('ProfilePictureManager not initialized or profile element not found');
+          return;
+        }
+
+        const profilePicPath = this.getProfilePicturePath(user);
+        console.log('ProfilePictureManager updating to:', profilePicPath);
+        console.log('User profile_picture value:', user?.profile_picture);
+
+        // Add timestamp to prevent caching
+        const timestamp = Date.now();
+        const finalPath = profilePicPath + '?t=' + timestamp;
+
+        console.log('Setting profile picture element src to:', finalPath);
+
+        // Create new image to test loading
+        const img = new Image();
+        img.onload = () => {
+          this.profilePicElement.src = finalPath;
+          console.log('ProfilePictureManager: Profile picture loaded successfully');
+        };
+
+        img.onerror = () => {
+          console.warn('ProfilePictureManager: Profile picture failed to load, using default');
+          console.log('Failed path:', finalPath);
+          this.profilePicElement.src = this.defaultProfilePic;
+        };
+
+        img.src = finalPath;
+      }
+
+      // Get user display name
+      getUserDisplayName(user) {
+        if (!user) return 'User';
+        return user.name || user.first_name || 'User';
+      }
+
+      // Update entire header profile section
+      updateHeaderProfile(user, userType) {
+        const profileSection = document.querySelector('.profile-section');
+        if (!profileSection) {
+          console.warn('Profile section not found');
+          return;
+        }
+
+        const userName = this.getUserDisplayName(user);
+        const profilePicPath = this.getProfilePicturePath(user);
+
+        console.log('Updating header profile:', {
+          userName: userName,
+          userType: userType,
+          profilePicPath: profilePicPath,
+          fullUserData: user
+        });
+
+        // Update the existing profile picture element instead of recreating
+        const existingProfilePic = document.getElementById('headerProfilePic');
+        if (existingProfilePic) {
+          existingProfilePic.src = profilePicPath;
+          existingProfilePic.alt = `${userName}'s profile picture`;
+          existingProfilePic.onclick = () => window.location.href = `public/${userType}.html`;
+        }
+
+        // Update the profile picture with the new element
+        this.init();
+        if (user) {
+          this.updateProfilePicture(user);
+        }
+      }
+    }
+
+    // Create global profile picture manager instance
+    window.profileManager = new ProfilePictureManager();
 
     // Modern JavaScript with reduced redundancy
     document.addEventListener('DOMContentLoaded', async function () {
-      // Get CSRF token first
-      await getCSRFToken();
+      // Initialize profile picture manager
+      if (window.profileManager) {
+        profileManager.init();
+      }
 
-      // Check login status on page load and update UI
-      checkLoginStatusOnLoad();
+      // Initialize CSRF token and check login status
+      try {
+        await getCSRFToken();
+        await checkLoginStatusOnLoad();
+      } catch (error) {
+        console.error('Initialization error:', error);
+        // Continue without initialization, will retry as needed
+      }
       
       // Smooth scrolling for nav links
       document.querySelectorAll('nav a[href^="#"]').forEach(link => {
@@ -656,59 +1000,139 @@
 
           const result = await response.json();
           if (result.success) {
-            csrfToken = result.data.csrf_token;
+            csrfToken = result.csrf_token || result.data?.csrf_token;
+            if (!csrfToken) {
+              console.error('CSRF token not found in response:', result);
+            }
           } else {
             console.error('Failed to get CSRF token:', result.message);
           }
         } catch (error) {
           console.error('Error getting CSRF token:', error);
+          // Continue without CSRF token, server will handle it
         }
       }
 
       // Helper function for API calls with CSRF token
       async function apiCall(payload) {
-        // Add CSRF token to payload for state-changing actions
-        const csrfActions = ['register', 'login', 'logout', 'book_appointment', 'add_pet', 'update_appointment_status', 'add_to_cart', 'place_order', 'update_staff_profile', 'change_staff_password'];
-        if (csrfActions.includes(payload.action)) {
-          payload.csrf_token = csrfToken;
+        try {
+          // Add CSRF token to payload for state-changing actions
+          const csrfActions = ['register', 'login', 'logout', 'book_appointment', 'add_pet', 'update_appointment_status', 'add_to_cart', 'place_order', 'update_staff_profile', 'change_staff_password'];
+          if (csrfActions.includes(payload.action)) {
+            payload.csrf_token = csrfToken;
+          }
+
+        try {
+            console.log('Making API call:', payload);
+            const response = await fetch('api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // Log response status
+            console.log('API response status:', response.status);
+            
+            // Handle non-200 responses
+            if (!response.ok) {
+                let errorText = await response.text();
+                console.error('API error response:', errorText);
+                try {
+                    // Try to parse error as JSON
+                    const errorJson = JSON.parse(errorText);
+                    return { success: false, message: errorJson.message || 'API request failed' };
+                } catch (e) {
+                    // If not JSON, return text
+                    return { success: false, message: 'API error: ' + errorText };
+                }
+            }
+
+            // Parse JSON response
+            const result = await response.json();
+            console.log('API response:', result);
+            return result;
+        } catch (err) {
+            console.error('API call error:', err);
+            return { success: false, message: 'Connection error: ' + err.message };
         }
-
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        return await response.json();
+      } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+      }
       }
 
       // Check login status on page load and update UI accordingly
       async function checkLoginStatusOnLoad() {
         try {
           const result = await apiCall({ action: 'get_user_info' });
-          
+
           if (result.success && result.data.logged_in) {
             // User is logged in, update UI
             const user = result.data.user;
             const userType = result.data.user_type;
-            
+
+            console.log('User logged in:', user);
+            console.log('Profile picture path:', user.profile_picture);
+
             updateUIForLoggedInUser(user, userType);
-            
+
             // Update booking buttons text for staff users
             if (userType === 'staff') {
-              const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
-              bookingBtns.forEach(btn => {
-                if (btn.tagName === 'A') {
-                  btn.innerHTML = '<i class="icon">📊</i> DASHBOARD';
-                } else {
-                  btn.innerHTML = '<i class="icon">📊</i> STAFF DASHBOARD';
-                }
-              });
+              updateBookingButtonsForStaff();
             }
+          } else {
+            console.log('User not logged in or API error:', result);
+            // Ensure proper logged out state
+            resetToLoggedOutState();
           }
         } catch (error) {
           console.error('Error checking login status on load:', error);
+          // Ensure proper logged out state on error
+          resetToLoggedOutState();
         }
+      }
+
+      // Update booking buttons for staff users
+      function updateBookingButtonsForStaff() {
+        const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
+        bookingBtns.forEach(btn => {
+          if (btn.tagName === 'A') {
+            btn.innerHTML = '<i class="icon">📊</i> DASHBOARD';
+          } else {
+            btn.innerHTML = '<i class="icon">📊</i> STAFF DASHBOARD';
+          }
+        });
+      }
+
+      // Reset all elements to logged out state
+      function resetToLoggedOutState() {
+        document.body.classList.remove('logged-in');
+        const logoutSidebarBtn = document.querySelector('.logout-sidebar-btn');
+        const dashboardLink = document.querySelector('.dashboard-link');
+
+        if (logoutSidebarBtn) {
+          logoutSidebarBtn.classList.remove('visible');
+        }
+
+        if (dashboardLink) {
+          dashboardLink.href = "#";
+          dashboardLink.innerHTML = '🏠 Homepage';
+        }
+
+        // Reset all booking buttons to default text
+        resetBookingButtonsToDefault();
+      }
+
+      // Reset booking buttons to default logged-out text
+      function resetBookingButtonsToDefault() {
+        const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
+        bookingBtns.forEach(btn => {
+          if (btn.tagName === 'A') {
+            btn.innerHTML = '<i class="icon"></i> BOOKING';
+          } else {
+            btn.innerHTML = '<i class="icon">🗓️</i> BOOK APPOINTMENT';
+          }
+        });
       }
 
       // Global modal functions
@@ -810,31 +1234,39 @@
       
       // Initialize booking modal
       async function initializeBookingModal() {
+        console.log('Initializing booking modal...');
+
         // Check if user is logged in
         try {
           const result = await apiCall({ action: 'get_user_info' });
-          
+          console.log('User info check result:', result);
+
           if (result.success && result.data.logged_in) {
             const userType = result.data.user_type;
-            
+            console.log('User logged in as:', userType);
+
             // Hide login required message
             document.getElementById('loginRequiredMessage').style.display = 'none';
-            
+
             if (userType === 'staff') {
+              console.log('Showing staff dashboard');
               // Show staff dashboard
               document.getElementById('bookingForm').style.display = 'none';
               document.getElementById('addPetForm').style.display = 'none';
               showStaffDashboard();
             } else {
+              console.log('Showing client booking form');
               // Show client booking form
               document.getElementById('bookingForm').style.display = 'block';
               hideStaffDashboard();
-              
+
               // Load services and pets for clients
+              console.log('Loading services and pets for client...');
               await loadServices();
               await loadUserPets();
             }
           } else {
+            console.log('User not logged in, showing login required message');
             // User not logged in
             document.getElementById('loginRequiredMessage').style.display = 'block';
             document.getElementById('bookingForm').style.display = 'none';
@@ -847,28 +1279,55 @@
           hideStaffDashboard();
         }
       }
+
+      // Manual service refresh function
+      window.refreshServices = async () => {
+        console.log('Manual service refresh requested');
+        await loadServices();
+        toast('Services refreshed!', 'success');
+      };
       
       // Load services
       async function loadServices() {
         try {
+          console.log('Loading services...');
           const result = await apiCall({ action: 'get_services' });
           const serviceSelect = document.querySelector('select[name="service_id"]');
 
+          console.log('Services API response:', result);
+
           if (result.success && result.data) {
+            console.log('Services data received:', result.data.length, 'services');
+
             serviceSelect.innerHTML = '<option value="">Select a service</option>';
-            result.data.forEach(service => {
+
+            result.data.forEach((service, index) => {
+              console.log(`Service ${index + 1}:`, service);
+
               const option = document.createElement('option');
               option.value = service.service_id;
+
               // Show service name and description if available
               const description = service.description ? ` - ${service.description}` : '';
-              option.textContent = `${service.service_name}${description}`;
+              const serviceText = `${service.service_name}${description}`;
+
+              option.textContent = serviceText;
+              option.title = serviceText; // Add tooltip for long service names
+
               serviceSelect.appendChild(option);
             });
+
+            console.log('Services loaded successfully into dropdown');
           } else {
+            console.error('Failed to load services:', result);
             serviceSelect.innerHTML = '<option value="">No services available</option>';
+            toast('Failed to load services. Please refresh and try again.', 'error');
           }
         } catch (error) {
           console.error('Error loading services:', error);
+          const serviceSelect = document.querySelector('select[name="service_id"]');
+          serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+          toast('Connection error while loading services.', 'error');
         }
       }
       
@@ -968,10 +1427,10 @@
       // Handle booking form submission
       async function handleBooking(e) {
         e.preventDefault();
-        
+
         const form = e.target;
         const formData = new FormData(form);
-        
+
         const bookingData = {
           action: 'book_appointment',
           service_id: formData.get('service_id'),
@@ -980,50 +1439,93 @@
           appointment_time: formData.get('appointment_time'),
           notes: formData.get('notes') || ''
         };
-        
+
         // Enhanced booking validation with debugging
-        console.log('Booking validation debug:');
+        console.log('=== BOOKING FORM SUBMISSION ===');
+        console.log('Form data received:');
+        console.log('service_id (raw):', formData.get('service_id'));
+        console.log('pet_id (raw):', formData.get('pet_id'));
+        console.log('appointment_date (raw):', formData.get('appointment_date'));
+        console.log('appointment_time (raw):', formData.get('appointment_time'));
+
+        console.log('Processed booking data:');
         console.log('service_id:', JSON.stringify(bookingData.service_id));
         console.log('pet_id:', JSON.stringify(bookingData.pet_id));
         console.log('appointment_date:', JSON.stringify(bookingData.appointment_date));
         console.log('appointment_time:', JSON.stringify(bookingData.appointment_time));
-        
+
+        // Check service selection
+        const serviceSelect = document.querySelector('select[name="service_id"]');
+        const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
+        console.log('Selected service option:', {
+          value: selectedServiceOption?.value,
+          text: selectedServiceOption?.textContent,
+          index: serviceSelect.selectedIndex
+        });
+
+        // Check pet selection
+        const petSelect = document.querySelector('select[name="pet_id"]');
+        const selectedPetOption = petSelect.options[petSelect.selectedIndex];
+        console.log('Selected pet option:', {
+          value: selectedPetOption?.value,
+          text: selectedPetOption?.textContent,
+          index: petSelect.selectedIndex
+        });
+
         const missingBookingFields = [];
         if (!bookingData.service_id) missingBookingFields.push('Service');
         if (!bookingData.pet_id) missingBookingFields.push('Pet');
         if (!bookingData.appointment_date) missingBookingFields.push('Date');
         if (!bookingData.appointment_time) missingBookingFields.push('Time');
-        
+
         if (missingBookingFields.length > 0) {
           const errorMsg = `Please fill in all required fields. Missing: ${missingBookingFields.join(', ')}`;
           console.log('Booking validation failed:', errorMsg);
           toast(errorMsg, 'error');
           return;
         }
-        
+
+        // Check if service selection is valid (not the placeholder option)
+        if (!selectedServiceOption || selectedServiceOption.textContent.includes('Loading services') ||
+            selectedServiceOption.textContent.includes('No services available') ||
+            selectedServiceOption.textContent.includes('Error loading services')) {
+          toast('Please select a valid service from the dropdown.', 'error');
+          return;
+        }
+
         // Check if pet selection is valid (not the placeholder option)
-        const petSelect = document.querySelector('select[name="pet_id"]');
-        const selectedOption = petSelect.options[petSelect.selectedIndex];
-        if (!selectedOption || selectedOption.textContent.includes('No pets registered') || selectedOption.textContent.includes('Error loading pets')) {
+        if (!selectedPetOption || selectedPetOption.textContent.includes('Loading pets') ||
+            selectedPetOption.textContent.includes('No pets registered') ||
+            selectedPetOption.textContent.includes('Error loading pets')) {
           toast('Please select a valid pet or add a new pet first.', 'error');
           showAddPetForm();
           return;
         }
-        
+
+        console.log('All validations passed, submitting booking...');
+
         try {
+          console.log('Sending booking data to API:', bookingData);
           const result = await apiCall(bookingData);
-          
+          console.log('Booking API response:', result);
+
           if (result.success) {
             toast('Appointment booked successfully!', 'success');
             closeModal('bookingModal');
             form.reset();
+            console.log('Booking form reset and modal closed');
           } else {
+            console.error('Booking failed:', result);
             // Handle specific error messages
             if (result.message && result.message.includes('Invalid pet selection')) {
               toast('The selected pet is not valid for your account. Please select a different pet or add a new one.', 'error');
               // Reload pets to refresh the list
               await loadUserPets();
               showAddPetForm();
+            } else if (result.message && result.message.includes('Invalid service')) {
+              toast('The selected service is not valid. Please select a different service.', 'error');
+              // Reload services to refresh the list
+              await loadServices();
             } else {
               toast(result.message || 'Failed to book appointment.', 'error');
             }
@@ -1259,11 +1761,20 @@
       wirePasswordStrength('signupForm', 'signup');
 
       // Form handlers with PHP API integration
-      document.getElementById('loginForm').addEventListener('submit', handleLogin);
-      document.getElementById('registerForm').addEventListener('submit', handleRegister);
-      document.getElementById('signupForm').addEventListener('submit', handleRegister); // Footer signup
-      document.getElementById('forgotPasswordForm').addEventListener('submit', handleForgotPassword);
-      document.getElementById('bookingForm').addEventListener('submit', handleBooking);
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) loginForm.addEventListener('submit', handleLogin);
+
+      const registerForm = document.getElementById('registerForm');
+      if (registerForm) registerForm.addEventListener('submit', handleRegister);
+
+      const signupForm = document.getElementById('signupForm');
+      if (signupForm) signupForm.addEventListener('submit', handleRegister); // Footer signup
+
+      const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+      if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+
+      const bookingForm = document.getElementById('bookingForm');
+      if (bookingForm) bookingForm.addEventListener('submit', handleBooking);
       
       // Add change listener for date input to load available times
       document.querySelector('input[name="appointment_date"]')?.addEventListener('change', loadAvailableTimeSlots);
@@ -1295,27 +1806,29 @@
           if (result.success) {
             toast('Login successful! Redirecting...', 'success');
 
-            // Redirect to appropriate dashboard
-            if (result.redirect && result.redirect !== 'undefined' && result.redirect !== 'null') {
+            // Determine redirect path based on user type
+            let redirectPath = '';
+            if (result.user && result.user.type) {
+              if (result.user.type === 'staff') {
+                redirectPath = 'public/staff.html';
+              } else if (result.user.type === 'client') {
+                redirectPath = 'public/client.html';
+              }
+            }
+
+            if (redirectPath) {
               setTimeout(() => {
-                console.log('Redirecting to:', result.redirect);
-                window.location.href = result.redirect;
+                console.log('Redirecting to:', redirectPath);
+                window.location.href = redirectPath;
               }, 1500);
             } else {
-              console.log('No redirect provided, staying on homepage');
+              console.log('No redirect path determined, staying on homepage');
               closeModal('loginModal');
               updateUIForLoggedInUser(result.user, result.user.type);
 
               // Update booking buttons text for staff users
               if (result.user.type === 'staff') {
-                const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
-                bookingBtns.forEach(btn => {
-                  if (btn.tagName === 'A') {
-                    btn.innerHTML = '<i class="icon">📊</i> DASHBOARD';
-                  } else {
-                    btn.innerHTML = '<i class="icon">📊</i> STAFF DASHBOARD';
-                  }
-                });
+                updateBookingButtonsForStaff();
               }
             }
           }
@@ -1396,7 +1909,7 @@
             if (result.client) {
               // Redirect to client dashboard
               setTimeout(() => {
-                window.location.href = 'client.html';
+                window.location.href = 'public/client.html';
               }, 1500);
 
               updateUIForLoggedInUser(result.client, 'client');
@@ -1448,53 +1961,100 @@
       
       // Update UI when user logs in
       function updateUIForLoggedInUser(user, userType) {
-        // Update header auth links
-        const authLinks = document.querySelector('.auth-links');
-        if (authLinks) {
-          const userName = user.name || user.first_name || 'User';
-          let welcomeText = `Welcome, ${userName}!`;
-          
-          // Add position for staff users
-          if (userType === 'staff' && user.position) {
-            welcomeText = `Welcome, ${userName} (${user.position})!`;
+        const userName = user.name || user.first_name || 'User';
+
+        // Determine profile picture path
+        let profilePicPath = 'assets/images/logoo.jpg'; // default
+        if (user.profile_picture && user.profile_picture.trim() !== '' && user.profile_picture !== 'null') {
+          // Handle different profile picture path formats
+          if (!user.profile_picture.startsWith('assets/')) {
+            profilePicPath = 'assets/images/profiles/' + user.profile_picture;
+          } else {
+            profilePicPath = user.profile_picture;
           }
-          
-          authLinks.innerHTML = `
-            <span style="color: white; margin-right: 10px;">${welcomeText}</span>
-            <a href="#" onclick="handleLogout()">LOGOUT</a>
-          `;
         }
-        
-        // Show/hide booking button based on user type
-        const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
-        bookingBtns.forEach(btn => {
-          if (userType === 'client') {
-            btn.style.display = 'block';
-          }
-        });
+
+        console.log('Updating for user:', userName);
+        console.log('Profile picture path:', profilePicPath);
+
+        // Add logged-in class to body
+        document.body.classList.add('logged-in');
+
+        // Show profile picture and hide auth links
+        const profilePic = document.getElementById('headerProfilePic');
+        const authLinks = document.getElementById('authLinks');
+
+        if (profilePic) {
+          console.log('Setting profile picture to:', profilePicPath);
+          profilePic.src = profilePicPath;
+          profilePic.style.display = 'block';
+
+          // Add error handling for profile picture loading
+          profilePic.onerror = () => {
+            console.warn('Profile picture failed to load, using default');
+            profilePic.src = this.defaultProfilePic;
+          };
+        }
+
+        if (authLinks) {
+          authLinks.style.display = 'none';
+        }
+
+        // Update sidebar elements for logged in user
+        const logoutSidebarBtn = document.querySelector('.logout-sidebar-btn');
+        const dashboardLink = document.querySelector('.dashboard-link');
+
+        if (logoutSidebarBtn) {
+          logoutSidebarBtn.classList.add('visible');
+        }
+
+        // Update dashboard link to point to user dashboard
+        if (dashboardLink) {
+          dashboardLink.href = `public/${userType}.html`;
+          dashboardLink.innerHTML = '📊 Dashboard';
+        }
+
+        console.log('UI updated successfully for user:', userName);
       }
       
       // Logout function
       window.handleLogout = async () => {
         try {
           const result = await apiCall({ action: 'logout' });
-          
+
           if (result.success) {
             toast('Logged out successfully.', 'success');
-            // Reset UI
-            const authLinks = document.querySelector('.auth-links');
-            if (authLinks) {
-              authLinks.innerHTML = `
-                <a href="#" onclick="showLoginModal()"><i class="icon">🔐</i> LOG-IN</a>
-                <a href="#" onclick="showRegisterModal()"><i class="icon">📝</i> SIGN-UP</a>
-              `;
-            }
+            // Reset UI to show login/signup
+            resetHeaderToLoginState();
           }
         } catch (error) {
           console.error('Logout error:', error);
           toast('Logout failed.', 'error');
         }
       };
+
+      // Reset header to login state
+      function resetHeaderToLoginState() {
+        // Remove logged-in class from body
+        document.body.classList.remove('logged-in');
+
+        // Hide profile picture and show auth links
+        const profilePic = document.getElementById('headerProfilePic');
+        const authLinks = document.getElementById('authLinks');
+
+        if (profilePic) {
+          profilePic.style.display = 'none';
+        }
+
+        if (authLinks) {
+          authLinks.style.display = 'flex';
+        }
+
+        console.log('Header reset to login state');
+
+        // Use centralized logged out state management
+        resetToLoggedOutState();
+      }
 
       // Staff Dashboard Functions
       window.showStaffDashboard = () => {
@@ -1510,7 +2070,7 @@
       
       window.loadAllAppointments = async () => {
         try {
-          const response = await fetch('api/vet_api.php', {
+          const response = await fetch('/vetfinal/api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'get_all_appointments', limit: 50 })
@@ -1540,7 +2100,7 @@
           const payload = { action: 'get_all_appointments', limit: 50 };
           if (status) payload.status = status;
           
-          const response = await fetch('../api/vet_api.php', {
+          const response = await fetch('/vetfinal/api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -1610,7 +2170,7 @@
         if (!newStatus) return;
         
         try {
-          const response = await fetch('api/vet_api.php', {
+          const response = await fetch('/vetfinal/api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1636,10 +2196,13 @@
       
       // Click outside modal to close & close mobile nav when clicking outside
       document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal')) {
-          e.target.style.display = 'none';
-        }
-        
+        // Close modals when clicking outside
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
       });
     });
 
@@ -1654,6 +2217,71 @@
     // - Open a modal with category products
     // - etc.
   };
+
+  // Ensure all modals exist before adding event listeners
+  function initializeModalHandlers() {
+    // List of required modal IDs
+    const modalIds = ['loginModal', 'registerModal', 'forgotPasswordModal', 'bookingModal'];
+    
+    // Check if all modals exist
+    const missingModals = modalIds.filter(id => !document.getElementById(id));
+    if (missingModals.length > 0) {
+      console.warn('Missing modals:', missingModals);
+      return;
+    }
+
+    // Add click handlers only if all modals exist
+    document.addEventListener('click', function(e) {
+      // Close modals when clicking outside
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (e.target === modal) {
+          closeModal(modal.id);
+        }
+      });
+    });
+  }
+
+  // Call initialization after DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeModalHandlers);
+  } else {
+    initializeModalHandlers();
+  }
+
+  // Sidebar Toggle Functionality with Hamburger Menu Button
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+
+  // Hamburger menu button functionality
+  if (menuBtn) {
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
+  }
+
+  // Close sidebar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuBtn) {
+      sidebar.classList.remove('active');
+    }
+  });
+
+  // Allow sidebar to be toggled programmatically
+  window.toggleSidebar = () => {
+    if (sidebar) {
+      sidebar.classList.toggle('active');
+    }
+  };
+
+  // Scroll to section function for homepage navigation
+  function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   </script>
 </body>

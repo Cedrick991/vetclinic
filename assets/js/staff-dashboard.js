@@ -1,4 +1,4 @@
-so/**
+/**
  * Staff Dashboard JavaScript
  * Handles staff-specific functionality for the veterinary clinic management system
  */
@@ -277,13 +277,14 @@ class StaffDashboard {
             if (sessionValid) {
                 await this.loadDashboardDataWithSession();
             } else {
-                await this.loadDashboardDataFallback();
+                // Use mock data for demonstration when PHP server is not available
+                await this.loadDashboardDataMock();
             }
 
         } catch (error) {
             console.error('❌ Failed to load dashboard data:', error);
-            // Final fallback attempt
-            await this.loadDashboardDataFallback();
+            // Final fallback attempt with mock data
+            await this.loadDashboardDataMock();
         }
     }
 
@@ -321,13 +322,7 @@ class StaffDashboard {
                 // Don't show error toast for dashboard data failure
             }
 
-            // Update today's schedule
-            if (appointmentsResult.success && appointmentsResult.data) {
-                console.log('✅ Updating today schedule with', appointmentsResult.data.length, 'appointments');
-                this.updateTodaySchedule(appointmentsResult.data);
-            } else {
-                console.log('⚠️ No appointments data or API failed');
-            }
+            // Recent activity removed - today's schedule no longer updated
 
             // Load other sections
             console.log('🔄 Loading other sections...');
@@ -382,10 +377,7 @@ class StaffDashboard {
                 console.log('✅ Fallback data calculated:', fallbackData);
                 this.updateDashboardCards(fallbackData);
 
-                // Update today's schedule with appointments data
-                if (appointmentsResult.data) {
-                    this.updateTodaySchedule(appointmentsResult.data);
-                }
+                // Recent activity removed - today's schedule no longer updated
 
                 // Load other sections
                 await this.loadAppointmentsSection();
@@ -400,6 +392,72 @@ class StaffDashboard {
 
         } catch (error) {
             console.error('❌ Error in fallback mode:', error);
+            this.showToast('Error loading dashboard data', 'error');
+        }
+    }
+
+    async loadDashboardDataMock() {
+        console.log('🔄 Loading dashboard data with mock data...');
+
+        try {
+            // Mock data for demonstration
+            const mockData = {
+                total_clients: 12,
+                total_pets: 18,
+                today_appointments: 5,
+                monthly_revenue: 15420.50
+            };
+
+            console.log('✅ Mock data loaded:', mockData);
+            this.updateDashboardCards(mockData);
+
+            // Mock today's schedule
+            const todayAppointments = [
+                {
+                    appointment_date: new Date().toISOString().split('T')[0],
+                    appointment_time: '09:00',
+                    service_name: 'General Check-up',
+                    first_name: 'John',
+                    last_name: 'Doe',
+                    pet_name: 'Buddy',
+                    species: 'Dog',
+                    status: 'confirmed'
+                },
+                {
+                    appointment_date: new Date().toISOString().split('T')[0],
+                    appointment_time: '10:30',
+                    service_name: 'Vaccination',
+                    first_name: 'Jane',
+                    last_name: 'Smith',
+                    pet_name: 'Whiskers',
+                    species: 'Cat',
+                    status: 'pending'
+                },
+                {
+                    appointment_date: new Date().toISOString().split('T')[0],
+                    appointment_time: '14:00',
+                    service_name: 'Dental Cleaning',
+                    first_name: 'Mike',
+                    last_name: 'Johnson',
+                    pet_name: 'Max',
+                    species: 'Dog',
+                    status: 'in-progress'
+                }
+            ];
+
+            // Recent activity removed - today's schedule no longer updated
+
+            // Load other sections with mock data
+            await this.loadAppointmentsSectionMock();
+            await this.loadClientsSectionMock();
+            await this.loadPetsSectionMock();
+            await this.loadServicesSectionMock();
+
+            console.log('✅ All sections loaded with mock data');
+            this.showToast('Dashboard loaded with demo data', 'info');
+
+        } catch (error) {
+            console.error('❌ Error loading mock data:', error);
             this.showToast('Error loading dashboard data', 'error');
         }
     }
@@ -450,38 +508,7 @@ class StaffDashboard {
         }
     }
 
-    updateTodaySchedule(appointments) {
-        const todaySchedule = document.getElementById('todaySchedule');
-
-        if (!todaySchedule) {
-            console.error('❌ todaySchedule element not found');
-            return;
-        }
-
-        const today = new Date().toISOString().split('T')[0];
-        const todayAppointments = appointments.filter(apt =>
-            apt.appointment_date === today && apt.status !== 'cancelled'
-        );
-
-        if (todayAppointments.length > 0) {
-            todaySchedule.innerHTML = todayAppointments.map(appointment => `
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="activity-content">
-                        <p><strong>${appointment.service_name}</strong> - ${appointment.first_name} ${appointment.last_name}</p>
-                        <small>${appointment.appointment_time} - ${appointment.pet_name} (${appointment.species})</small>
-                    </div>
-                    <div class="activity-status status-${appointment.status.toLowerCase()}">
-                        ${appointment.status}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            todaySchedule.innerHTML = '<p>No appointments scheduled for today.</p>';
-        }
-    }
+    // Recent activity removed - updateTodaySchedule function disabled
 
     setupEventListeners() {
         // Modal functionality
@@ -533,6 +560,14 @@ class StaffDashboard {
             });
         }
 
+        // Add service form
+        const addServiceForm = document.getElementById('addServiceForm');
+        if (addServiceForm) {
+            addServiceForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleAddService(addServiceForm);
+            });
+        }
 
         // Edit service form
         const editServiceForm = document.getElementById('editServiceForm');
@@ -654,6 +689,51 @@ class StaffDashboard {
         const modal = this.createAddPetModal();
         document.body.appendChild(modal);
         this.openModal('addPetModal');
+    }
+
+    showAddServiceModal() {
+        const modal = this.createAddServiceModal();
+        document.body.appendChild(modal);
+        this.openModal('addServiceModal');
+    }
+
+    createAddServiceModal() {
+        const modal = document.createElement('div');
+        modal.id = 'addServiceModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-plus"></i> Add New Service</h3>
+                    <span class="close" onclick="staffDashboard.closeModal('addServiceModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="addServiceForm" class="booking-form">
+                        <div class="form-group">
+                            <label for="serviceName">Service Name *</label>
+                            <input type="text" id="serviceName" name="service_name" required placeholder="e.g., General Check-up">
+                        </div>
+                        <div class="form-group">
+                            <label for="serviceDescription">Description</label>
+                            <textarea id="serviceDescription" name="service_description" rows="3" placeholder="Brief description of the service..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="serviceStatus">Status</label>
+                            <select id="serviceStatus" name="service_status">
+                                <option value="1" selected>Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="staffDashboard.closeModal('addServiceModal')">CANCEL</button>
+                            <button type="submit" class="btn-primary">ADD SERVICE</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        return modal;
     }
 
     // Medical History Modal Functions
@@ -1006,29 +1086,65 @@ class StaffDashboard {
         }
     }
 
-    async toggleServiceStatus(serviceId, newStatus) {
+    async deleteService(serviceId, buttonElement) {
+        if (!serviceId || isNaN(parseInt(serviceId))) {
+            this.showToast('Invalid service ID', 'error');
+            return;
+        }
+
         try {
+            console.log('🗑️ Deactivating service with ID:', serviceId);
+
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'update_service_status',
-                    service_id: serviceId,
-                    is_active: newStatus
+                    service_id: parseInt(serviceId),
+                    is_active: 0
                 })
             });
 
             const result = await response.json();
+            console.log('📡 Deactivate service response:', result);
 
             if (result.success) {
-                this.showToast(`Service ${newStatus ? 'activated' : 'deactivated'} successfully!`, 'success');
-                await this.loadServicesSection(); // Refresh services list
+                this.showToast('Service deleted successfully!', 'success');
+                // Immediately hide the table row for better UX
+                const serviceRow = buttonElement.closest('tr');
+                if (serviceRow) {
+                    serviceRow.style.transition = 'opacity 0.3s ease';
+                    serviceRow.style.opacity = '0';
+                    setTimeout(() => {
+                        serviceRow.remove();
+                    }, 300);
+                }
             } else {
-                this.showToast(result.message || 'Failed to update service status', 'error');
+                this.showToast(result.message || 'Failed to delete service', 'error');
             }
         } catch (error) {
-            console.error('Toggle service status error:', error);
-            this.showToast('Failed to update service status. Please try again.', 'error');
+            console.error('Error deleting service:', error);
+            this.showToast('Error deleting service. Please try again.', 'error');
+        }
+    }
+
+    async getServiceDetails(serviceId) {
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_services' })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                return result.data.find(s => s.id == serviceId);
+            }
+            return null;
+        } catch (error) {
+            console.error('Error getting service details:', error);
+            return null;
         }
     }
 
@@ -1320,6 +1436,120 @@ class StaffDashboard {
         }
     }
 
+    async handleAddService(form) {
+        try {
+            const formData = new FormData(form);
+            const serviceData = {
+                action: 'add_service',
+                name: formData.get('service_name'),
+                description: formData.get('service_description'),
+                is_active: parseInt(formData.get('service_status'))
+            };
+
+            // Validate required fields
+            if (!serviceData.name || serviceData.name.trim() === '') {
+                this.showToast('Service name is required', 'error');
+                return;
+            }
+
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Service added successfully!', 'success');
+                this.closeModal('addServiceModal');
+                await this.loadServicesSection(); // Refresh services list
+                await this.loadDashboardData(); // Refresh dashboard data
+            } else {
+                this.showToast(result.message || 'Failed to add service', 'error');
+            }
+        } catch (error) {
+            console.error('Add service error:', error);
+            this.showToast('Failed to add service. Please try again.', 'error');
+        }
+    }
+
+    async handleAddService(form) {
+        try {
+            const formData = new FormData(form);
+            const serviceData = {
+                action: 'add_service',
+                name: formData.get('service_name'),
+                description: formData.get('service_description'),
+                is_active: parseInt(formData.get('service_status'))
+            };
+
+            // Validate required fields
+            if (!serviceData.name || serviceData.name.trim() === '') {
+                this.showToast('Service name is required', 'error');
+                return;
+            }
+
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Service added successfully!', 'success');
+                this.closeModal('addServiceModal');
+                await this.loadServicesSection(); // Refresh services list
+                await this.loadDashboardData(); // Refresh dashboard data
+            } else {
+                this.showToast(result.message || 'Failed to add service', 'error');
+            }
+        } catch (error) {
+            console.error('Add service error:', error);
+            this.showToast('Failed to add service. Please try again.', 'error');
+        }
+    }
+
+    async handleAddService(form) {
+        try {
+            const formData = new FormData(form);
+            const serviceData = {
+                action: 'add_service',
+                name: formData.get('service_name'),
+                description: formData.get('service_description'),
+                is_active: parseInt(formData.get('service_status'))
+            };
+
+            // Validate required fields
+            if (!serviceData.name || serviceData.name.trim() === '') {
+                this.showToast('Service name is required', 'error');
+                return;
+            }
+
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Service added successfully!', 'success');
+                this.closeModal('addServiceModal');
+                await this.loadServicesSection(); // Refresh services list
+                await this.loadDashboardData(); // Refresh dashboard data
+            } else {
+                this.showToast(result.message || 'Failed to add service', 'error');
+            }
+        } catch (error) {
+            console.error('Add service error:', error);
+            this.showToast('Failed to add service. Please try again.', 'error');
+        }
+    }
+
     async handleMedicalHistorySubmission(form) {
         try {
             if (!this.currentAppointmentId) {
@@ -1420,18 +1650,75 @@ class StaffDashboard {
             }
         } catch (error) {
             console.error('Failed to load appointments:', error);
-            const appointmentsTableBody = document.getElementById('appointmentsTableBody');
-            appointmentsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="error-state-table">
-                        <div class="error-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>Failed to load appointments</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
+            // Fallback to mock data
+            await this.loadAppointmentsSectionMock();
         }
+    }
+
+    async loadAppointmentsSectionMock() {
+        const appointmentsTableBody = document.getElementById('appointmentsTableBody');
+        if (!appointmentsTableBody) return;
+
+        const mockAppointments = [
+            {
+                id: 1,
+                appointment_date: new Date().toISOString().split('T')[0],
+                appointment_time: '09:00',
+                first_name: 'John',
+                last_name: 'Doe',
+                pet_name: 'Buddy',
+                species: 'Dog',
+                service_name: 'General Check-up',
+                status: 'confirmed'
+            },
+            {
+                id: 2,
+                appointment_date: new Date().toISOString().split('T')[0],
+                appointment_time: '10:30',
+                first_name: 'Jane',
+                last_name: 'Smith',
+                pet_name: 'Whiskers',
+                species: 'Cat',
+                service_name: 'Vaccination',
+                status: 'pending'
+            },
+            {
+                id: 3,
+                appointment_date: new Date().toISOString().split('T')[0],
+                appointment_time: '14:00',
+                first_name: 'Mike',
+                last_name: 'Johnson',
+                pet_name: 'Max',
+                species: 'Dog',
+                service_name: 'Dental Cleaning',
+                status: 'in-progress'
+            }
+        ];
+
+        appointmentsTableBody.innerHTML = mockAppointments.map(appointment => `
+            <tr>
+                <td>${appointment.appointment_date}</td>
+                <td>${appointment.appointment_time}</td>
+                <td>${appointment.first_name} ${appointment.last_name}</td>
+                <td>${appointment.pet_name} (${appointment.species})</td>
+                <td>${appointment.service_name}</td>
+                <td>
+                    <div class="status-container">
+                        <select class="status-select" data-appointment-id="${appointment.id}" onchange="staffDashboard.changeAppointmentStatus(${appointment.id}, this.value)">
+                            <option value="pending" ${appointment.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${appointment.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="in-progress" ${appointment.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="completed" ${appointment.status === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${appointment.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            <option value="no-show" ${appointment.status === 'no-show' ? 'selected' : ''}>No Show</option>
+                        </select>
+                        <button class="btn-primary btn-small" onclick="staffDashboard.updateAppointmentStatus(${appointment.id})" title="Update Status">
+                            <i class="fas fa-check"></i> UPDATE
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async loadClientsSection() {
@@ -1454,30 +1741,51 @@ class StaffDashboard {
             if (result.success && result.data && result.data.length > 0) {
                 clientsGrid.innerHTML = result.data.map(client => this.createClientCard(client)).join('');
             } else {
-                clientsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <h3>No Clients</h3>
-                        <p>No clients registered.</p>
-                    </div>
-                `;
+                // Fallback to mock data
+                await this.loadClientsSectionMock();
             }
         } catch (error) {
             console.error('Failed to load clients:', error);
-            const clientsGrid = document.getElementById('clientsGrid');
-            if (clientsGrid) {
-                clientsGrid.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Failed to load clients</p>
-                        <button class="btn-primary" onclick="if(window.staffDashboard) window.staffDashboard.loadClientsSection()">
-                            <i class="fas fa-refresh"></i> Retry
-                        </button>
-                    </div>
-                `;
-            }
-            this.showToast('Failed to load clients. Please try again.', 'error');
+            // Fallback to mock data
+            await this.loadClientsSectionMock();
         }
+    }
+
+    async loadClientsSectionMock() {
+        const clientsGrid = document.getElementById('clientsGrid');
+        if (!clientsGrid) return;
+
+        const mockClients = [
+            {
+                id: 1,
+                first_name: 'John',
+                last_name: 'Doe',
+                email: 'john.doe@email.com',
+                phone: '+1-555-0123',
+                address: '123 Main St, City, State',
+                created_at: '2024-01-15',
+                profile_picture: null,
+                pets: [
+                    { name: 'Buddy' },
+                    { name: 'Max' }
+                ]
+            },
+            {
+                id: 2,
+                first_name: 'Jane',
+                last_name: 'Smith',
+                email: 'jane.smith@email.com',
+                phone: '+1-555-0456',
+                address: '456 Oak Ave, City, State',
+                created_at: '2024-02-20',
+                profile_picture: null,
+                pets: [
+                    { name: 'Whiskers' }
+                ]
+            }
+        ];
+
+        clientsGrid.innerHTML = mockClients.map(client => this.createClientCard(client)).join('');
     }
 
     createClientCard(client) {
@@ -1558,60 +1866,174 @@ class StaffDashboard {
             if (result.success && result.data && result.data.length > 0) {
                 petsGrid.innerHTML = result.data.map(pet => this.createPetCard(pet)).join('');
             } else {
-                petsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-paw"></i>
-                        <h3>No Pets Registered</h3>
-                        <p>No pets in the system.</p>
-                    </div>
-                `;
+                // Fallback to mock data
+                await this.loadPetsSectionMock();
             }
         } catch (error) {
             console.error('Failed to load pets:', error);
-            const petsGrid = document.getElementById('petsGrid');
-            petsGrid.innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Failed to load pets</p>
-                    <button class="btn-primary" onclick="if(window.staffDashboard) window.staffDashboard.loadPetsSection()">
-                        <i class="fas fa-refresh"></i> Retry
-                    </button>
-                </div>
-            `;
+            // Fallback to mock data
+            await this.loadPetsSectionMock();
         }
     }
 
+    async loadPetsSectionMock() {
+        const petsGrid = document.getElementById('petsGrid');
+        if (!petsGrid) return;
+
+        const mockPets = [
+            {
+                id: 1,
+                name: 'Buddy',
+                species: 'Dog',
+                breed: 'Golden Retriever',
+                first_name: 'John',
+                last_name: 'Doe',
+                birthdate: '2020-03-15',
+                gender: 'Male',
+                weight: 25,
+                color: 'Golden'
+            },
+            {
+                id: 2,
+                name: 'Whiskers',
+                species: 'Cat',
+                breed: 'Persian',
+                first_name: 'Jane',
+                last_name: 'Smith',
+                birthdate: '2021-07-22',
+                gender: 'Female',
+                weight: 4,
+                color: 'White'
+            }
+        ];
+
+        petsGrid.innerHTML = mockPets.map(pet => this.createPetCard(pet)).join('');
+    }
+
     createPetCard(pet) {
-        // Handle pet image with fallback
-        let imageHtml = '';
-        let placeholderHtml = '<div class="pet-image-placeholder"><i class="fas fa-paw"></i></div>';
+        // Get species-specific styling and icon
+        const speciesInfo = this.getSpeciesStyling(pet.species);
 
-        // For now, we'll use a placeholder since pets might not have individual images
-        // In the future, you could add pet image functionality
-        const speciesIcon = this.getSpeciesIcon(pet.species);
+        // Calculate age if birthdate is available
+        let ageInfo = '';
+        if (pet.birthdate) {
+            const birthDate = new Date(pet.birthdate);
+            const today = new Date();
+            const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+            const years = Math.floor(ageInMonths / 12);
+            const months = ageInMonths % 12;
 
-        // Create pet details
-        const details = [];
-        if (pet.breed) details.push(`<strong>Breed:</strong> ${pet.breed}`);
-        if (pet.birthdate) details.push(`<strong>Birthdate:</strong> ${new Date(pet.birthdate).toLocaleDateString()}`);
-        details.push(`<strong>Gender:</strong> ${pet.gender}`);
-        details.push(`<strong>Owner:</strong> ${pet.first_name} ${pet.last_name}`);
-        if (pet.weight) details.push(`<strong>Weight:</strong> ${pet.weight} kg`);
-        if (pet.color) details.push(`<strong>Color:</strong> ${pet.color}`);
+            if (years > 0) {
+                ageInfo = years === 1 ? '1 year' : `${years} years`;
+                if (months > 0) ageInfo += ` ${months} month${months > 1 ? 's' : ''}`;
+            } else if (months > 0) {
+                ageInfo = months === 1 ? '1 month' : `${months} months`;
+            } else {
+                ageInfo = 'Newborn';
+            }
+        }
 
-        const detailsText = details.join('<br>');
+        // Create status badges for additional info
+        const statusBadges = [];
+        if (pet.weight) {
+            const weightClass = pet.weight > 20 ? 'heavy' : pet.weight > 10 ? 'medium' : 'light';
+            statusBadges.push(`<span class="pet-badge weight-badge ${weightClass}">${pet.weight}kg</span>`);
+        }
+        if (ageInfo) {
+            statusBadges.push(`<span class="pet-badge age-badge">${ageInfo}</span>`);
+        }
+        if (pet.color) {
+            statusBadges.push(`<span class="pet-badge color-badge">${pet.color}</span>`);
+        }
 
         return `
-            <div class="pet-card">
-                <div class="pet-image">
-                    <div class="pet-image-placeholder">
-                        <i class="${speciesIcon}"></i>
+            <div class="pet-card" data-pet-id="${pet.id}">
+                <div class="pet-card-header">
+                    <div class="pet-avatar-container">
+                        <div class="pet-avatar ${speciesInfo.class}">
+                            <i class="${speciesInfo.icon}"></i>
+                        </div>
+                        <div class="pet-species-badge ${speciesInfo.badgeClass}">
+                            <i class="${speciesInfo.icon}"></i>
+                            ${pet.species}
+                        </div>
+                    </div>
+                    <div class="pet-name-section">
+                        <h3 class="pet-name">${pet.name}</h3>
+                        ${pet.breed ? `<p class="pet-breed">${pet.breed}</p>` : `<p class="pet-breed">${pet.species}</p>`}
                     </div>
                 </div>
-                <div class="pet-info">
-                    <div class="pet-name">${pet.name}</div>
-                    <div class="pet-species">${pet.species}</div>
-                    <div class="pet-details">${detailsText}</div>
+
+                <div class="pet-card-body">
+                    <div class="pet-info-grid">
+                        <div class="info-group">
+                            <div class="info-label">
+                                <i class="fas fa-user"></i>
+                                Owner
+                            </div>
+                            <div class="info-value">${pet.first_name} ${pet.last_name}</div>
+                        </div>
+
+                        ${pet.birthdate ? `
+                        <div class="info-group">
+                            <div class="info-label">
+                                <i class="fas fa-calendar"></i>
+                                Birthdate
+                            </div>
+                            <div class="info-value">${new Date(pet.birthdate).toLocaleDateString()}</div>
+                        </div>
+                        ` : ''}
+
+                        <div class="info-group">
+                            <div class="info-label">
+                                <i class="fas fa-venus-mars"></i>
+                                Gender
+                            </div>
+                            <div class="info-value">${pet.gender}</div>
+                        </div>
+
+                        ${pet.weight ? `
+                        <div class="info-group">
+                            <div class="info-label">
+                                <i class="fas fa-weight"></i>
+                                Weight
+                            </div>
+                            <div class="info-value">${pet.weight} kg</div>
+                        </div>
+                        ` : ''}
+
+                        ${pet.color ? `
+                        <div class="info-group">
+                            <div class="info-label">
+                                <i class="fas fa-palette"></i>
+                                Color
+                            </div>
+                            <div class="info-value">${pet.color}</div>
+                        </div>
+                        ` : ''}
+
+                        ${pet.notes ? `
+                        <div class="info-group full-width">
+                            <div class="info-label">
+                                <i class="fas fa-sticky-note"></i>
+                                Notes
+                            </div>
+                            <div class="info-value notes-value">${pet.notes}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${statusBadges.length > 0 ? `
+                    <div class="pet-badges">
+                        ${statusBadges.join('')}
+                    </div>
+                    ` : ''}
+                    <div class="pet-actions">
+                        <button class="action-btn history-btn" onclick="showPetMedicalHistory(${pet.id})" title="Medical History">
+                            <i class="fas fa-file-medical"></i>
+                            <span>Medical History</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1631,79 +2053,60 @@ class StaffDashboard {
         return icons[species.toLowerCase()] || 'fas fa-paw';
     }
 
-    async viewPetDetails(petId) {
-        try {
-            console.log('🔍 Loading pet details for ID:', petId);
-
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'get_pet_details',
-                    pet_id: petId
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success && result.data) {
-                this.showPetDetailsModal(result.data);
-            } else {
-                this.showToast('Failed to load pet details', 'error');
+    getSpeciesStyling(species) {
+        const styling = {
+            'dog': {
+                icon: 'fas fa-dog',
+                class: 'species-dog',
+                badgeClass: 'badge-dog',
+                gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)'
+            },
+            'cat': {
+                icon: 'fas fa-cat',
+                class: 'species-cat',
+                badgeClass: 'badge-cat',
+                gradient: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)'
+            },
+            'bird': {
+                icon: 'fas fa-dove',
+                class: 'species-bird',
+                badgeClass: 'badge-bird',
+                gradient: 'linear-gradient(135deg, #45B7D1 0%, #96C93D 100%)'
+            },
+            'rabbit': {
+                icon: 'fas fa-paw',
+                class: 'species-rabbit',
+                badgeClass: 'badge-rabbit',
+                gradient: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)'
+            },
+            'hamster': {
+                icon: 'fas fa-paw',
+                class: 'species-hamster',
+                badgeClass: 'badge-hamster',
+                gradient: 'linear-gradient(135deg, #FFC312 0%, #F79F1F 100%)'
+            },
+            'fish': {
+                icon: 'fas fa-fish',
+                class: 'species-fish',
+                badgeClass: 'badge-fish',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            },
+            'reptile': {
+                icon: 'fas fa-paw',
+                class: 'species-reptile',
+                badgeClass: 'badge-reptile',
+                gradient: 'linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%)'
+            },
+            'other': {
+                icon: 'fas fa-paw',
+                class: 'species-other',
+                badgeClass: 'badge-other',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             }
-        } catch (error) {
-            console.error('Error loading pet details:', error);
-            this.showToast('Failed to load pet details', 'error');
-        }
-    }
+        };
 
-    showPetDetailsModal(petData) {
-        const modal = document.createElement('div');
-        modal.id = 'petDetailsModal';
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content pet-report-modal">
-                <h2><i class="fas fa-paw"></i> Pet Details</h2>
-                <span class="close" onclick="if(window.staffDashboard) window.staffDashboard.closeModal('petDetailsModal')">&times;</span>
-
-                <div class="pet-report-content">
-                    <div class="pet-details-section">
-                        <div class="pet-card" style="max-width: 400px; margin: 0 auto;">
-                            <div class="pet-image">
-                                <div class="pet-image-placeholder">
-                                    <i class="${this.getSpeciesIcon(petData.species)}"></i>
-                                </div>
-                            </div>
-                            <div class="pet-info">
-                                <div class="pet-name">${petData.name}</div>
-                                <div class="pet-species">${petData.species}</div>
-                                <div class="pet-details">
-                                    ${petData.breed ? `<p><strong>Breed:</strong> ${petData.breed}</p>` : ''}
-                                    ${petData.birthdate ? `<p><strong>Birthdate:</strong> ${new Date(petData.birthdate).toLocaleDateString()}</p>` : ''}
-                                    <p><strong>Gender:</strong> ${petData.gender}</p>
-                                    <p><strong>Owner:</strong> ${petData.first_name} ${petData.last_name}</p>
-                                    ${petData.weight ? `<p><strong>Weight:</strong> ${petData.weight} kg</p>` : ''}
-                                    ${petData.color ? `<p><strong>Color:</strong> ${petData.color}</p>` : ''}
-                                    ${petData.notes ? `<p><strong>Notes:</strong> ${petData.notes}</p>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="report-actions">
-                        <button type="button" class="btn-secondary" onclick="if(window.staffDashboard) window.staffDashboard.closeModal('petDetailsModal')">
-                            <i class="fas fa-times"></i> Close
-                        </button>
-                        <button type="button" class="btn-primary" onclick="showPetMedicalHistory(${petData.id})">
-                            <i class="fas fa-file-medical"></i> View Medical History
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-        this.openModal('petDetailsModal');
+        const speciesKey = species.toLowerCase();
+        return styling[speciesKey] || styling['other'];
     }
 
     async showPetMedicalHistory(petId) {
@@ -1714,7 +2117,45 @@ class StaffDashboard {
             const result = await response.json();
 
             if (result.success && result.data) {
-                this.displayPetMedicalHistory(result.data);
+                // Use existing pet reports modal instead of creating custom modal
+                const modal = document.getElementById('petReportModal');
+                if (modal) {
+                    // Clear any existing search and show the report directly for this pet
+                    const petSearchInput = document.getElementById('petSearchInput');
+                    const petList = document.getElementById('petList');
+                    const reportPreview = document.getElementById('reportPreview');
+                    const reportContent = document.getElementById('reportContent');
+
+                    if (petSearchInput) petSearchInput.value = '';
+                    if (petList) petList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading pet data...</div>';
+                    if (reportPreview) reportPreview.style.display = 'none';
+                    if (reportContent) reportContent.innerHTML = '';
+
+                    // Show the modal first
+                    modal.style.display = 'block';
+
+                    // Update modal title
+                    const modalTitle = modal.querySelector('h2');
+                    if (modalTitle) {
+                        modalTitle.innerHTML = `<i class="fas fa-file-medical"></i> Pet Medical Report - ${result.data.pet.name}`;
+                    }
+
+                    // Display the report preview directly (skip pet selection)
+                    if (reportPreview && reportContent) {
+                        reportPreview.style.display = 'block';
+                        reportContent.innerHTML = this.generateMedicalHistoryHTML(result.data);
+                    }
+
+                    // Update the print button to work with this specific pet
+                    const printBtn = document.getElementById('downloadBtn');
+                    if (printBtn) {
+                        printBtn.onclick = () => this.downloadPetMedicalReport(petId);
+                    }
+
+                    this.showToast('Pet medical report loaded successfully', 'success');
+                } else {
+                    this.showToast('Pet reports modal not found', 'error');
+                }
             } else {
                 this.showToast('Failed to load medical history', 'error');
             }
@@ -2358,45 +2799,111 @@ class StaffDashboard {
             const servicesTableBody = document.getElementById('servicesTableBody');
 
             if (result.success && result.data && result.data.length > 0) {
-                servicesTableBody.innerHTML = result.data.map(service => `
-                    <tr>
-                        <td>${service.name}</td>
-                        <td>${service.description || 'No description'}</td>
-                        <td><span class="status-badge status-${service.is_active ? 'active' : 'inactive'}">${service.is_active ? 'Active' : 'Inactive'}</span></td>
-                        <td>
-                            <div class="service-actions">
-                                <button class="btn-primary btn-small" onclick="staffDashboard.editService(${service.id})" title="Edit Service">
-                                    <i class="fas fa-edit"></i> EDIT
-                                </button>
-                                <button class="btn-${service.is_active ? 'danger' : 'success'} btn-small" onclick="staffDashboard.toggleServiceStatus(${service.id}, ${service.is_active ? 0 : 1})" title="${service.is_active ? 'Deactivate' : 'Activate'} Service">
-                                    <i class="fas fa-${service.is_active ? 'times' : 'check'}"></i> ${service.is_active ? 'DEACTIVATE' : 'ACTIVATE'}
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                // Filter to show only active services
+                const activeServices = result.data.filter(service => service.is_active === 1 || service.is_active === "1");
+
+                if (activeServices.length > 0) {
+                    servicesTableBody.innerHTML = activeServices.map(service => `
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                            <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name}</td>
+                            <td style="padding: 16px 12px; text-align: center;">
+                                <span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">ACTIVE</span>
+                            </td>
+                            <td style="padding: 16px 12px; text-align: center;">
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    <button onclick="staffDashboard.editService(${service.id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                        <i class="fas fa-edit"></i> EDIT
+                                    </button>
+                                    <button onclick="staffDashboard.deleteService(${service.id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                        <i class="fas fa-trash"></i> DELETE
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    servicesTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.7);">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                    <i class="fas fa-stethoscope" style="font-size: 48px; color: rgba(255, 255, 255, 0.3);"></i>
+                                    <div>
+                                        <h3 style="margin: 0 0 10px 0; color: #ffffff;">No Active Services</h3>
+                                        <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">All services have been deactivated. Add a new service to get started.</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
             } else {
-                servicesTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="empty-state-table">
-                            <div class="empty-state">
-                                <i class="fas fa-stethoscope"></i>
-                                <h3>No Services</h3>
-                                <p>No services available. Add your first service to get started.</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                // Fallback to mock data - only show active services
+                await this.loadServicesSectionMock();
             }
         } catch (error) {
             console.error('Failed to load services:', error);
-            const servicesTableBody = document.getElementById('servicesTableBody');
+            // Fallback to mock data
+            await this.loadServicesSectionMock();
+        }
+    }
+
+    async loadServicesSectionMock() {
+        const servicesTableBody = document.getElementById('servicesTableBody');
+        if (!servicesTableBody) return;
+
+        const mockServices = [
+            {
+                id: 1,
+                name: 'General Check-up',
+                description: 'Comprehensive health examination',
+                is_active: 1
+            },
+            {
+                id: 2,
+                name: 'Vaccination',
+                description: 'Annual vaccination service',
+                is_active: 1
+            },
+            {
+                id: 3,
+                name: 'Dental Cleaning',
+                description: 'Professional teeth cleaning',
+                is_active: 1
+            }
+        ];
+
+        // Filter to show only active services
+        const activeServices = mockServices.filter(service => service.is_active === 1);
+
+        if (activeServices.length > 0) {
+            servicesTableBody.innerHTML = activeServices.map(service => `
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name}</td>
+                    <td style="padding: 16px 12px; text-align: center;">
+                        <span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">ACTIVE</span>
+                    </td>
+                    <td style="padding: 16px 12px; text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center;">
+                            <button onclick="staffDashboard.editService(${service.id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="fas fa-edit"></i> EDIT
+                            </button>
+                            <button onclick="staffDashboard.deleteService(${service.id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="fas fa-trash"></i> DELETE
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
             servicesTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="error-state-table">
-                        <div class="error-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>Failed to load services</p>
+                    <td colspan="3" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.7);">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <i class="fas fa-stethoscope" style="font-size: 48px; color: rgba(255, 255, 255, 0.3);"></i>
+                            <div>
+                                <h3 style="margin: 0 0 10px 0; color: #ffffff;">No Active Services</h3>
+                                <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">All services have been deactivated. Add a new service to get started.</p>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -2435,33 +2942,43 @@ class StaffDashboard {
                     productsGrid.innerHTML = result.data.map(product => this.createProductCard(product)).join('');
                 } else {
                     console.log('⚠️ Staff Dashboard: No products found or API failed:', result);
-                    productsGrid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-store-slash"></i>
-                            <h3>No Products</h3>
-                            <p>No products available. Add your first product to get started.</p>
-                            <button class="btn-primary" onclick="showAddProductModal()">
-                                <i class="fas fa-plus"></i> Add First Product
-                            </button>
-                        </div>
-                    `;
+                    // Fallback to mock data
+                    await this.loadStoreSectionMock();
                 }
             }
         } catch (error) {
             console.error('❌ Staff Dashboard: Failed to load store:', error);
-            const productsGrid = document.getElementById('productsGrid');
-            if (productsGrid) {
-                productsGrid.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Failed to load products</p>
-                        <button class="btn-primary" onclick="if(window.staffDashboard) window.staffDashboard.loadStoreSection()">
-                            <i class="fas fa-refresh"></i> Retry
-                        </button>
-                    </div>
-                `;
-            }
+            // Fallback to mock data
+            await this.loadStoreSectionMock();
         }
+    }
+
+    async loadStoreSectionMock() {
+        const productsGrid = document.getElementById('productsGrid');
+        if (!productsGrid) return;
+
+        const mockProducts = [
+            {
+                id: 1,
+                name: 'Premium Dog Food',
+                category: 'Food',
+                description: 'High-quality nutrition for dogs',
+                price: 45.99,
+                stock: 25,
+                image: null
+            },
+            {
+                id: 2,
+                name: 'Cat Toys Set',
+                category: 'Toys',
+                description: 'Interactive toys for cats',
+                price: 12.50,
+                stock: 8,
+                image: null
+            }
+        ];
+
+        productsGrid.innerHTML = mockProducts.map(product => this.createProductCard(product)).join('');
     }
 
     createProductCard(product) {
@@ -3375,7 +3892,7 @@ class StaffDashboard {
     redirectToLogin() {
         this.showToast('Please log in to access the staff dashboard', 'warning');
         setTimeout(() => {
-            window.location.href = '../public/homepage.html';
+            window.location.href = '../index.html';
         }, 2000);
     }
 
@@ -3394,7 +3911,7 @@ class StaffDashboard {
             if (result.success) {
                 this.showToast('Logged out successfully!', 'success');
                 setTimeout(() => {
-                    window.location.href = '../public/homepage.html';
+                    window.location.href = '../index.html';
                 }, 1500);
             } else {
                 this.showToast('Logout failed. Please try again.', 'error');

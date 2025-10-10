@@ -1,0 +1,16 @@
+# Enable CORS for API endpoints
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type"
+
+# Force PHP handling
+AddType application/x-httpd-php .php
+DirectoryIndex index.php
+
+# Prevent directory listing
+Options -Indexes
+
+# Handle PHP errors correctly
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_reporting -1

@@ -39,7 +39,7 @@ function initializeModalHandlers() {
         
         if (loggedIn) {
             // Get user info to determine if staff or client
-            const response = await fetch('../api/vet_api.php', {
+            const response = await fetch('api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_user_info' })
@@ -232,7 +232,7 @@ async function handleRegistration(formData) {
         
         console.log('Request data:', requestData);
         
-        const response = await fetch('../api/vet_api.php', {
+        const response = await fetch('api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
@@ -278,7 +278,7 @@ async function handleBooking(formData) {
     }
 
     try {
-        const response = await fetch('../api/vet_api.php', {
+        const response = await fetch('api/vet_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -307,6 +307,16 @@ async function handleBooking(formData) {
 
 // Utility function to show toast notifications
 function showToast(message, type = 'success') {
+    // Standardize error messages
+    if (type === 'error' && typeof message === 'object') {
+        if (message.message) message = message.message;
+    }
+    
+    // Log errors to console
+    if (type === 'error') {
+        console.error('Toast error:', message);
+    }
+
     const toast = document.getElementById('toast');
     if (!toast) return;
     

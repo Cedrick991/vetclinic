@@ -1,0 +1,10 @@
+# Block access to database files
+<FilesMatch "\.(db|sqlite|sqlite3)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block directory access
+Options -Indexes
+Order Deny,Allow
+Deny from all
