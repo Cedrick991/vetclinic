@@ -58,18 +58,66 @@
         <img src="assets/images/catsolohehe.png" alt="Cat">
       </div>
       <div class="service-list">
-        <span><i class="service-icon">🐕</i> BASIC OBEDIENCE TRAINING</span>
-        <span><i class="service-icon">🐍</i> DEWORMING</span>
-        <span><i class="service-icon">📶</i> MICROCHIP IMPLANTING</span>
-        <span><i class="service-icon">💉</i> VACCINATION</span>
-        <span><i class="service-icon">🏠</i> PET BOARDING</span>
-        <span><i class="service-icon">🦇</i> EXTERNAL PARASITE PREVENTION</span>
-        <span><i class="service-icon">🕊️</i> EUTHANASIA</span>
-        <span><i class="service-icon">🚑</i> COMPREHENSIVE GENERAL CHECK UP</span>
-        <span><i class="service-icon">✂️</i> GROOMING</span>
-        <span><i class="service-icon">🦷</i> DENTAL SURGERY</span>
-        <span><i class="service-icon">🏥</i> SURGERY</span>
-        <span><i class="service-icon">🏡</i> HOME SERVICE BY APPOINTMENT</span>
+        <div class="service-item" onclick="showServiceDetails('basic-obedience-training')" data-service-id="basic-obedience-training">
+          <i class="service-icon">🐕</i>
+          <span class="service-name">BASIC OBEDIENCE TRAINING</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('deworming')" data-service-id="deworming">
+          <i class="service-icon">🐍</i>
+          <span class="service-name">DEWORMING</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('microchip')" data-service-id="microchip">
+          <i class="service-icon">📶</i>
+          <span class="service-name">MICROCHIP IMPLANTING</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('vaccination')" data-service-id="vaccination">
+          <i class="service-icon">💉</i>
+          <span class="service-name">VACCINATION</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('pet-boarding')" data-service-id="pet-boarding">
+          <i class="service-icon">🏠</i>
+          <span class="service-name">PET BOARDING</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('parasite-prevention')" data-service-id="parasite-prevention">
+          <i class="service-icon">🦇</i>
+          <span class="service-name">EXTERNAL PARASITE PREVENTION</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('euthanasia')" data-service-id="euthanasia">
+          <i class="service-icon">🕊️</i>
+          <span class="service-name">EUTHANASIA</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('general-checkup')" data-service-id="general-checkup">
+          <i class="service-icon">🚑</i>
+          <span class="service-name">COMPREHENSIVE GENERAL CHECK UP</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('grooming')" data-service-id="grooming">
+          <i class="service-icon">✂️</i>
+          <span class="service-name">GROOMING</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('dental-surgery')" data-service-id="dental-surgery">
+          <i class="service-icon">🦷</i>
+          <span class="service-name">DENTAL SURGERY</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('surgery')" data-service-id="surgery">
+          <i class="service-icon">🏥</i>
+          <span class="service-name">SURGERY</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
+        <div class="service-item" onclick="showServiceDetails('home-service')" data-service-id="home-service">
+          <i class="service-icon">🏡</i>
+          <span class="service-name">HOME SERVICE BY APPOINTMENT</span>
+          <i class="fas fa-chevron-right service-arrow"></i>
+        </div>
       </div>
     </div>
           </section>
@@ -260,133 +308,47 @@
     </div>
   </div>
 
-  <!-- Booking Modal -->
-  <div id="bookingModal" class="modal" style="display: none;">
-    <div class="modal-content booking-modal">
-      <span class="close" onclick="closeModal('bookingModal')">&times;</span>
-      <h2 id="bookingModalTitle"><i class="modal-icon">📅</i> Book an Appointment</h2>
-      
-      <!-- Login Required Message -->
-      <div id="loginRequiredMessage" style="display: none; text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(255,153,0,0.15), rgba(255,215,0,0.15)); border: 2px solid rgba(255,153,0,0.3); border-radius: 15px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <div style="font-size: 60px; margin-bottom: 15px;">🔐</div>
-        <h2 style="color: #e67e22; margin-bottom: 15px; font-size: 24px;">Login Required</h2>
-        <p style="color: #8b5a00; font-size: 16px; margin-bottom: 25px; line-height: 1.5;">You need to log in to your account to book an appointment for your pet.</p>
-        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-          <button onclick="showLoginModal(); closeModal('bookingModal');" style="background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='#3498db'"><i class="btn-icon">🔐</i> Login Now</button>
-          <button onclick="showRegisterModal(); closeModal('bookingModal');" style="background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#219a52'" onmouseout="this.style.background='#27ae60'"><i class="btn-icon">📝</i> Register Now</button>
-        </div>
-        <p style="color: #95a5a6; font-size: 14px; margin-top: 20px; margin-bottom: 0;">Don't have an account? Registration is quick and easy!</p>
+  <!-- Service Details Modal -->
+  <div id="serviceDetailsModal" class="modal" style="display: none;">
+    <div class="modal-content service-modal">
+      <span class="close" onclick="closeModal('serviceDetailsModal')">&times;</span>
+      <div class="service-modal-header">
+        <div class="service-icon-large" id="serviceIconLarge">🏥</div>
+        <h2 id="serviceTitle">Service Details</h2>
       </div>
-      
-      <!-- Booking Form -->
-      <form id="bookingForm" style="display: none;">
-        <div class="form-group">
-          <label for="booking_service"><i class="form-icon">🏥</i> Select Service:</label>
-          <select id="booking_service" name="service_id" title="Select a veterinary service" aria-label="Select a veterinary service" required>
-            <option value="">Loading services...</option>
-          </select>
-          <button type="button" onclick="refreshServices()" title="Refresh services" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px;">🔄</button>
-        </div>
-        
-        <div class="form-group">
-          <label for="booking_pet"><i class="form-icon">🐶</i> Select Pet:</label>
-          <select id="booking_pet" name="pet_id" title="Select your pet" aria-label="Select your pet" required>
-            <option value="">Loading pets...</option>
-          </select>
-          <button type="button" onclick="showAddPetForm()" title="Add a new pet" style="background: #4169e1; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px;"><i class="btn-icon">🐶</i> Add New Pet</button>
-        </div>
-        
-        <div class="form-group">
-          <label for="booking_date"><i class="form-icon">📅</i> Appointment Date:</label>
-          <input type="date" id="booking_date" name="appointment_date" title="Select appointment date" required min="" />
-        </div>
-        
-        <div class="form-group">
-          <label for="booking_time"><i class="form-icon">⏰</i> Appointment Time:</label>
-          <select id="booking_time" name="appointment_time" title="Select appointment time" aria-label="Select appointment time" required>
-            <option value="">Select date first</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="booking_notes"><i class="form-icon">📝</i> Notes (Optional):</label>
-          <textarea id="booking_notes" name="notes" rows="3" placeholder="💬 Any special instructions or concerns..." title="Enter any special instructions or concerns"></textarea>
-        </div>
-        
-        <button type="submit"><i class="btn-icon">🗓️</i> Book Appointment</button>
-      </form>
-      
-      <!-- Add Pet Form (Hidden) -->
-      <div id="addPetForm" style="display: none; border-top: 1px solid rgba(255,215,0,0.3); padding-top: 20px; margin-top: 20px;">
-        <h3 style="color: #ffd700;"><i class="form-icon">🐾</i> Add New Pet</h3>
-        <div class="form-row">
-          <label for="petName" class="sr-only">Pet Name</label>
-          <input type="text" id="petName" placeholder="🏷️ Pet Name" title="Enter your pet's name" required />
-          
-          <label for="petSpecies" class="sr-only">Pet Species</label>
-          <select id="petSpecies" title="Select your pet's species" aria-label="Select pet species" required>
-            <option value="">🐾 Select Species</option>
-            <option value="Dog">🐶 Dog</option>
-            <option value="Cat">🐱 Cat</option>
-            <option value="Bird">🐦 Bird</option>
-            <option value="Rabbit">🐰 Rabbit</option>
-            <option value="Other">🐾 Other</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="petBreed" class="sr-only">Pet Breed (Optional)</label>
-          <input type="text" id="petBreed" placeholder="🧬 Breed (Optional)" title="Enter your pet's breed (optional)" />
 
-          <label for="petBirthdate" class="sr-only">Pet Birthdate</label>
-          <input type="date" id="petBirthdate" placeholder="🎂 Birthdate" title="Select your pet's birthdate" max="" />
+      <div class="service-modal-body">
+        <div class="service-description" id="serviceDescription">
+          <p>Loading service information...</p>
         </div>
-        <div class="form-row">
-          <label for="petGender" class="sr-only">Pet Gender</label>
-          <select id="petGender" title="Select your pet's gender" aria-label="Select pet gender" required>
-            <option value="">⚔️ Select Gender</option>
-            <option value="Male">♂️ Male</option>
-            <option value="Female">♀️ Female</option>
-          </select>
-          
-          <label for="petWeight" class="sr-only">Pet Weight</label>
-          <input type="number" id="petWeight" placeholder="⚖️ Weight (kg)" title="Enter your pet's weight in kilograms" step="0.1" min="0" />
+
+        <div class="service-features" id="serviceFeatures">
+          <h4><i class="fas fa-star"></i> Service Features</h4>
+          <ul id="serviceFeaturesList">
+            <li>Loading features...</li>
+          </ul>
         </div>
-        
-        <label for="petColor" class="sr-only">Pet Color (Optional)</label>
-        <input type="text" id="petColor" placeholder="🎨 Color (Optional)" title="Enter your pet's color (optional)" />
-        <div style="margin-top: 15px;">
-          <button type="button" onclick="addPet()"><i class="btn-icon">➕</i> Add Pet</button>
-          <button type="button" onclick="hideAddPetForm()" style="background: #666;"><i class="btn-icon">❌</i> Cancel</button>
-        </div>
-      </div>
-      
-      <!-- Staff Dashboard (Hidden by default) -->
-      <div id="staffDashboard" style="display: none;">
-        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
-          <h3 style="color: #ffd700; margin: 0;">📋 Appointment Management Dashboard</h3>
-          <div>
-            <button onclick="loadAllAppointments()" style="background: #4169e1; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-right: 10px;"><i class="btn-icon">🔄</i> Refresh</button>
-            <select id="statusFilter" onchange="filterAppointments()" style="padding: 8px; border-radius: 5px;">
-              <option value="">All Appointments</option>
-              <option value="Pending">Pending</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+
+
+        <div class="service-process" id="serviceProcess">
+          <h4><i class="fas fa-clipboard-list"></i> What to Expect</h4>
+          <div class="process-steps" id="processSteps">
+            <p>Loading process information...</p>
           </div>
         </div>
-        
-        <div id="appointmentsList" style="max-height: 400px; overflow-y: auto; border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; padding: 15px;">
-          <p style="text-align: center; color: #666;">Loading appointments...</p>
-        </div>
-        
-        <div style="margin-top: 15px; text-align: center;">
-          <p style="color: #888; font-size: 14px;">💡 Click on appointments to update their status</p>
-        </div>
+      </div>
+
+      <div class="service-modal-footer">
+        <button class="btn-secondary" onclick="closeModal('serviceDetailsModal')">
+          <i class="fas fa-times"></i> Close
+        </button>
+        <button class="btn-primary" onclick="bookServiceFromModal()">
+          <i class="fas fa-calendar-plus"></i> Book This Service
+        </button>
       </div>
     </div>
   </div>
+
 
 
   <!-- Notification Toast -->
@@ -644,16 +606,52 @@
       margin-right: 6px;
     }
     
-    /* Service Icons */
-    .service-icon {
-      font-size: 1.3em;
-      margin-right: 10px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    /* Service Items */
+    .service-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
     }
-    
-    .service-list span:hover .service-icon {
-      transform: scale(1.2);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+
+    .service-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .service-item .service-icon {
+      font-size: 1.4em;
+      margin-right: 15px;
+      min-width: 30px;
+      text-align: center;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .service-item .service-name {
+      flex: 1;
+      font-weight: 500;
+      font-size: 14px;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .service-item .service-arrow {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .service-item:hover .service-arrow {
+      color: white;
+      transform: translateX(3px);
     }
     
     /* Modal Icons */
@@ -809,6 +807,163 @@
       color: white;
     }
 
+    /* Service Modal Styles */
+    .service-modal {
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .service-modal-header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+      margin-bottom: 30px;
+    }
+
+    .service-icon-large {
+      font-size: 48px;
+      margin-bottom: 15px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+
+    .service-modal-body {
+      flex: 1;
+      padding: 0 10px;
+    }
+
+    .service-description {
+      background: rgba(255, 215, 0, 0.1);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border-left: 5px solid #ffd700;
+      line-height: 1.6;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .service-features, .service-pricing, .service-process {
+      margin-bottom: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .service-features h4, .service-pricing h4, .service-process h4 {
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .service-features ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .service-features li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.5;
+    }
+
+    .service-features li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #4CAF50;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .pricing-info {
+      background: rgba(76, 175, 80, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .process-steps {
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+    }
+
+    .service-modal-footer {
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 215, 0, 0.3);
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+    }
+
+    /* Modal animations */
+    .modal.show {
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Enhanced service modal styles */
+    .service-modal .modal-content {
+      animation: modalContentSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalContentSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Service modal enhancements */
+    .service-modal-header {
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .service-modal-header::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      border-radius: 2px;
+    }
+
+    .service-features li:hover,
+    .service-pricing div:hover,
+    .service-process p:hover {
+      background: rgba(255, 215, 0, 0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin: 2px 0;
+      transition: all 0.3s ease;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .categories {
@@ -828,6 +983,21 @@
       .auth-btn {
         padding: 6px 12px;
         font-size: 11px;
+      }
+
+      .service-modal {
+        max-width: 95vw;
+        max-height: 90vh;
+        margin: 5vh 2.5vw;
+      }
+
+      .service-modal-footer {
+        flex-direction: column;
+      }
+
+      .service-modal-header::after {
+        width: 40px;
+        height: 2px;
       }
     }
 
@@ -1140,9 +1310,8 @@
       window.showRegisterModal = () => openModal('registerModal');
       window.showForgotPasswordModal = () => openModal('forgotPasswordModal');
       window.showBookingModal = () => {
-        // Always open the booking modal, let initializeBookingModal handle login checking
-        openModal('bookingModal');
-        initializeBookingModal();
+        // Redirect to client dashboard appointments section
+        window.location.href = 'public/client.html#appointments';
       };
       window.closeModal = (id) => {
         const modal = document.getElementById(id);
@@ -1217,422 +1386,9 @@
       // Initialize register form state
       updateRegisterForm();
       
-      // Set minimum date to today
-      const dateInput = document.querySelector('input[name="appointment_date"]');
-      if (dateInput) {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        dateInput.min = tomorrow.toISOString().split('T')[0];
-        
-        // Add event listener for date changes
-        dateInput.addEventListener('change', loadAvailableTimeSlots);
-      }
+      // Booking functionality now handled by client dashboard
       
-      // Add booking form handler
-      document.getElementById('bookingForm').addEventListener('submit', handleBooking);
-      
-      // Initialize booking modal
-      async function initializeBookingModal() {
-        console.log('Initializing booking modal...');
-
-        // Check if user is logged in
-        try {
-          const result = await apiCall({ action: 'get_user_info' });
-          console.log('User info check result:', result);
-
-          if (result.success && result.data.logged_in) {
-            const userType = result.data.user_type;
-            console.log('User logged in as:', userType);
-
-            // Hide login required message
-            document.getElementById('loginRequiredMessage').style.display = 'none';
-
-            if (userType === 'staff') {
-              console.log('Showing staff dashboard');
-              // Show staff dashboard
-              document.getElementById('bookingForm').style.display = 'none';
-              document.getElementById('addPetForm').style.display = 'none';
-              showStaffDashboard();
-            } else {
-              console.log('Showing client booking form');
-              // Show client booking form
-              document.getElementById('bookingForm').style.display = 'block';
-              hideStaffDashboard();
-
-              // Load services and pets for clients
-              console.log('Loading services and pets for client...');
-              await loadServices();
-              await loadUserPets();
-            }
-          } else {
-            console.log('User not logged in, showing login required message');
-            // User not logged in
-            document.getElementById('loginRequiredMessage').style.display = 'block';
-            document.getElementById('bookingForm').style.display = 'none';
-            hideStaffDashboard();
-          }
-        } catch (error) {
-          console.error('Error checking login status:', error);
-          document.getElementById('loginRequiredMessage').style.display = 'block';
-          document.getElementById('bookingForm').style.display = 'none';
-          hideStaffDashboard();
-        }
-      }
-
-      // Manual service refresh function
-      window.refreshServices = async () => {
-        console.log('Manual service refresh requested');
-        await loadServices();
-        toast('Services refreshed!', 'success');
-      };
-      
-      // Load services
-      async function loadServices() {
-        try {
-          console.log('Loading services...');
-          const result = await apiCall({ action: 'get_services' });
-          const serviceSelect = document.querySelector('select[name="service_id"]');
-
-          console.log('Services API response:', result);
-
-          if (result.success && result.data) {
-            console.log('Services data received:', result.data.length, 'services');
-
-            serviceSelect.innerHTML = '<option value="">Select a service</option>';
-
-            result.data.forEach((service, index) => {
-              console.log(`Service ${index + 1}:`, service);
-
-              const option = document.createElement('option');
-              option.value = service.service_id;
-
-              // Show service name and description if available
-              const description = service.description ? ` - ${service.description}` : '';
-              const serviceText = `${service.service_name}${description}`;
-
-              option.textContent = serviceText;
-              option.title = serviceText; // Add tooltip for long service names
-
-              serviceSelect.appendChild(option);
-            });
-
-            console.log('Services loaded successfully into dropdown');
-          } else {
-            console.error('Failed to load services:', result);
-            serviceSelect.innerHTML = '<option value="">No services available</option>';
-            toast('Failed to load services. Please refresh and try again.', 'error');
-          }
-        } catch (error) {
-          console.error('Error loading services:', error);
-          const serviceSelect = document.querySelector('select[name="service_id"]');
-          serviceSelect.innerHTML = '<option value="">Error loading services</option>';
-          toast('Connection error while loading services.', 'error');
-        }
-      }
-      
-      // Load user pets
-      async function loadUserPets() {
-        try {
-          const result = await apiCall({ action: 'get_client_pets' });
-          const petSelect = document.querySelector('select[name="pet_id"]');
-          
-          if (result.success && result.data && result.data.length > 0) {
-            petSelect.innerHTML = '<option value="">Select a pet</option>';
-            result.data.forEach(pet => {
-              const option = document.createElement('option');
-              option.value = pet.pet_id;
-              option.textContent = `${pet.pet_name} (${pet.species})`;
-              petSelect.appendChild(option);
-            });
-            
-            // Hide the "no pets" message if it exists
-            const noPetsMsg = document.getElementById('noPetsMessage');
-            if (noPetsMsg) noPetsMsg.style.display = 'none';
-          } else {
-            petSelect.innerHTML = '<option value="">No pets registered</option>';
-            
-            // Show helpful message about adding pets
-            showNoPetsMessage();
-          }
-        } catch (error) {
-          console.error('Error loading pets:', error);
-          const petSelect = document.querySelector('select[name="pet_id"]');
-          petSelect.innerHTML = '<option value="">Error loading pets</option>';
-          toast('Failed to load your pets. Please refresh and try again.', 'error');
-        }
-      }
-      
-      // Show message when user has no pets
-      function showNoPetsMessage() {
-        let noPetsMsg = document.getElementById('noPetsMessage');
-        if (!noPetsMsg) {
-          noPetsMsg = document.createElement('div');
-          noPetsMsg.id = 'noPetsMessage';
-          noPetsMsg.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 8px; margin: 15px 0;';
-          noPetsMsg.innerHTML = `
-            <h4 style="margin: 0 0 10px 0; color: #856404;">🐾 No Pets Registered</h4>
-            <p style="margin: 0 0 10px 0;">You need to add at least one pet before booking an appointment.</p>
-          `;
-          
-          // Insert after the pet selection field
-          const petSelect = document.querySelector('select[name="pet_id"]');
-          petSelect.parentNode.insertBefore(noPetsMsg, petSelect.nextSibling);
-        }
-        noPetsMsg.style.display = 'block';
-      }
-      
-      // Load available time slots for selected date
-      async function loadAvailableTimeSlots() {
-        const dateInput = document.querySelector('input[name="appointment_date"]');
-        const timeSelect = document.querySelector('select[name="appointment_time"]');
-        const selectedDate = dateInput.value;
-        
-        if (!selectedDate) {
-          timeSelect.innerHTML = '<option value="">Select date first</option>';
-          return;
-        }
-        
-        try {
-          const result = await apiCall({
-            action: 'get_available_times',
-            date: selectedDate
-          });
-          
-          if (result.success && result.data && result.data.length > 0) {
-            timeSelect.innerHTML = '<option value="">Select a time</option>';
-            result.data.forEach(time => {
-              const option = document.createElement('option');
-              option.value = time;
-              option.textContent = formatTime(time);
-              timeSelect.appendChild(option);
-            });
-          } else {
-            timeSelect.innerHTML = '<option value="">No available time slots</option>';
-          }
-        } catch (error) {
-          console.error('Error loading time slots:', error);
-          timeSelect.innerHTML = '<option value="">Error loading times</option>';
-        }
-      }
-      
-      // Format time for display (12-hour format)
-      function formatTime(time) {
-        const [hours, minutes] = time.split(':');
-        const hour12 = hours % 12 || 12;
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        return `${hour12}:${minutes} ${ampm}`;
-      }
-      
-      // Handle booking form submission
-      async function handleBooking(e) {
-        e.preventDefault();
-
-        const form = e.target;
-        const formData = new FormData(form);
-
-        const bookingData = {
-          action: 'book_appointment',
-          service_id: formData.get('service_id'),
-          pet_id: formData.get('pet_id'),
-          appointment_date: formData.get('appointment_date'),
-          appointment_time: formData.get('appointment_time'),
-          notes: formData.get('notes') || ''
-        };
-
-        // Enhanced booking validation with debugging
-        console.log('=== BOOKING FORM SUBMISSION ===');
-        console.log('Form data received:');
-        console.log('service_id (raw):', formData.get('service_id'));
-        console.log('pet_id (raw):', formData.get('pet_id'));
-        console.log('appointment_date (raw):', formData.get('appointment_date'));
-        console.log('appointment_time (raw):', formData.get('appointment_time'));
-
-        console.log('Processed booking data:');
-        console.log('service_id:', JSON.stringify(bookingData.service_id));
-        console.log('pet_id:', JSON.stringify(bookingData.pet_id));
-        console.log('appointment_date:', JSON.stringify(bookingData.appointment_date));
-        console.log('appointment_time:', JSON.stringify(bookingData.appointment_time));
-
-        // Check service selection
-        const serviceSelect = document.querySelector('select[name="service_id"]');
-        const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
-        console.log('Selected service option:', {
-          value: selectedServiceOption?.value,
-          text: selectedServiceOption?.textContent,
-          index: serviceSelect.selectedIndex
-        });
-
-        // Check pet selection
-        const petSelect = document.querySelector('select[name="pet_id"]');
-        const selectedPetOption = petSelect.options[petSelect.selectedIndex];
-        console.log('Selected pet option:', {
-          value: selectedPetOption?.value,
-          text: selectedPetOption?.textContent,
-          index: petSelect.selectedIndex
-        });
-
-        const missingBookingFields = [];
-        if (!bookingData.service_id) missingBookingFields.push('Service');
-        if (!bookingData.pet_id) missingBookingFields.push('Pet');
-        if (!bookingData.appointment_date) missingBookingFields.push('Date');
-        if (!bookingData.appointment_time) missingBookingFields.push('Time');
-
-        if (missingBookingFields.length > 0) {
-          const errorMsg = `Please fill in all required fields. Missing: ${missingBookingFields.join(', ')}`;
-          console.log('Booking validation failed:', errorMsg);
-          toast(errorMsg, 'error');
-          return;
-        }
-
-        // Check if service selection is valid (not the placeholder option)
-        if (!selectedServiceOption || selectedServiceOption.textContent.includes('Loading services') ||
-            selectedServiceOption.textContent.includes('No services available') ||
-            selectedServiceOption.textContent.includes('Error loading services')) {
-          toast('Please select a valid service from the dropdown.', 'error');
-          return;
-        }
-
-        // Check if pet selection is valid (not the placeholder option)
-        if (!selectedPetOption || selectedPetOption.textContent.includes('Loading pets') ||
-            selectedPetOption.textContent.includes('No pets registered') ||
-            selectedPetOption.textContent.includes('Error loading pets')) {
-          toast('Please select a valid pet or add a new pet first.', 'error');
-          showAddPetForm();
-          return;
-        }
-
-        console.log('All validations passed, submitting booking...');
-
-        try {
-          console.log('Sending booking data to API:', bookingData);
-          const result = await apiCall(bookingData);
-          console.log('Booking API response:', result);
-
-          if (result.success) {
-            toast('Appointment booked successfully!', 'success');
-            closeModal('bookingModal');
-            form.reset();
-            console.log('Booking form reset and modal closed');
-          } else {
-            console.error('Booking failed:', result);
-            // Handle specific error messages
-            if (result.message && result.message.includes('Invalid pet selection')) {
-              toast('The selected pet is not valid for your account. Please select a different pet or add a new one.', 'error');
-              // Reload pets to refresh the list
-              await loadUserPets();
-              showAddPetForm();
-            } else if (result.message && result.message.includes('Invalid service')) {
-              toast('The selected service is not valid. Please select a different service.', 'error');
-              // Reload services to refresh the list
-              await loadServices();
-            } else {
-              toast(result.message || 'Failed to book appointment.', 'error');
-            }
-          }
-        } catch (error) {
-          console.error('Booking error:', error);
-          toast('Connection error. Please try again.', 'error');
-        }
-      }
-      
-      // Show add pet form with enhanced UX
-      window.showAddPetForm = () => {
-        const addPetForm = document.getElementById('addPetForm');
-        
-        // Show the form
-        addPetForm.style.display = 'block';
-        
-        // Add a subtle animation
-        addPetForm.style.opacity = '0';
-        addPetForm.style.transform = 'translateY(-10px)';
-        addPetForm.style.transition = 'all 0.3s ease';
-        
-        // Trigger the animation
-        setTimeout(() => {
-          addPetForm.style.opacity = '1';
-          addPetForm.style.transform = 'translateY(0)';
-        }, 10);
-        
-        // Smooth scroll to the add pet form
-        setTimeout(() => {
-          addPetForm.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest'
-          });
-          
-          // Focus on the first input field for better UX
-          const firstInput = document.getElementById('petName');
-          if (firstInput) {
-            firstInput.focus();
-          }
-        }, 100);
-      };
-      
-      // Hide add pet form with smooth animation
-      window.hideAddPetForm = () => {
-        const addPetForm = document.getElementById('addPetForm');
-        
-        // Add hide animation
-        addPetForm.style.opacity = '0';
-        addPetForm.style.transform = 'translateY(-10px)';
-        
-        // Hide the form after animation
-        setTimeout(() => {
-          addPetForm.style.display = 'none';
-          
-          // Clear form fields
-          document.getElementById('petName').value = '';
-          document.getElementById('petSpecies').value = '';
-          document.getElementById('petBreed').value = '';
-          document.getElementById('petBirthdate').value = '';
-          document.getElementById('petGender').value = '';
-          document.getElementById('petWeight').value = '';
-          document.getElementById('petColor').value = '';
-          
-          // Reset styles for next show
-          addPetForm.style.opacity = '';
-          addPetForm.style.transform = '';
-          addPetForm.style.transition = '';
-        }, 300);
-      };
-      
-      // Add new pet
-      window.addPet = async () => {
-        const petData = {
-          action: 'add_pet',
-          pet_name: document.getElementById('petName').value.trim(),
-          species: document.getElementById('petSpecies').value,
-          breed: document.getElementById('petBreed').value.trim(),
-          birthdate: document.getElementById('petBirthdate').value,
-          gender: document.getElementById('petGender').value,
-          weight: parseFloat(document.getElementById('petWeight').value) || null,
-          color: document.getElementById('petColor').value.trim()
-        };
-
-        // Validation
-        if (!petData.pet_name || !petData.species || !petData.gender) {
-          toast('Please fill in pet name, species, and gender.', 'error');
-          return;
-        }
-
-        try {
-          const result = await apiCall(petData);
-
-          if (result.success) {
-            toast('Pet added successfully!', 'success');
-            hideAddPetForm();
-            // Reload pets in the select dropdown
-            await loadUserPets();
-          } else {
-            toast(result.message || 'Failed to add pet.', 'error');
-          }
-        } catch (error) {
-          console.error('Add pet error:', error);
-          toast('Connection error. Please try again.', 'error');
-        }
-      };
+      // Booking functionality now handled by client dashboard
 
       // Email validation function
       window.validateEmail = (email) => {
@@ -1773,11 +1529,7 @@
       const forgotPasswordForm = document.getElementById('forgotPasswordForm');
       if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', handleForgotPassword);
 
-      const bookingForm = document.getElementById('bookingForm');
-      if (bookingForm) bookingForm.addEventListener('submit', handleBooking);
-      
-      // Add change listener for date input to load available times
-      document.querySelector('input[name="appointment_date"]')?.addEventListener('change', loadAvailableTimeSlots);
+      // Booking functionality now handled by client dashboard
       
       async function handleLogin(e) {
         e.preventDefault();
@@ -2056,143 +1808,15 @@
         resetToLoggedOutState();
       }
 
-      // Staff Dashboard Functions
-      window.showStaffDashboard = () => {
-        document.getElementById('bookingModalTitle').innerHTML = '<i class="modal-icon">📊</i> Staff Dashboard - Appointment Management';
-        document.getElementById('staffDashboard').style.display = 'block';
-        loadAllAppointments();
-      };
+      // Booking functionality now handled by client dashboard
       
-      window.hideStaffDashboard = () => {
-        document.getElementById('bookingModalTitle').innerHTML = '<i class="modal-icon">📅</i> Book an Appointment';
-        document.getElementById('staffDashboard').style.display = 'none';
-      };
+      // Booking functionality now handled by client dashboard
       
-      window.loadAllAppointments = async () => {
-        try {
-          const response = await fetch('/vetfinal/api/vet_api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_all_appointments', limit: 50 })
-          });
-          
-          const result = await response.json();
-          const appointmentsList = document.getElementById('appointmentsList');
-          
-          if (result.success && result.data && result.data.length > 0) {
-            appointmentsList.innerHTML = '';
-            result.data.forEach(appointment => {
-              const appointmentDiv = createAppointmentCard(appointment);
-              appointmentsList.appendChild(appointmentDiv);
-            });
-          } else {
-            appointmentsList.innerHTML = '<p style="text-align: center; color: #666;">No appointments found.</p>';
-          }
-        } catch (error) {
-          console.error('Error loading appointments:', error);
-          document.getElementById('appointmentsList').innerHTML = '<p style="text-align: center; color: #f44336;">Error loading appointments.</p>';
-        }
-      };
+      // Booking functionality now handled by client dashboard
       
-      window.filterAppointments = async () => {
-        const status = document.getElementById('statusFilter').value;
-        try {
-          const payload = { action: 'get_all_appointments', limit: 50 };
-          if (status) payload.status = status;
-          
-          const response = await fetch('/vetfinal/api/vet_api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          
-          const result = await response.json();
-          const appointmentsList = document.getElementById('appointmentsList');
-          
-          if (result.success && result.data && result.data.length > 0) {
-            appointmentsList.innerHTML = '';
-            result.data.forEach(appointment => {
-              const appointmentDiv = createAppointmentCard(appointment);
-              appointmentsList.appendChild(appointmentDiv);
-            });
-          } else {
-            appointmentsList.innerHTML = '<p style="text-align: center; color: #666;">No appointments found.</p>';
-          }
-        } catch (error) {
-          console.error('Error filtering appointments:', error);
-        }
-      };
+      // Booking functionality now handled by client dashboard
       
-      function createAppointmentCard(appointment) {
-        const div = document.createElement('div');
-        div.style.cssText = 'border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white; cursor: pointer; transition: all 0.3s ease;';
-        div.onmouseover = () => div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-        div.onmouseout = () => div.style.boxShadow = 'none';
-        
-        const statusColor = {
-          'Pending': '#ff9900',
-          'Confirmed': '#4CAF50', 
-          'In Progress': '#2196F3',
-          'Completed': '#9E9E9E',
-          'Cancelled': '#f44336',
-          'No Show': '#ff5722'
-        }[appointment.status] || '#666';
-        
-        div.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="flex: 1;">
-              <h4 style="margin: 0 0 5px 0; color: #333;">${appointment.client_first_name} ${appointment.client_last_name}</h4>
-              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">🐕 ${appointment.pet_name} (${appointment.species})</p>
-              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">👩‍⚕️ ${appointment.service_name}</p>
-              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">📅 ${appointment.appointment_date} at ${formatTime(appointment.appointment_time)}</p>
-              ${appointment.notes ? `<p style="margin: 5px 0; color: #666; font-size: 12px; font-style: italic;">📝 ${appointment.notes}</p>` : ''}
-            </div>
-            <div style="text-align: right;">
-              <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${appointment.status}</span>
-              <div style="margin-top: 10px;">
-                <select onchange="updateAppointmentStatus(${appointment.appointment_id}, this.value)" style="font-size: 12px; padding: 2px;">
-                  <option value="">Change Status</option>
-                  <option value="Confirmed" ${appointment.status === 'Confirmed' ? 'selected' : ''}>Confirm</option>
-                  <option value="In Progress" ${appointment.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="Completed" ${appointment.status === 'Completed' ? 'selected' : ''}>Complete</option>
-                  <option value="Cancelled" ${appointment.status === 'Cancelled' ? 'selected' : ''}>Cancel</option>
-                  <option value="No Show" ${appointment.status === 'No Show' ? 'selected' : ''}>No Show</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        `;
-        
-        return div;
-      }
-      
-      window.updateAppointmentStatus = async (appointmentId, newStatus) => {
-        if (!newStatus) return;
-        
-        try {
-          const response = await fetch('/vetfinal/api/vet_api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'update_appointment_status',
-              appointment_id: appointmentId,
-              status: newStatus
-            })
-          });
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            toast(`Appointment status updated to ${newStatus}`, 'success');
-            loadAllAppointments(); // Refresh the list
-          } else {
-            toast(result.message || 'Failed to update status', 'error');
-          }
-        } catch (error) {
-          console.error('Error updating status:', error);
-          toast('Connection error. Please try again.', 'error');
-        }
-      };
+      // Booking functionality now handled by client dashboard
       
       // Click outside modal to close & close mobile nav when clicking outside
       document.addEventListener('click', function(e) {
@@ -2220,9 +1844,9 @@
 
   // Ensure all modals exist before adding event listeners
   function initializeModalHandlers() {
-    // List of required modal IDs
-    const modalIds = ['loginModal', 'registerModal', 'forgotPasswordModal', 'bookingModal'];
-    
+    // List of required modal IDs (removed bookingModal since it redirects to client dashboard)
+    const modalIds = ['loginModal', 'registerModal', 'forgotPasswordModal'];
+
     // Check if all modals exist
     const missingModals = modalIds.filter(id => !document.getElementById(id));
     if (missingModals.length > 0) {
@@ -2282,6 +1906,366 @@
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
+
+  // Service details data mapping
+  const serviceDetailsData = {
+    'basic-obedience-training': {
+      name: 'Basic Obedience Training',
+      icon: '🐕',
+      description: 'Comprehensive basic obedience training for your dog to learn essential commands and behaviors. Our professional trainers use positive reinforcement techniques to help your pet become well-mannered and responsive.',
+      features: [
+        'Sit, stay, and come commands',
+        'Leash walking without pulling',
+        'Basic house manners',
+        'Socialization skills',
+        'Positive reinforcement methods',
+        'One-on-one training sessions'
+      ],
+      pricing: {},
+      process: [
+        'Initial consultation and assessment',
+        'Customized training plan development',
+        'Hands-on training sessions',
+        'Progress evaluation and adjustments',
+        'Home practice guidance and support'
+      ],
+      duration: '45-60 minutes per session',
+      requirements: 'Dogs aged 4 months and above, current on vaccinations'
+    },
+    'deworming': {
+      name: 'Deworming Service',
+      icon: '🐍',
+      description: 'Professional deworming treatment to protect your pet from internal parasites. Regular deworming is essential for maintaining your pet\'s health and preventing the spread of parasites to other pets and family members.',
+      features: [
+        'Safe and effective deworming medication',
+        'Internal parasite prevention',
+        'Consultation on parasite prevention',
+        'Follow-up recommendations',
+        'Pet-safe environment guidance'
+      ],
+      pricing: {},
+      process: [
+        'Pet health assessment',
+        'Weight-based medication calculation',
+        'Safe administration of dewormer',
+        'Post-treatment monitoring',
+        'Prevention schedule planning'
+      ],
+      duration: '15-20 minutes',
+      requirements: 'No food restriction required, bring vaccination records'
+    },
+    'microchip': {
+      name: 'Microchip Implanting',
+      icon: '📶',
+      description: 'Permanent identification microchip implantation for your pet. Microchipping is the most reliable way to ensure your pet can be identified and returned to you if they ever get lost.',
+      features: [
+        'ISO standard microchip',
+        'Lifetime identification',
+        'Registered in national database',
+        'Quick and painless procedure',
+        'Transferable ownership records',
+        'International travel compatibility'
+      ],
+      pricing: {},
+      process: [
+        'Pre-implantation health check',
+        'Sterile microchip insertion',
+        'Registration in database',
+        'Ownership verification setup',
+        'ID card and certificate provided'
+      ],
+      duration: '10-15 minutes',
+      requirements: 'Pets must be at least 8 weeks old, no sedation required'
+    },
+    'vaccination': {
+      name: 'Vaccination Service',
+      icon: '💉',
+      description: 'Comprehensive vaccination program to protect your pet from common and serious diseases. Our vaccination schedules are tailored to your pet\'s age, lifestyle, and local disease risks.',
+      features: [
+        'Core vaccine administration',
+        'Vaccination schedule planning',
+        'Vaccine reaction monitoring',
+        'Vaccination record keeping',
+        'Booster shot reminders',
+        'Health certificate issuance'
+      ],
+      pricing: {},
+      process: [
+        'Health examination before vaccination',
+        'Appropriate vaccine selection',
+        'Safe vaccine administration',
+        'Post-vaccination monitoring',
+        'Vaccination certificate provided'
+      ],
+      duration: '15-20 minutes',
+      requirements: 'Pets must be healthy, current on deworming'
+    },
+    'pet-boarding': {
+      name: 'Pet Boarding',
+      icon: '🏠',
+      description: 'Safe and comfortable boarding facility for your pets when you\'re away. Our boarding service provides a home-like environment with 24/7 supervision and personalized care.',
+      features: [
+        'Climate-controlled environment',
+        'Individual sleeping quarters',
+        'Daily exercise and playtime',
+        'Medication administration',
+        'Regular updates to owners',
+        'Emergency veterinary access'
+      ],
+      pricing: {},
+      process: [
+        'Pre-boarding health assessment',
+        'Familiarization with environment',
+        'Daily care routine establishment',
+        'Regular photo/video updates',
+        'Smooth transition home'
+      ],
+      duration: 'Flexible (daily rates)',
+      requirements: 'Current vaccinations, reservation required, meet & greet recommended'
+    },
+    'parasite-prevention': {
+      name: 'External Parasite Prevention',
+      icon: '🦇',
+      description: 'Comprehensive external parasite prevention program including fleas, ticks, and mites. We offer various prevention methods tailored to your pet\'s lifestyle and environment.',
+      features: [
+        'Flea and tick prevention',
+        'Topical treatments available',
+        'Oral medications options',
+        'Environmental control advice',
+        'Regular prevention schedules',
+        'Treatment effectiveness monitoring'
+      ],
+      pricing: {},
+      process: [
+        'Pet lifestyle assessment',
+        'Appropriate product selection',
+        'Safe application demonstration',
+        'Effectiveness monitoring',
+        'Reapplication schedule planning'
+      ],
+      duration: '20-25 minutes',
+      requirements: 'Pets must be healthy, discuss current medications'
+    },
+    'euthanasia': {
+      name: 'Euthanasia Service',
+      icon: '🕊️',
+      description: 'Compassionate end-of-life care when your pet is suffering from untreatable conditions. We provide gentle, painless euthanasia services with emotional support for pet owners.',
+      features: [
+        'Compassionate consultation',
+        'Painless procedure',
+        'Cremation arrangements',
+        'Grief support resources',
+        'Memorial options available',
+        'Private consultation room'
+      ],
+      pricing: {},
+      process: [
+        'Compassionate consultation',
+        'Decision-making support',
+        'Gentle procedure explanation',
+        'Peaceful farewell process',
+        'Aftercare arrangements'
+      ],
+      duration: '30-45 minutes',
+      requirements: 'Prior consultation required, bring medical records'
+    },
+    'general-checkup': {
+      name: 'Comprehensive General Check-up',
+      icon: '🚑',
+      description: 'Thorough physical examination and health assessment for your pet. Our comprehensive check-ups help detect potential health issues early and maintain your pet\'s optimal wellness.',
+      features: [
+        'Complete physical examination',
+        'Weight and body condition assessment',
+        'Dental health evaluation',
+        'Parasite screening',
+        'Vaccination status review',
+        'Nutritional counseling'
+      ],
+      pricing: {},
+      process: [
+        'Detailed health history review',
+        'Comprehensive physical exam',
+        'Diagnostic recommendations',
+        'Treatment plan development',
+        'Preventive care planning'
+      ],
+      duration: '30-45 minutes',
+      requirements: 'No preparation needed, bring medical history'
+    },
+    'grooming': {
+      name: 'Professional Grooming',
+      icon: '✂️',
+      description: 'Full-service grooming to keep your pet looking and feeling their best. Our experienced groomers provide breed-specific styling and gentle handling for all pets.',
+      features: [
+        'Bath and blow dry',
+        'Nail trimming and filing',
+        'Ear cleaning',
+        'Teeth brushing',
+        'Breed-specific styling',
+        'Gland expression (dogs)'
+      ],
+      pricing: {},
+      process: [
+        'Pre-grooming assessment',
+        'Gentle bathing and conditioning',
+        'Professional styling',
+        'Nail and ear care',
+        'Final inspection and photos'
+      ],
+      duration: '1-2 hours',
+      requirements: 'Current vaccinations, no food 2 hours before'
+    },
+    'dental-surgery': {
+      name: 'Dental Surgery',
+      icon: '🦷',
+      description: 'Advanced dental procedures including tooth extractions, oral surgery, and periodontal treatments. Our veterinary dentists provide specialized dental care for complex cases.',
+      features: [
+        'Dental X-rays available',
+        'Tooth extraction procedures',
+        'Periodontal surgery',
+        'Oral tumor removal',
+        'Fracture repair',
+        'Post-operative care'
+      ],
+      pricing: {},
+      process: [
+        'Dental examination and X-rays',
+        'Treatment plan development',
+        'Pre-surgical preparation',
+        'Surgical procedure',
+        'Post-operative care instructions'
+      ],
+      duration: '1-3 hours',
+      requirements: 'Pre-surgical blood work, fasting required'
+    },
+    'surgery': {
+      name: 'General Surgery',
+      icon: '🏥',
+      description: 'Comprehensive surgical services including spay/neuter, mass removals, and emergency procedures. Our surgical team provides safe, modern veterinary surgery with advanced monitoring.',
+      features: [
+        'Spay and neuter procedures',
+        'Mass and tumor removal',
+        'Abdominal surgery',
+        'Orthopedic procedures',
+        'Emergency surgery',
+        'Advanced monitoring equipment'
+      ],
+      pricing: {},
+      process: [
+        'Pre-surgical consultation',
+        'Pre-operative blood work',
+        'Surgical procedure',
+        'Recovery monitoring',
+        'Post-operative care instructions'
+      ],
+      duration: '2-4 hours',
+      requirements: 'Pre-surgical examination, fasting 12 hours'
+    },
+    'home-service': {
+      name: 'Home Service by Appointment',
+      icon: '🏡',
+      description: 'Convenient veterinary care in the comfort of your home. Our mobile veterinary service brings professional care directly to you, reducing stress for your pets.',
+      features: [
+        'Vaccinations at home',
+        'Health examinations',
+        'Minor procedures',
+        'Euthanasia services',
+        'Geriatric pet care',
+        'Multiple pet discounts'
+      ],
+      pricing: {},
+      process: [
+        'Appointment scheduling',
+        'Veterinarian home visit',
+        'Complete service delivery',
+        'Treatment documentation',
+        'Follow-up care planning'
+      ],
+      duration: '45-90 minutes',
+      requirements: 'Safe access to property, advance booking required'
+    }
+  };
+
+  // Show service details function
+  window.showServiceDetails = function(serviceId) {
+    console.log('Showing service details for:', serviceId);
+
+    // Get service data from our mapping
+    const serviceData = serviceDetailsData[serviceId];
+
+    if (!serviceData) {
+      console.error('Service not found:', serviceId);
+      toast('Service information not available.', 'error');
+      return;
+    }
+
+    // Get modal elements
+    const modal = document.getElementById('serviceDetailsModal');
+    const iconElement = document.getElementById('serviceIconLarge');
+    const titleElement = document.getElementById('serviceTitle');
+    const descriptionElement = document.getElementById('serviceDescription');
+    const featuresElement = document.getElementById('serviceFeaturesList');
+    const pricingElement = document.getElementById('pricingInfo');
+    const processElement = document.getElementById('processSteps');
+
+    if (!modal || !iconElement || !titleElement) {
+      console.error('Service modal elements not found');
+      toast('Unable to display service details.', 'error');
+      return;
+    }
+
+    // Populate modal content
+    iconElement.textContent = serviceData.icon;
+    titleElement.textContent = serviceData.name;
+
+    // Set description
+    descriptionElement.innerHTML = `<p>${serviceData.description}</p>`;
+
+    // Set features list
+    if (serviceData.features && featuresElement) {
+      featuresElement.innerHTML = serviceData.features.map(feature =>
+        `<li>${feature}</li>`
+      ).join('');
+    }
+
+
+    // Set process information
+    if (serviceData.process && processElement) {
+      processElement.innerHTML = serviceData.process.map((step, index) =>
+        `<p><strong>${index + 1}.</strong> ${step}</p>`
+      ).join('');
+    }
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Add smooth animation
+    setTimeout(() => {
+      modal.classList.add('show');
+    }, 10);
+
+    console.log('Service details modal displayed successfully');
+  };
+
+  // Enhanced modal close function for service details
+  window.closeModal = function(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300); // Match CSS transition time
+    }
+  };
+
+  // Book service from modal function
+  window.bookServiceFromModal = function() {
+    // Close service details modal
+    closeModal('serviceDetailsModal');
+
+    // Redirect to client dashboard for booking
+    window.location.href = 'public/client.html#appointments';
+  };
 
   </script>
 </body>
