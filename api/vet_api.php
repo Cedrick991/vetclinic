@@ -177,8 +177,20 @@ try {
             $response = cancelAppointment($db, $input);
             break;
 
+        case 'request_appointment_cancellation':
+            $response = requestAppointmentCancellation($db, $input);
+            break;
+
+        case 'deny_cancellation_request':
+            $response = denyCancellationRequest($db, $input);
+            break;
+
         case 'update_appointment_status':
             $response = updateAppointmentStatus($db, $input);
+            break;
+
+        case 'update_appointment_status_with_reason':
+            $response = updateAppointmentStatusWithReason($db, $input);
             break;
 
         case 'get_available_times':
@@ -263,6 +275,43 @@ try {
 
         case 'delete_pet':
             $response = deletePet($db, $input);
+            break;
+
+        // Notification endpoints
+        case 'get_notifications':
+            $response = getNotifications($db, $input);
+            break;
+
+        case 'mark_notification_read':
+            $response = markNotificationRead($db, $input);
+            break;
+
+        case 'mark_all_notifications_read':
+            $response = markAllNotificationsRead($db, $input);
+            break;
+
+        case 'get_unread_count':
+            $response = getUnreadNotificationCount($db, $input);
+            break;
+
+        case 'get_notification_preferences':
+            $response = getNotificationPreferences($db, $input);
+            break;
+
+        case 'update_notification_preferences':
+            $response = updateNotificationPreferences($db, $input);
+            break;
+
+        case 'send_notification':
+            $response = sendNotification($db, $input);
+            break;
+
+        case 'delete_notification':
+            $response = deleteNotification($db, $input);
+            break;
+
+        case 'clear_all_notifications':
+            $response = clearAllNotifications($db, $input);
             break;
 
         default:
@@ -969,6 +1018,19 @@ function addPet($db, $input) {
 
         $petId = $db->lastInsertId();
 
+        // Trigger notifications
+        if ($_SESSION['user_type'] === 'client') {
+            // Notify staff about new pet registration
+            $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+            foreach ($staffUsers as $staff) {
+                if (isNotificationEnabled($db, $staff['id'], 'pet_registration')) {
+                    createNotification($db, $staff['id'], 'pet_registration', 'New Pet Registered',
+                        "New pet \"{$petName}\" ({$species}) has been registered.", 'normal',
+                        ['pet_id' => $petId, 'pet_name' => $petName, 'species' => $species]);
+                }
+            }
+        }
+
         return [
             'success' => true,
             'message' => 'Pet added successfully!',
@@ -1015,6 +1077,21 @@ function bookAppointment($db, $input) {
 
         $appointmentId = $db->lastInsertId();
 
+        // Get service name for notification
+        $service = $db->fetch('SELECT name FROM services WHERE id = ?', [$serviceId]);
+
+        // Trigger notifications
+        if ($service) {
+            // Notify staff about new appointment
+            $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+            foreach ($staffUsers as $staff) {
+                if (isNotificationEnabled($db, $staff['id'], 'appointment_new')) {
+                    createNotification($db, $staff['id'], 'appointment_new', 'New Appointment Booked',
+                        "A new appointment has been scheduled for {$service['name']}.", 'normal',
+                        ['appointment_id' => $appointmentId, 'service_name' => $service['name']]);
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -1119,6 +1196,151 @@ function cancelAppointment($db, $input) {
     }
 }
 
+function requestAppointmentCancellation($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    $appointmentId = intval($input['appointment_id'] ?? 0);
+
+    if (!$appointmentId) {
+        return ['success' => false, 'message' => 'Appointment ID is required'];
+    }
+
+    try {
+        // Check if appointment exists and belongs to user
+        $appointment = $db->fetch('SELECT * FROM appointments WHERE id = ? AND client_id = ?', [$appointmentId, $_SESSION['user_id']]);
+        if (!$appointment) {
+            return ['success' => false, 'message' => 'Appointment not found or not owned by you'];
+        }
+
+        // Only allow cancellation requests for pending, confirmed, or scheduled appointments
+        if (!in_array($appointment['status'], ['pending', 'confirmed', 'scheduled'])) {
+            return ['success' => false, 'message' => 'Cannot request cancellation for appointment with status: ' . $appointment['status']];
+        }
+
+        // Check if there's already a pending cancellation request
+        if ($appointment['cancellation_requested']) {
+            return ['success' => false, 'message' => 'Cancellation request already pending for this appointment'];
+        }
+
+        // Set cancellation request flag
+        $db->execute(
+            'UPDATE appointments SET cancellation_requested = 1 WHERE id = ?',
+            [$appointmentId]
+        );
+
+        // Get appointment details for notification
+        $appointmentDetails = $db->fetch('
+            SELECT a.*, s.name as service_name, p.name as pet_name, u.first_name, u.last_name
+            FROM appointments a
+            JOIN services s ON a.service_id = s.id
+            JOIN pets p ON a.pet_id = p.id
+            JOIN users u ON a.client_id = u.id
+            WHERE a.id = ?
+        ', [$appointmentId]);
+
+        // Notify staff about cancellation request
+        if ($appointmentDetails) {
+            $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+            foreach ($staffUsers as $staff) {
+                if (isNotificationEnabled($db, $staff['id'], 'appointment_cancellation_request')) {
+                    createNotification($db, $staff['id'], 'appointment_cancellation_request',
+                        'Cancellation Request',
+                        "{$appointmentDetails['first_name']} {$appointmentDetails['last_name']} has requested to cancel their appointment for {$appointmentDetails['pet_name']} on {$appointmentDetails['appointment_date']} at {$appointmentDetails['appointment_time']}.",
+                        'high',
+                        [
+                            'appointment_id' => $appointmentId,
+                            'client_name' => $appointmentDetails['first_name'] . ' ' . $appointmentDetails['last_name'],
+                            'pet_name' => $appointmentDetails['pet_name'],
+                            'appointment_date' => $appointmentDetails['appointment_date'],
+                            'appointment_time' => $appointmentDetails['appointment_time'],
+                            'service_name' => $appointmentDetails['service_name']
+                        ]);
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Cancellation request submitted successfully! Staff will review and confirm.',
+            'appointment_id' => $appointmentId
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to submit cancellation request: ' . $e->getMessage()];
+    }
+}
+
+function denyCancellationRequest($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    // Only staff can deny cancellation requests
+    if ($_SESSION['user_type'] !== 'staff') {
+        return ['success' => false, 'message' => 'Only staff can deny cancellation requests'];
+    }
+
+    $appointmentId = intval($input['appointment_id'] ?? 0);
+
+    if (!$appointmentId) {
+        return ['success' => false, 'message' => 'Appointment ID is required'];
+    }
+
+    try {
+        // Check if appointment exists and has a pending cancellation request
+        $appointment = $db->fetch('SELECT * FROM appointments WHERE id = ?', [$appointmentId]);
+        if (!$appointment) {
+            return ['success' => false, 'message' => 'Appointment not found'];
+        }
+
+        if (!$appointment['cancellation_requested']) {
+            return ['success' => false, 'message' => 'No pending cancellation request for this appointment'];
+        }
+
+        // Clear the cancellation request flag (restore original status)
+        $db->execute(
+            'UPDATE appointments SET cancellation_requested = 0 WHERE id = ?',
+            [$appointmentId]
+        );
+
+        // Get appointment details for notification
+        $appointmentDetails = $db->fetch('
+            SELECT a.*, s.name as service_name, p.name as pet_name, u.first_name, u.last_name
+            FROM appointments a
+            JOIN services s ON a.service_id = s.id
+            JOIN pets p ON a.pet_id = p.id
+            JOIN users u ON a.client_id = u.id
+            WHERE a.id = ?
+        ', [$appointmentId]);
+
+        // Notify client that cancellation request was denied
+        if ($appointmentDetails) {
+            if (isNotificationEnabled($db, $appointmentDetails['client_id'], 'appointment_cancellation_denied')) {
+                createNotification($db, $appointmentDetails['client_id'], 'appointment_cancellation_denied',
+                    'Cancellation Request Denied',
+                    "Your cancellation request for {$appointmentDetails['pet_name']}'s appointment on {$appointmentDetails['appointment_date']} at {$appointmentDetails['appointment_time']} has been denied. The appointment remains scheduled.",
+                    'normal',
+                    [
+                        'appointment_id' => $appointmentId,
+                        'pet_name' => $appointmentDetails['pet_name'],
+                        'appointment_date' => $appointmentDetails['appointment_date'],
+                        'appointment_time' => $appointmentDetails['appointment_time'],
+                        'service_name' => $appointmentDetails['service_name']
+                    ]);
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Cancellation request denied. Appointment status restored.',
+            'appointment_id' => $appointmentId
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to deny cancellation request: ' . $e->getMessage()];
+    }
+}
+
 function updateAppointmentStatus($db, $input) {
     if (!isset($_SESSION['user_id'])) {
         return ['success' => false, 'message' => 'Not logged in'];
@@ -1155,6 +1377,138 @@ function updateAppointmentStatus($db, $input) {
             [$newStatus, $appointmentId]
         );
 
+        // Get appointment details for notification
+        $appointment = $db->fetch('
+            SELECT a.*, s.name as service_name, p.name as pet_name, u.first_name, u.last_name
+            FROM appointments a
+            JOIN services s ON a.service_id = s.id
+            JOIN pets p ON a.pet_id = p.id
+            JOIN users u ON a.client_id = u.id
+            WHERE a.id = ?
+        ', [$appointmentId]);
+
+        // Trigger notifications
+        if ($appointment) {
+            // Notify client about status change
+            if (isNotificationEnabled($db, $appointment['client_id'], 'appointment_status_change')) {
+                createNotification($db, $appointment['client_id'], 'appointment_status_change',
+                    'Appointment Status Updated',
+                    "Your appointment status has been updated to: {$newStatus}.",
+                    'normal', ['appointment_id' => $appointmentId, 'new_status' => $newStatus]);
+            }
+
+            // Notify staff about status changes (except for staff updating their own appointments)
+            if ($_SESSION['user_type'] !== 'staff' || $_SESSION['user_id'] != $appointment['staff_id']) {
+                $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+                foreach ($staffUsers as $staff) {
+                    if ($staff['id'] != $_SESSION['user_id'] && isNotificationEnabled($db, $staff['id'], 'appointment_status_change')) {
+                        createNotification($db, $staff['id'], 'appointment_status_change',
+                            'Appointment Status Updated',
+                            "Appointment for {$appointment['first_name']} {$appointment['last_name']}'s {$appointment['pet_name']} has been updated to: {$newStatus}.",
+                            'normal', ['appointment_id' => $appointmentId, 'new_status' => $newStatus]);
+                    }
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Appointment status updated successfully!',
+            'appointment_id' => $appointmentId,
+            'new_status' => $newStatus
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to update appointment status: ' . $e->getMessage()];
+    }
+}
+
+function updateAppointmentStatusWithReason($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    $appointmentId = intval($input['appointment_id'] ?? 0);
+    $newStatus = trim($input['status'] ?? '');
+    $cancellationReason = trim($input['cancellation_reason'] ?? '');
+
+    if (!$appointmentId || !$newStatus) {
+        return ['success' => false, 'message' => 'Appointment ID and status are required'];
+    }
+
+    // Validate status
+    $validStatuses = ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled', 'no-show'];
+    if (!in_array($newStatus, $validStatuses)) {
+        return ['success' => false, 'message' => 'Invalid status. Must be one of: ' . implode(', ', $validStatuses)];
+    }
+
+    // If cancelling, require a reason
+    if ($newStatus === 'cancelled' && empty($cancellationReason)) {
+        return ['success' => false, 'message' => 'Cancellation reason is required when cancelling an appointment'];
+    }
+
+    try {
+        // Check if appointment exists
+        $appointment = $db->fetch('SELECT * FROM appointments WHERE id = ?', [$appointmentId]);
+        if (!$appointment) {
+            return ['success' => false, 'message' => 'Appointment not found'];
+        }
+
+        // Only staff can update appointment status
+        if ($_SESSION['user_type'] !== 'staff') {
+            return ['success' => false, 'message' => 'Only staff can update appointment status'];
+        }
+
+        // Update appointment status and add cancellation reason if provided
+        if ($newStatus === 'cancelled' && !empty($cancellationReason)) {
+            $db->execute(
+                'UPDATE appointments SET status = ?, cancellation_reason = ? WHERE id = ?',
+                [$newStatus, $cancellationReason, $appointmentId]
+            );
+        } else {
+            $db->execute(
+                'UPDATE appointments SET status = ? WHERE id = ?',
+                [$newStatus, $appointmentId]
+            );
+        }
+
+        // Get appointment details for notification
+        $appointment = $db->fetch('
+            SELECT a.*, s.name as service_name, p.name as pet_name, u.first_name, u.last_name
+            FROM appointments a
+            JOIN services s ON a.service_id = s.id
+            JOIN pets p ON a.pet_id = p.id
+            JOIN users u ON a.client_id = u.id
+            WHERE a.id = ?
+        ', [$appointmentId]);
+
+        // Trigger notifications
+        if ($appointment) {
+            // Notify client about status change
+            if (isNotificationEnabled($db, $appointment['client_id'], 'appointment_status_change')) {
+                $message = "Your appointment status has been updated to: {$newStatus}.";
+                if ($newStatus === 'cancelled' && !empty($cancellationReason)) {
+                    $message .= " Reason: {$cancellationReason}";
+                }
+
+                createNotification($db, $appointment['client_id'], 'appointment_status_change',
+                    'Appointment Status Updated',
+                    $message,
+                    'normal', ['appointment_id' => $appointmentId, 'new_status' => $newStatus, 'cancellation_reason' => $cancellationReason]);
+            }
+
+            // Notify staff about status changes (except for staff updating their own appointments)
+            if ($_SESSION['user_type'] !== 'staff' || $_SESSION['user_id'] != $appointment['staff_id']) {
+                $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+                foreach ($staffUsers as $staff) {
+                    if ($staff['id'] != $_SESSION['user_id'] && isNotificationEnabled($db, $staff['id'], 'appointment_status_change')) {
+                        createNotification($db, $staff['id'], 'appointment_status_change',
+                            'Appointment Status Updated',
+                            "Appointment for {$appointment['first_name']} {$appointment['last_name']}'s {$appointment['pet_name']} has been updated to: {$newStatus}.",
+                            'normal', ['appointment_id' => $appointmentId, 'new_status' => $newStatus]);
+                    }
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -1386,6 +1740,16 @@ function checkout($db, $input) {
 
         // Commit transaction
         $db->execute('COMMIT');
+
+        // Trigger notifications
+        $staffUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "staff" AND is_active = 1');
+        foreach ($staffUsers as $staff) {
+            if (isNotificationEnabled($db, $staff['id'], 'order_new')) {
+                createNotification($db, $staff['id'], 'order_new', 'New Order Placed',
+                    "New order #{$orderId} placed for ₱{$total}.", 'normal',
+                    ['order_id' => $orderId, 'total_amount' => $total]);
+            }
+        }
 
         return [
             'success' => true,
@@ -2277,6 +2641,20 @@ function addMedicalHistory($db, $input) {
 
         $medicalHistoryId = $db->lastInsertId();
 
+        // Get pet name for notification
+        $pet = $db->fetch('SELECT name FROM pets WHERE id = ?', [$appointment['pet_id']]);
+
+        // Trigger notifications
+        if ($pet) {
+            // Notify pet owner about medical history update
+            if (isNotificationEnabled($db, $appointment['client_id'], 'medical_history_update')) {
+                createNotification($db, $appointment['client_id'], 'medical_history_update',
+                    'Medical History Updated',
+                    "Medical history has been updated for {$pet['name']}.",
+                    'normal', ['pet_id' => $appointment['pet_id'], 'pet_name' => $pet['name']]);
+            }
+        }
+
         return [
             'success' => true,
             'message' => 'Medical history saved successfully!',
@@ -2492,6 +2870,7 @@ function updatePet($db, $input) {
     $breed = trim($input['breed'] ?? '');
     $birthdate = trim($input['birthdate'] ?? '');
     $gender = trim($input['gender'] ?? '');
+    $weight = floatval($input['weight'] ?? 0);
     $color = trim($input['color'] ?? '');
 
     if (!$petId) {
@@ -2524,8 +2903,8 @@ function updatePet($db, $input) {
 
         // Update pet
         $db->execute(
-            'UPDATE pets SET name = ?, species = ?, breed = ?, birthdate = ?, age = ?, gender = ?, color = ? WHERE id = ?',
-            [$name, $species, $breed, $birthdate, $age, $gender, $color, $petId]
+            'UPDATE pets SET name = ?, species = ?, breed = ?, birthdate = ?, age = ?, gender = ?, weight = ?, color = ? WHERE id = ?',
+            [$name, $species, $breed, $birthdate, $age, $gender, $weight, $color, $petId]
         );
 
         return [
@@ -2570,5 +2949,388 @@ function deletePet($db, $input) {
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Failed to delete pet: ' . $e->getMessage()];
     }
+}
+
+// ====================
+// NOTIFICATION FUNCTIONS
+// ====================
+
+function getNotifications($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $userId = $_SESSION['user_id'];
+   $limit = intval($input['limit'] ?? 50);
+   $offset = intval($input['offset'] ?? 0);
+
+   try {
+       // Get notifications for the user
+       $notifications = $db->fetchAll('
+           SELECT n.*, nrs.is_read, nrs.read_at
+           FROM notifications n
+           LEFT JOIN notification_read_status nrs ON n.id = nrs.notification_id AND nrs.user_id = ?
+           WHERE n.user_id = ?
+           ORDER BY n.created_at DESC
+           LIMIT ? OFFSET ?
+       ', [$userId, $userId, $limit, $offset]);
+
+       // Format notifications
+       $formattedNotifications = array_map(function($notification) {
+           return [
+               'id' => $notification['id'],
+               'type' => $notification['type'],
+               'title' => $notification['title'],
+               'message' => $notification['message'],
+               'data' => $notification['data'] ? json_decode($notification['data'], true) : null,
+               'priority' => $notification['priority'],
+               'is_read' => (bool)($notification['is_read'] ?? 0),
+               'read_at' => $notification['read_at'],
+               'expires_at' => $notification['expires_at'],
+               'created_at' => $notification['created_at']
+           ];
+       }, $notifications);
+
+       return [
+           'success' => true,
+           'data' => $formattedNotifications,
+           'total' => count($formattedNotifications)
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to load notifications: ' . $e->getMessage()];
+   }
+}
+
+function markNotificationRead($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $notificationId = intval($input['notification_id'] ?? 0);
+
+   if (!$notificationId) {
+       return ['success' => false, 'message' => 'Notification ID is required'];
+   }
+
+   try {
+       // Check if notification exists and belongs to user
+       $notification = $db->fetch('SELECT * FROM notifications WHERE id = ? AND user_id = ?', [$notificationId, $_SESSION['user_id']]);
+       if (!$notification) {
+           return ['success' => false, 'message' => 'Notification not found'];
+       }
+
+       // Mark as read
+       $db->execute('
+           INSERT OR REPLACE INTO notification_read_status (notification_id, user_id, is_read, read_at)
+           VALUES (?, ?, 1, datetime("now"))
+       ', [$notificationId, $_SESSION['user_id']]);
+
+       return [
+           'success' => true,
+           'message' => 'Notification marked as read'
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to mark notification as read: ' . $e->getMessage()];
+   }
+}
+
+function markAllNotificationsRead($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $userId = $_SESSION['user_id'];
+
+   try {
+       // Mark all unread notifications as read
+       $db->execute('
+           INSERT OR REPLACE INTO notification_read_status (notification_id, user_id, is_read, read_at)
+           SELECT n.id, ?, 1, datetime("now")
+           FROM notifications n
+           LEFT JOIN notification_read_status nrs ON n.id = nrs.notification_id AND nrs.user_id = ?
+           WHERE n.user_id = ? AND (nrs.is_read IS NULL OR nrs.is_read = 0)
+       ', [$userId, $userId, $userId]);
+
+       return [
+           'success' => true,
+           'message' => 'All notifications marked as read'
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to mark all notifications as read: ' . $e->getMessage()];
+   }
+}
+
+function getUnreadNotificationCount($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $userId = $_SESSION['user_id'];
+
+   try {
+       // Get count of unread notifications
+       $count = $db->fetch('
+           SELECT COUNT(*) as unread_count
+           FROM notifications n
+           LEFT JOIN notification_read_status nrs ON n.id = nrs.notification_id AND nrs.user_id = ?
+           WHERE n.user_id = ? AND (nrs.is_read IS NULL OR nrs.is_read = 0)
+       ', [$userId, $userId]);
+
+       return [
+           'success' => true,
+           'data' => [
+               'unread_count' => intval($count['unread_count'])
+           ]
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to get unread count: ' . $e->getMessage()];
+   }
+}
+
+function getNotificationPreferences($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $userId = $_SESSION['user_id'];
+
+   try {
+       // Get user's notification preferences
+       $preferences = $db->fetchAll('
+           SELECT notification_type, is_enabled
+           FROM notification_preferences
+           WHERE user_id = ?
+       ', [$userId]);
+
+       // Format preferences
+       $formattedPreferences = [];
+       foreach ($preferences as $pref) {
+           $formattedPreferences[$pref['notification_type']] = (bool)$pref['is_enabled'];
+       }
+
+       return [
+           'success' => true,
+           'data' => $formattedPreferences
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to load notification preferences: ' . $e->getMessage()];
+   }
+}
+
+function updateNotificationPreferences($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   $userId = $_SESSION['user_id'];
+   $preferences = $input['preferences'] ?? [];
+
+   if (!is_array($preferences)) {
+       return ['success' => false, 'message' => 'Invalid preferences format'];
+   }
+
+   try {
+       $db->execute('BEGIN TRANSACTION');
+
+       foreach ($preferences as $type => $isEnabled) {
+           $db->execute('
+               INSERT OR REPLACE INTO notification_preferences (user_id, notification_type, is_enabled, updated_at)
+               VALUES (?, ?, ?, datetime("now"))
+           ', [$userId, $type, $isEnabled ? 1 : 0]);
+       }
+
+       $db->execute('COMMIT');
+
+       return [
+           'success' => true,
+           'message' => 'Notification preferences updated successfully'
+       ];
+   } catch (Exception $e) {
+       $db->execute('ROLLBACK');
+       return ['success' => false, 'message' => 'Failed to update notification preferences: ' . $e->getMessage()];
+   }
+}
+
+function sendNotification($db, $input) {
+   if (!isset($_SESSION['user_id'])) {
+       return ['success' => false, 'message' => 'Not logged in'];
+   }
+
+   // Only staff can send notifications
+   if ($_SESSION['user_type'] !== 'staff') {
+       return ['success' => false, 'message' => 'Only staff can send notifications'];
+   }
+
+   $targetUserId = intval($input['user_id'] ?? 0);
+   $type = trim($input['type'] ?? '');
+   $title = trim($input['title'] ?? '');
+   $message = trim($input['message'] ?? '');
+   $priority = trim($input['priority'] ?? 'normal');
+   $data = $input['data'] ?? null;
+
+   if (!$targetUserId || !$type || !$title || !$message) {
+       return ['success' => false, 'message' => 'User ID, type, title, and message are required'];
+   }
+
+   // Validate priority
+   $validPriorities = ['low', 'normal', 'high', 'urgent'];
+   if (!in_array($priority, $validPriorities)) {
+       $priority = 'normal';
+   }
+
+   try {
+       // Check if target user exists
+       $user = $db->fetch('SELECT id FROM users WHERE id = ? AND is_active = 1', [$targetUserId]);
+       if (!$user) {
+           return ['success' => false, 'message' => 'Target user not found'];
+       }
+
+       // Insert notification
+       $db->execute('
+           INSERT INTO notifications (user_id, type, title, message, data, priority, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, datetime("now"))
+       ', [$targetUserId, $type, $title, $message, $data ? json_encode($data) : null, $priority]);
+
+       $notificationId = $db->lastInsertId();
+
+       return [
+           'success' => true,
+           'message' => 'Notification sent successfully',
+           'notification_id' => $notificationId
+       ];
+   } catch (Exception $e) {
+       return ['success' => false, 'message' => 'Failed to send notification: ' . $e->getMessage()];
+   }
+}
+
+function deleteNotification($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    $notificationId = intval($input['notification_id'] ?? 0);
+
+    if (!$notificationId) {
+        return ['success' => false, 'message' => 'Notification ID is required'];
+    }
+
+    try {
+        // Check if notification exists and belongs to user
+        $notification = $db->fetch('SELECT * FROM notifications WHERE id = ? AND user_id = ?', [$notificationId, $_SESSION['user_id']]);
+        if (!$notification) {
+            return ['success' => false, 'message' => 'Notification not found'];
+        }
+
+        // Delete related read status first (due to foreign key constraints)
+        $db->execute('DELETE FROM notification_read_status WHERE notification_id = ?', [$notificationId]);
+
+        // Then delete the notification
+        $db->execute('DELETE FROM notifications WHERE id = ?', [$notificationId]);
+
+        return [
+            'success' => true,
+            'message' => 'Notification deleted successfully'
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to delete notification: ' . $e->getMessage()];
+    }
+}
+
+function clearAllNotifications($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    $userId = $_SESSION['user_id'];
+
+    try {
+        // Get all notification IDs for the user
+        $notifications = $db->fetchAll('SELECT id FROM notifications WHERE user_id = ?', [$userId]);
+
+        if (empty($notifications)) {
+            return [
+                'success' => true,
+                'message' => 'No notifications to clear'
+            ];
+        }
+
+        // Delete related read status records first (due to foreign key constraints)
+        $db->execute('DELETE FROM notification_read_status WHERE user_id = ?', [$userId]);
+
+        // Then delete all notifications for the user
+        $db->execute('DELETE FROM notifications WHERE user_id = ?', [$userId]);
+
+        return [
+            'success' => true,
+            'message' => 'All notifications cleared successfully',
+            'cleared_count' => count($notifications)
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to clear all notifications: ' . $e->getMessage()];
+    }
+}
+
+// ====================
+// NOTIFICATION HELPER FUNCTIONS
+// ====================
+
+/**
+* Create a notification for a specific user
+*/
+function createNotification($db, $userId, $type, $title, $message, $priority = 'normal', $data = null) {
+   try {
+       $db->execute('
+           INSERT INTO notifications (user_id, type, title, message, data, priority, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, datetime("now"))
+       ', [$userId, $type, $title, $message, $data ? json_encode($data) : null, $priority]);
+
+       return $db->lastInsertId();
+   } catch (Exception $e) {
+       error_log('Failed to create notification: ' . $e->getMessage());
+       return false;
+   }
+}
+
+/**
+* Create notifications for multiple users
+*/
+function createBulkNotifications($db, $userIds, $type, $title, $message, $priority = 'normal', $data = null) {
+   try {
+       $db->execute('BEGIN TRANSACTION');
+
+       $notificationIds = [];
+       foreach ($userIds as $userId) {
+           $db->execute('
+               INSERT INTO notifications (user_id, type, title, message, data, priority, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, datetime("now"))
+           ', [$userId, $type, $title, $message, $data ? json_encode($data) : null, $priority]);
+
+           $notificationIds[] = $db->lastInsertId();
+       }
+
+       $db->execute('COMMIT');
+       return $notificationIds;
+   } catch (Exception $e) {
+       $db->execute('ROLLBACK');
+       error_log('Failed to create bulk notifications: ' . $e->getMessage());
+       return false;
+   }
+}
+
+/**
+* Check if user has enabled notifications for a specific type
+*/
+function isNotificationEnabled($db, $userId, $notificationType) {
+   try {
+       $preference = $db->fetch('
+           SELECT is_enabled FROM notification_preferences
+           WHERE user_id = ? AND notification_type = ?
+       ', [$userId, $notificationType]);
+
+       return $preference ? (bool)$preference['is_enabled'] : true; // Default to enabled
+   } catch (Exception $e) {
+       error_log('Failed to check notification preference: ' . $e->getMessage());
+       return true; // Default to enabled on error
+   }
 }
 

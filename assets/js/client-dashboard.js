@@ -4,6 +4,8 @@ class ClientDashboard {
     this.cart = JSON.parse(localStorage.getItem('clientCart') || '[]');
     this.currentReportData = null;
     this.selectedPetId = null;
+    this.isSubmittingBooking = false; // Flag to prevent duplicate submissions
+    this.currentEditingAppointmentId = null; // Track appointment being edited
     this.init();
   }
 
@@ -22,6 +24,9 @@ class ClientDashboard {
 
     // Setup cart functionality
     this.setupCartFunctionality();
+
+    // Setup booking functionality
+    this.setupBookingForm();
   }
 
   setupCartFunctionality() {
@@ -39,6 +44,7 @@ class ClientDashboard {
 
     // Cart count updates are handled in addToCart and buyNow methods
   }
+
 
   setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item[data-section]');
@@ -710,7 +716,83 @@ class ClientDashboard {
 
   // Placeholder methods for other sections
   async loadAppointmentsSection() {
-    // Implementation for appointments
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_appointments' })
+      });
+
+      const result = await response.json();
+      const appointmentsTableBody = document.getElementById('appointmentsTableBody');
+
+      if (result.success && result.data && result.data.length > 0) {
+        appointmentsTableBody.innerHTML = result.data.map(appointment => {
+          const appointmentDate = new Date(appointment.appointment_date);
+          const today = new Date();
+          const isPast = appointmentDate < today;
+          const canModify = !isPast && appointment.status !== 'cancelled' && appointment.status !== 'completed';
+
+          return `
+            <tr>
+              <td>${appointment.appointment_date}</td>
+              <td>${appointment.appointment_time}</td>
+              <td>${appointment.pet_name} (${appointment.species})</td>
+              <td>${appointment.service_name}</td>
+              <td>
+                <span class="status-badge status-${appointment.status}">
+                  ${appointment.status}
+                </span>
+              </td>
+              <td>
+                ${canModify ?
+                  `<div class="appointment-actions">
+                    <button class="btn-primary btn-small" onclick="clientDashboard.editAppointment(${appointment.id})" title="Edit Appointment">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="clientDashboard.requestCancellation(${appointment.id})" title="Request Cancellation">
+                      <i class="fas fa-times"></i> Request Cancellation
+                    </button>
+                  </div>` :
+                  `${appointment.status === 'cancelled' ?
+                    `<span class="status-locked" title="Appointment is cancelled and locked">
+                      <i class="fas fa-lock"></i> LOCKED
+                    </span>` :
+                    `<span class="status-text">Cannot modify</span>`
+                  }`
+                }
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        appointmentsTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state-table">
+              <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h3>No Appointments</h3>
+                <p>No appointments scheduled.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+    } catch (error) {
+      console.error('Failed to load appointments:', error);
+      const appointmentsTableBody = document.getElementById('appointmentsTableBody');
+      appointmentsTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-state-table">
+            <div class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Error Loading Appointments</h3>
+              <p>Failed to load appointments. Please try again.</p>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
   }
 
   async loadPetsSection() {
@@ -723,6 +805,552 @@ class ClientDashboard {
 
   async loadOrders() {
     // Implementation for orders
+  }
+
+  async editAppointment(appointmentId) {
+    if (!appointmentId) {
+      this.showToast('Invalid appointment ID', 'error');
+      return;
+    }
+
+    try {
+      console.log('Client editing appointment for ID:', appointmentId);
+
+      // Get appointment details first
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_appointment_details',
+          appointment_id: appointmentId
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const appointment = result.data;
+
+        // Show the booking modal with pre-filled data
+        this.showBookingModal();
+
+        // Pre-fill the form with existing appointment data
+        setTimeout(() => {
+          this.prefillEditForm(appointment);
+        }, 100);
+
+      } else {
+        this.showToast('Failed to load appointment details for editing', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading appointment for editing:', error);
+      this.showToast('Error loading appointment details. Please try again.', 'error');
+    }
+  }
+
+  prefillEditForm(appointment) {
+    // Pre-fill the booking form with existing appointment data
+    const serviceSelect = document.getElementById('clientBookingService');
+    const petSelect = document.getElementById('clientBookingPet');
+    const dateInput = document.getElementById('clientBookingDate');
+    const timeSelect = document.getElementById('clientBookingTime');
+    const notesInput = document.getElementById('clientBookingNotes');
+
+    if (serviceSelect) serviceSelect.value = appointment.service_id || '';
+    if (petSelect) petSelect.value = appointment.pet_id || '';
+    if (dateInput) dateInput.value = appointment.appointment_date || '';
+    if (timeSelect) timeSelect.value = appointment.appointment_time || '';
+    if (notesInput) notesInput.value = appointment.notes || '';
+
+    // Store the appointment ID for update instead of create
+    this.currentEditingAppointmentId = appointment.id;
+
+    // Update form submission to handle edit mode
+    const form = document.getElementById('clientBookingForm');
+    if (form) {
+      form.setAttribute('data-edit-mode', 'true');
+    }
+
+    this.showToast('Appointment details loaded for editing. Make your changes and submit.', 'info');
+  }
+
+  async requestCancellation(appointmentId) {
+    if (!appointmentId) {
+      this.showToast('Invalid appointment ID', 'error');
+      return;
+    }
+
+    // Confirm cancellation request with user
+    if (!confirm('Are you sure you want to request cancellation for this appointment? Staff will review and approve your request.')) {
+      return;
+    }
+
+    try {
+      console.log('Client requesting appointment cancellation for ID:', appointmentId);
+
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'request_appointment_cancellation',
+          appointment_id: appointmentId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Cancellation request response:', result);
+
+      if (result.success) {
+        this.showToast('Cancellation request submitted successfully! Staff will review and confirm.', 'success');
+
+        // Reload appointments to reflect the changes
+        await this.loadAppointmentsSection();
+      } else {
+        this.showToast(result.message || 'Failed to submit cancellation request', 'error');
+      }
+    } catch (error) {
+      console.error('Error requesting appointment cancellation:', error);
+      this.showToast('Error submitting cancellation request. Please try again or contact the clinic staff.', 'error');
+    }
+  }
+
+  // Booking functionality
+  showBookingModal() {
+    const modal = document.getElementById('clientBookingModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      this.initializeBookingModal();
+    }
+  }
+
+  closeBookingModal() {
+    const modal = document.getElementById('clientBookingModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      // Reset form
+      const form = document.getElementById('clientBookingForm');
+      if (form) {
+        form.reset();
+        form.removeAttribute('data-edit-mode');
+      }
+      // Hide add pet form
+      this.hideAddPetForm();
+      // Clear edit mode
+      this.currentEditingAppointmentId = null;
+    }
+  }
+
+  async initializeBookingModal() {
+    console.log('🔄 Initializing client booking modal...');
+
+    // Load services and pets
+    await this.loadClientServices();
+    await this.loadClientPets();
+
+    // Set minimum date to today
+    const dateInput = document.getElementById('clientBookingDate');
+    if (dateInput) {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      dateInput.min = tomorrow.toISOString().split('T')[0];
+
+      // Add event listener for date changes
+      dateInput.addEventListener('change', () => this.loadAvailableTimeSlots());
+    }
+
+    console.log('✅ Client booking modal initialized');
+  }
+
+  async loadClientServices() {
+    try {
+      console.log('Loading services for client booking...');
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_services' })
+      });
+
+      const result = await response.json();
+      const serviceSelect = document.getElementById('clientBookingService');
+
+      console.log('Client booking services API response:', result);
+
+      if (result.success && result.data) {
+        console.log('Client booking services data received:', result.data.length, 'services');
+
+        // Filter to show only active services (same as services section)
+        const activeServices = result.data.filter(service => service.is_active === 1 || service.is_active === "1");
+        console.log('Active services for client booking:', activeServices.length);
+
+        serviceSelect.innerHTML = '<option value="">Select a service</option>';
+
+        activeServices.forEach((service, index) => {
+          console.log(`Client booking service ${index + 1}:`, service);
+
+          const option = document.createElement('option');
+          option.value = service.id || service.service_id;
+
+          // Show service name and description if available
+          const description = service.description ? ` - ${service.description}` : '';
+          const serviceName = service.name || service.service_name || 'Unnamed Service';
+          const serviceText = `${serviceName}${description}`;
+
+          option.textContent = serviceText;
+          option.title = serviceText; // Add tooltip for long service names
+
+          serviceSelect.appendChild(option);
+        });
+
+        console.log('Client booking services loaded successfully into dropdown');
+      } else {
+        console.error('Failed to load client booking services:', result);
+        serviceSelect.innerHTML = '<option value="">No active services available</option>';
+        this.showToast('Failed to load services. Please refresh and try again.', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading client booking services:', error);
+      const serviceSelect = document.getElementById('clientBookingService');
+      serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+      this.showToast('Connection error while loading services.', 'error');
+    }
+  }
+
+  async loadClientPets() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_pets' })
+      });
+
+      const result = await response.json();
+      const petSelect = document.getElementById('clientBookingPet');
+
+      if (result.success && result.data && result.data.length > 0) {
+        petSelect.innerHTML = '<option value="">Select a pet</option>';
+        result.data.forEach(pet => {
+          const option = document.createElement('option');
+          option.value = pet.id;
+          option.textContent = `${pet.name} (${pet.species})`;
+          petSelect.appendChild(option);
+        });
+      } else {
+        petSelect.innerHTML = '<option value="">No pets registered</option>';
+      }
+    } catch (error) {
+      console.error('Error loading client pets:', error);
+      const petSelect = document.getElementById('clientBookingPet');
+      petSelect.innerHTML = '<option value="">Error loading pets</option>';
+      this.showToast('Failed to load your pets. Please refresh and try again.', 'error');
+    }
+  }
+
+  async loadAvailableTimeSlots() {
+    const dateInput = document.getElementById('clientBookingDate');
+    const timeSelect = document.getElementById('clientBookingTime');
+    const selectedDate = dateInput.value;
+
+    if (!selectedDate) {
+      timeSelect.innerHTML = '<option value="">Select date first</option>';
+      return;
+    }
+
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'get_available_times',
+          date: selectedDate
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        timeSelect.innerHTML = '<option value="">Select a time</option>';
+        result.data.forEach(time => {
+          const option = document.createElement('option');
+          option.value = time;
+          option.textContent = this.formatTime(time);
+          timeSelect.appendChild(option);
+        });
+      } else {
+        timeSelect.innerHTML = '<option value="">No available time slots</option>';
+      }
+    } catch (error) {
+      console.error('Error loading time slots:', error);
+      timeSelect.innerHTML = '<option value="">Error loading times</option>';
+    }
+  }
+
+  formatTime(time) {
+    const [hours, minutes] = time.split(':');
+    const hour12 = hours % 12 || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
+  }
+
+  async handleBookingSubmission(e) {
+    e.preventDefault();
+
+    // Prevent duplicate submissions
+    if (this.isSubmittingBooking) {
+      console.log('Booking submission already in progress, ignoring duplicate...');
+      return;
+    }
+
+    this.isSubmittingBooking = true;
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const isEditMode = form.getAttribute('data-edit-mode') === 'true';
+
+    const bookingData = {
+      action: isEditMode ? 'update_appointment' : 'book_appointment',
+      service_id: formData.get('service_id'),
+      pet_id: formData.get('pet_id'),
+      appointment_date: formData.get('appointment_date'),
+      appointment_time: formData.get('appointment_time'),
+      notes: formData.get('notes') || ''
+    };
+
+    // Add appointment ID if in edit mode
+    if (isEditMode && this.currentEditingAppointmentId) {
+      bookingData.appointment_id = this.currentEditingAppointmentId;
+    }
+
+    console.log(`=== CLIENT ${isEditMode ? 'APPOINTMENT UPDATE' : 'BOOKING'} FORM SUBMISSION ===`);
+    console.log('Booking data:', bookingData);
+
+    // Validation
+    const missingFields = [];
+    if (!bookingData.service_id) missingFields.push('Service');
+    if (!bookingData.pet_id) missingFields.push('Pet');
+    if (!bookingData.appointment_date) missingFields.push('Date');
+    if (!bookingData.appointment_time) missingFields.push('Time');
+
+    if (missingFields.length > 0) {
+      const errorMsg = `Please fill in all required fields. Missing: ${missingFields.join(', ')}`;
+      console.log('Booking validation failed:', errorMsg);
+      this.showToast(errorMsg, 'error');
+      return;
+    }
+
+    // Additional validation for service selection
+    const serviceSelect = document.getElementById('clientBookingService');
+    const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
+    if (!selectedServiceOption || selectedServiceOption.textContent.includes('undefined') ||
+        selectedServiceOption.textContent.includes('No active services available')) {
+      this.showToast('Please select a valid service from the dropdown.', 'error');
+      return;
+    }
+
+    try {
+      console.log(`Sending ${isEditMode ? 'update' : 'booking'} data to API:`, bookingData);
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+
+      const result = await response.json();
+      console.log(`${isEditMode ? 'Update' : 'Booking'} API response:`, result);
+
+      if (result.success) {
+        const successMessage = isEditMode ? 'Appointment updated successfully!' : 'Appointment booked successfully!';
+        this.showToast(successMessage, 'success');
+        this.closeBookingModal();
+        form.reset();
+        form.removeAttribute('data-edit-mode');
+        this.currentEditingAppointmentId = null;
+        console.log(`${isEditMode ? 'Update' : 'Booking'} form reset and modal closed`);
+
+        // Refresh appointments if we're on the appointments section
+        if (document.getElementById('appointmentsSection').style.display === 'block') {
+          this.loadAppointmentsSection();
+        }
+      } else {
+        console.error(`${isEditMode ? 'Update' : 'Booking'} failed:`, result);
+        if (result.message && result.message.includes('Invalid pet selection')) {
+          this.showToast('The selected pet is not valid for your account. Please select a different pet or add a new one.', 'error');
+          await this.loadClientPets();
+          this.showAddPetForm();
+        } else if (result.message && result.message.includes('Invalid service')) {
+          this.showToast('The selected service is not valid. Please select a different service.', 'error');
+          await this.loadClientServices();
+        } else {
+          this.showToast(result.message || `Failed to ${isEditMode ? 'update' : 'book'} appointment.`, 'error');
+        }
+      }
+    } catch (error) {
+      console.error(`${isEditMode ? 'Update' : 'Booking'} error:`, error);
+      this.showToast('Connection error. Please try again.', 'error');
+    } finally {
+      // Reset the submission flag
+      this.isSubmittingBooking = false;
+    }
+  }
+
+  showAddPetForm() {
+    const addPetForm = document.getElementById('clientAddPetForm');
+
+    // Show the form
+    addPetForm.style.display = 'block';
+
+    // Add a subtle animation
+    addPetForm.style.opacity = '0';
+    addPetForm.style.transform = 'translateY(-10px)';
+    addPetForm.style.transition = 'all 0.3s ease';
+
+    // Trigger the animation
+    setTimeout(() => {
+      addPetForm.style.opacity = '1';
+      addPetForm.style.transform = 'translateY(0)';
+    }, 10);
+
+    // Smooth scroll to the add pet form
+    setTimeout(() => {
+      addPetForm.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+
+      // Focus on the first input field for better UX
+      const firstInput = document.getElementById('clientPetName');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 100);
+  }
+
+  hideAddPetForm() {
+    const addPetForm = document.getElementById('clientAddPetForm');
+
+    // Add hide animation
+    addPetForm.style.opacity = '0';
+    addPetForm.style.transform = 'translateY(-10px)';
+
+    // Hide the form after animation
+    setTimeout(() => {
+      addPetForm.style.display = 'none';
+
+      // Clear form fields using correct element IDs
+      document.getElementById('clientBookingPetName').value = '';
+      document.getElementById('clientBookingPetSpecies').value = '';
+      document.getElementById('clientBookingPetBreed').value = '';
+      document.getElementById('clientBookingPetBirthdate').value = '';
+      document.getElementById('clientBookingPetGender').value = '';
+      document.getElementById('clientBookingPetWeight').value = '';
+      document.getElementById('clientBookingPetColor').value = '';
+
+      // Reset styles for next show
+      addPetForm.style.opacity = '';
+      addPetForm.style.transform = '';
+      addPetForm.style.transition = '';
+    }, 300);
+  }
+
+  async addPet() {
+    const petData = {
+      action: 'add_pet',
+      pet_name: document.getElementById('clientBookingPetName').value.trim(),
+      species: document.getElementById('clientBookingPetSpecies').value,
+      breed: document.getElementById('clientBookingPetBreed').value.trim(),
+      birthdate: document.getElementById('clientBookingPetBirthdate').value,
+      gender: document.getElementById('clientBookingPetGender').value,
+      weight: parseFloat(document.getElementById('clientBookingPetWeight').value) || null,
+      color: document.getElementById('clientBookingPetColor').value.trim()
+    };
+
+    // Validation
+    if (!petData.pet_name || !petData.species || !petData.gender) {
+      this.showToast('Please fill in pet name, species, and gender.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(petData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        this.showToast('Pet added successfully!', 'success');
+        this.hideAddPetForm();
+        // Reload pets in the select dropdown
+        await this.loadClientPets();
+      } else {
+        this.showToast(result.message || 'Failed to add pet.', 'error');
+      }
+    } catch (error) {
+      console.error('Add pet error:', error);
+      this.showToast('Connection error. Please try again.', 'error');
+    }
+  }
+
+  async refreshServices() {
+    console.log('Manual service refresh requested for client booking');
+    await this.loadClientServices();
+    this.showToast('Services refreshed!', 'success');
+  }
+
+  setupBookingForm() {
+    const bookingForm = document.getElementById('clientBookingForm');
+    if (bookingForm) {
+      bookingForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleBookingSubmission(e);
+      });
+    }
+  }
+}
+
+// Global functions for client dashboard (called from HTML)
+function showClientBookingModal() {
+  if (window.clientDashboard) {
+    window.clientDashboard.showBookingModal();
+  }
+}
+
+function closeClientBookingModal() {
+  if (window.clientDashboard) {
+    window.clientDashboard.closeBookingModal();
+  }
+}
+
+function showClientAddPetForm() {
+  if (window.clientDashboard) {
+    window.clientDashboard.showAddPetForm();
+  }
+}
+
+function hideClientAddPetForm() {
+  if (window.clientDashboard) {
+    window.clientDashboard.hideAddPetForm();
+  }
+}
+
+function addClientPet() {
+  if (window.clientDashboard) {
+    window.clientDashboard.addPet();
+  }
+}
+
+function refreshClientServices() {
+  if (window.clientDashboard) {
+    window.clientDashboard.refreshServices();
   }
 }
 

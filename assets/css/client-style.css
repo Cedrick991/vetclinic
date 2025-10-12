@@ -542,6 +542,66 @@
    display: block;
  }
 
+ /* Appointment Status Styles */
+ .status-locked {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+   color: white;
+   padding: 6px 12px;
+   border-radius: 20px;
+   font-size: 12px;
+   font-weight: 600;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   cursor: default;
+   user-select: none;
+   pointer-events: none;
+ }
+
+ .status-locked i {
+   color: #ffc107;
+   font-size: 11px;
+ }
+
+ .status-text {
+   color: #6c757d;
+   font-size: 12px;
+   font-style: italic;
+   padding: 6px 0;
+ }
+
+ /* Button locked state for cancelled appointments */
+ .btn-locked {
+   background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+   color: white !important;
+   cursor: not-allowed !important;
+   opacity: 0.7 !important;
+   position: relative !important;
+ }
+
+ .btn-locked:hover {
+   background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+   transform: none !important;
+   cursor: not-allowed !important;
+ }
+
+ .btn-locked i {
+   color: #ffc107 !important;
+ }
+
+ .btn-locked::after {
+   content: '🔒';
+   position: absolute;
+   top: 50%;
+   right: 8px;
+   transform: translateY(-50%);
+   font-size: 10px;
+   opacity: 0.8;
+ }
+
  .form-group input.error,
  .form-group select.error,
  .form-group textarea.error {

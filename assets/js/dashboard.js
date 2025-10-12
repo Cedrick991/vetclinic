@@ -280,6 +280,9 @@ class Dashboard {
     }
 
     setupEventListeners() {
+        // Mobile sidebar toggle
+        this.setupMobileSidebar();
+
         // Logout functionality
         const logoutBtn = document.querySelector('[data-action="logout"]');
         if (logoutBtn) {
@@ -345,6 +348,116 @@ class Dashboard {
 
         // Settings functionality
         this.setupSettingsEventListeners();
+
+        // Mobile sidebar functionality
+        this.setupMobileSidebar();
+    }
+
+    setupMobileSidebar() {
+        // Mobile menu toggle button
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => {
+                this.toggleSidebar();
+            });
+        }
+
+        // Mobile overlay click to close sidebar
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', () => {
+                this.closeSidebar();
+            });
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const mobileToggle = document.getElementById('mobileMenuToggle');
+                const mobileOverlay = document.getElementById('mobileOverlay');
+
+                if (sidebar && mobileOverlay && mobileToggle) {
+                    const isOpen = sidebar.classList.contains('mobile-open');
+                    const clickedOnToggle = mobileToggle.contains(e.target);
+                    const clickedOnSidebar = sidebar.contains(e.target);
+                    const clickedOnOverlay = mobileOverlay.contains(e.target);
+
+                    if (isOpen && !clickedOnToggle && !clickedOnSidebar && !clickedOnOverlay) {
+                        this.closeSidebar();
+                    }
+                }
+            }
+        });
+
+        // Handle escape key to close mobile sidebar
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('mobile-open')) {
+                    this.closeSidebar();
+                }
+            }
+        });
+    }
+
+    toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+
+        if (sidebar && overlay) {
+            const isOpen = sidebar.classList.contains('mobile-open');
+
+            if (isOpen) {
+                this.closeSidebar();
+            } else {
+                this.openSidebar();
+            }
+        }
+    }
+
+    openSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+
+        if (sidebar && overlay) {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+                toggleBtn.setAttribute('aria-expanded', 'true');
+            }
+
+            // Focus management for accessibility
+            const firstFocusableElement = sidebar.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusableElement) {
+                firstFocusableElement.focus();
+            }
+        }
+    }
+
+    closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+
+        if (sidebar && overlay) {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            // Return focus to toggle button for accessibility
+            if (toggleBtn) {
+                toggleBtn.focus();
+            }
+        }
     }
 
     setupSettingsEventListeners() {
@@ -565,10 +678,15 @@ class Dashboard {
                 body: JSON.stringify({ action: 'get_services' })
             });
             const servicesResult = await servicesResponse.json();
-            this.services = servicesResult.success ? servicesResult.data.map(service => ({
+
+            // Filter to show only active services (same logic as staff dashboard)
+            const activeServices = servicesResult.success ?
+                servicesResult.data.filter(service => service.is_active === 1 || service.is_active === "1") : [];
+
+            this.services = activeServices.map(service => ({
                 service_id: service.id,
                 service_name: service.name
-            })) : [];
+            }));
 
             // Load user's pets
             const petsResponse = await fetch('../api/vet_api.php', {
@@ -975,6 +1093,13 @@ class Dashboard {
 
     async handleAddPet(form) {
         try {
+            // Prevent multiple submissions
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Pet...';
+            }
+
             const formData = new FormData(form);
             const petData = {
                 action: 'add_pet',
@@ -997,14 +1122,32 @@ class Dashboard {
 
             if (result.success) {
                 this.showToast('Pet added successfully!', 'success');
+
+                // Trigger notification for pet registration
+                this.triggerNotification('pet_registration', {
+                    pet_name: petData.pet_name,
+                    species: petData.species
+                });
+
                 form.closest('.modal').remove();
-                this.loadDashboardData(); // Refresh dashboard
+
+                // Reload pets section after a short delay to ensure database is updated
+                setTimeout(() => {
+                    this.loadPetsSection();
+                    this.loadDashboardData(); // Refresh dashboard data
+                }, 500);
             } else {
                 this.showToast(result.message || 'Failed to add pet', 'error');
             }
         } catch (error) {
             console.error('Error adding pet:', error);
             this.showToast('Failed to add pet. Please try again.', 'error');
+        } finally {
+            // Re-enable submit button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Add Pet';
+            }
         }
     }
 
@@ -1260,10 +1403,21 @@ class Dashboard {
                 const appointment = result.data.find(apt => apt.id == appointmentId);
 
                 if (appointment) {
-                    // Create a modal to show the pet report
-                    const modal = this.createPetReportModal(appointment);
-                    document.body.appendChild(modal);
-                    modal.style.display = 'block';
+                    // Get the pet ID from the appointment
+                    const petId = appointment.pet_id;
+
+                    // Now call the pet reports API to get comprehensive pet data
+                    const reportResponse = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${petId}`);
+                    const reportResult = await reportResponse.json();
+
+                    if (reportResult.success && reportResult.data) {
+                        // Create a modal to show the comprehensive pet report
+                        const modal = this.createComprehensivePetReportModal(appointment, reportResult.data);
+                        document.body.appendChild(modal);
+                        modal.style.display = 'block';
+                    } else {
+                        this.showToast('Failed to load pet report data', 'error');
+                    }
                 } else {
                     this.showToast('Appointment not found', 'error');
                 }
@@ -1276,19 +1430,111 @@ class Dashboard {
         }
     }
 
-    createPetReportModal(appointment) {
+    createComprehensivePetReportModal(appointment, reportData) {
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.innerHTML = `
             <div class="modal-content pet-report-modal">
                 <div class="modal-header">
-                    <h3>Pet Report - ${appointment.pet_name}</h3>
+                    <h3><i class="fas fa-file-medical"></i> Pet Medical Report - ${reportData.pet.name}</h3>
                     <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
                 </div>
                 <div class="modal-body">
                     <div class="report-content">
+                        <!-- Pet Information Section -->
                         <div class="report-section">
-                            <h4>Appointment Details</h4>
+                            <h4><i class="fas fa-paw"></i> Pet Information</h4>
+                            <div class="report-grid">
+                                <div class="report-item">
+                                    <label>Name:</label>
+                                    <span>${reportData.pet.name}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Species:</label>
+                                    <span>${reportData.pet.species}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Breed:</label>
+                                    <span>${reportData.pet.breed || 'Not specified'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Age:</label>
+                                    <span>${reportData.pet.age || 'Not recorded'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Gender:</label>
+                                    <span>${reportData.pet.gender || 'Not specified'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Weight:</label>
+                                    <span>${reportData.pet.weight || 'Not recorded'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Color:</label>
+                                    <span>${reportData.pet.color || 'Not specified'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Registration Date:</label>
+                                    <span>${new Date(reportData.pet.registration_date).toLocaleDateString()}</span>
+                                </div>
+                                ${reportData.pet.notes ? `
+                                <div class="report-item full-width">
+                                    <label>Notes:</label>
+                                    <span>${reportData.pet.notes}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Owner Information Section -->
+                        <div class="report-section">
+                            <h4><i class="fas fa-user"></i> Owner Information</h4>
+                            <div class="report-grid">
+                                <div class="report-item">
+                                    <label>Name:</label>
+                                    <span>${reportData.owner.name}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Email:</label>
+                                    <span>${reportData.owner.email}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Phone:</label>
+                                    <span>${reportData.owner.phone || 'Not provided'}</span>
+                                </div>
+                                <div class="report-item">
+                                    <label>Address:</label>
+                                    <span>${reportData.owner.address || 'Not provided'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Section -->
+                        <div class="report-section">
+                            <h4><i class="fas fa-chart-bar"></i> Pet Statistics</h4>
+                            <div class="statistics-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">${reportData.statistics.total_appointments}</div>
+                                    <div class="stat-label">Total Appointments</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${reportData.statistics.total_vaccinations}</div>
+                                    <div class="stat-label">Vaccinations</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${reportData.statistics.total_medical_records}</div>
+                                    <div class="stat-label">Medical Records</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${reportData.statistics.last_visit ? new Date(reportData.statistics.last_visit).toLocaleDateString() : 'None'}</div>
+                                    <div class="stat-label">Last Visit</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Appointment Details -->
+                        <div class="report-section">
+                            <h4><i class="fas fa-calendar-check"></i> Current Appointment</h4>
                             <div class="report-grid">
                                 <div class="report-item">
                                     <label>Date:</label>
@@ -1306,53 +1552,96 @@ class Dashboard {
                                     <label>Status:</label>
                                     <span class="status-badge status-completed">${appointment.status}</span>
                                 </div>
+                                ${appointment.notes ? `
+                                <div class="report-item full-width">
+                                    <label>Notes:</label>
+                                    <span>${appointment.notes}</span>
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
 
+                        <!-- Appointment History -->
+                        ${reportData.appointments && reportData.appointments.length > 0 ? `
                         <div class="report-section">
-                            <h4>Pet Information</h4>
-                            <div class="report-grid">
-                                <div class="report-item">
-                                    <label>Pet Name:</label>
-                                    <span>${appointment.pet_name}</span>
-                                </div>
-                                <div class="report-item">
-                                    <label>Species:</label>
-                                    <span>${appointment.species}</span>
-                                </div>
-                                <div class="report-item">
-                                    <label>Breed:</label>
-                                    <span>${appointment.breed || 'Not specified'}</span>
-                                </div>
-                                <div class="report-item">
-                                    <label>Gender:</label>
-                                    <span>${appointment.gender || 'Not specified'}</span>
-                                </div>
+                            <h4><i class="fas fa-history"></i> Appointment History</h4>
+                            <div class="appointments-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Service</th>
+                                            <th>Staff</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${reportData.appointments.slice(0, 10).map(apt => `
+                                        <tr>
+                                            <td>${new Date(apt.appointment_date).toLocaleDateString()}</td>
+                                            <td>${apt.service_name}</td>
+                                            <td>${apt.staff_first_name ? `${apt.staff_first_name} ${apt.staff_last_name || ''}` : 'Not assigned'}</td>
+                                            <td><span class="status-badge status-${apt.status}">${apt.status}</span></td>
+                                        </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                ${reportData.appointments.length > 10 ? `<p><em>Showing latest 10 appointments</em></p>` : ''}
                             </div>
                         </div>
+                        ` : ''}
 
+                        <!-- Medical History -->
+                        ${reportData.medical_history && reportData.medical_history.length > 0 ? `
                         <div class="report-section">
-                            <h4>Visit Summary</h4>
-                            <div class="report-notes">
-                                <p><strong>Service Provided:</strong> ${appointment.service_name}</p>
-                                <p><strong>Date of Visit:</strong> ${new Date(appointment.appointment_date).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}</p>
-                                <p><strong>Time:</strong> ${appointment.appointment_time}</p>
-                                ${appointment.notes ? `<p><strong>Notes:</strong> ${appointment.notes}</p>` : '<p><em>No additional notes for this visit.</em></p>'}
+                            <h4><i class="fas fa-stethoscope"></i> Medical History</h4>
+                            <div class="medical-records">
+                                ${reportData.medical_history.slice(0, 5).map(record => `
+                                <div class="medical-record">
+                                    <div class="record-header">
+                                        <span class="record-date">${new Date(record.appointment_date).toLocaleDateString()}</span>
+                                        <span class="record-service">${record.service_name}</span>
+                                    </div>
+                                    <div class="record-details">
+                                        <p><strong>Staff:</strong> ${record.staff_first_name} ${record.staff_last_name || ''}</p>
+                                        <p><strong>Diagnosis:</strong> ${record.diagnosis || 'Not recorded'}</p>
+                                        <p><strong>Treatment:</strong> ${record.treatment || 'Not recorded'}</p>
+                                        ${record.medications ? `<p><strong>Medications:</strong> ${record.medications}</p>` : ''}
+                                        ${record.notes ? `<p><strong>Notes:</strong> ${record.notes}</p>` : ''}
+                                    </div>
+                                </div>
+                                `).join('')}
+                                ${reportData.medical_history.length > 5 ? `<p><em>Showing latest 5 medical records</em></p>` : ''}
                             </div>
                         </div>
+                        ` : ''}
 
+                        <!-- Vaccination Records -->
+                        ${reportData.vaccinations && reportData.vaccinations.length > 0 ? `
                         <div class="report-section">
-                            <h4>Report Status</h4>
-                            <div class="report-status">
-                                <div class="status-indicator completed">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Visit Completed Successfully</span>
+                            <h4><i class="fas fa-syringe"></i> Vaccination Records</h4>
+                            <div class="vaccination-records">
+                                ${reportData.vaccinations.slice(0, 5).map(vac => `
+                                <div class="vaccination-record">
+                                    <div class="vac-date">${new Date(vac.appointment_date).toLocaleDateString()}</div>
+                                    <div class="vac-details">
+                                        <strong>${vac.service_name}</strong>
+                                        ${vac.notes ? `<br><span>${vac.notes}</span>` : ''}
+                                    </div>
                                 </div>
+                                `).join('')}
+                                ${reportData.vaccinations.length > 5 ? `<p><em>Showing latest 5 vaccination records</em></p>` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Report Footer -->
+                        <div class="report-section">
+                            <h4><i class="fas fa-info-circle"></i> Report Information</h4>
+                            <div class="report-info">
+                                <p><strong>Generated:</strong> ${new Date(reportData.generated_at).toLocaleString()}</p>
+                                <p><strong>Clinic:</strong> ${reportData.clinic_info.name}</p>
+                                <p><strong>Contact:</strong> ${reportData.clinic_info.phone} | ${reportData.clinic_info.email}</p>
                             </div>
                         </div>
                     </div>
@@ -1427,49 +1716,66 @@ class Dashboard {
 
     getEditPetForm(pet) {
         return `
-            <form id="editPetForm" class="pet-form">
-                <div class="form-row">
+            <form id="editPetForm" class="pet-form" data-pet-id="${pet.id}">
+                <!-- Pet Name and Species Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group">
-                        <label for="editPetName">Pet Name *</label>
-                        <input type="text" id="editPetName" name="pet_name" value="${pet.name}" required>
+                        <label for="petName" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Pet Name *</label>
+                        <input type="text" id="petName" name="pet_name" value="${pet.name}" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter pet name">
                     </div>
                     <div class="form-group">
-                        <label for="editPetSpecies">Species *</label>
-                        <select id="editPetSpecies" name="species" required>
+                        <label for="petSpecies" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Species *</label>
+                        <select id="petSpecies" name="species" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
                             <option value="">Select Species</option>
-                            <option value="Dog" ${pet.species === 'Dog' ? 'selected' : ''}>Dog</option>
-                            <option value="Cat" ${pet.species === 'Cat' ? 'selected' : ''}>Cat</option>
-                            <option value="Bird" ${pet.species === 'Bird' ? 'selected' : ''}>Bird</option>
-                            <option value="Rabbit" ${pet.species === 'Rabbit' ? 'selected' : ''}>Rabbit</option>
-                            <option value="Other" ${pet.species === 'Other' ? 'selected' : ''}>Other</option>
+                            <option value="Dog" ${pet.species === 'Dog' ? 'selected' : ''}>🐶 Dog</option>
+                            <option value="Cat" ${pet.species === 'Cat' ? 'selected' : ''}>🐱 Cat</option>
+                            <option value="Bird" ${pet.species === 'Bird' ? 'selected' : ''}>🐦 Bird</option>
+                            <option value="Rabbit" ${pet.species === 'Rabbit' ? 'selected' : ''}>🐰 Rabbit</option>
+                            <option value="Other" ${pet.species === 'Other' ? 'selected' : ''}>🐾 Other</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
+
+                <!-- Breed and Birthdate Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group">
-                        <label for="editPetBreed">Breed</label>
-                        <input type="text" id="editPetBreed" name="breed" value="${pet.breed || ''}">
+                        <label for="petBreed" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Breed</label>
+                        <input type="text" id="petBreed" name="breed" value="${pet.breed || ''}" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter breed (optional)">
                     </div>
                     <div class="form-group">
-                        <label for="editPetBirthdate">Birthdate</label>
-                        <input type="date" id="editPetBirthdate" name="birthdate" value="${pet.birthdate || ''}" max="${new Date().toISOString().split('T')[0]}">
+                        <label for="petBirthdate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Birthdate</label>
+                        <input type="date" id="petBirthdate" name="birthdate" value="${pet.birthdate || ''}" max="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="editPetGender">Gender *</label>
-                    <select id="editPetGender" name="gender" required>
-                        <option value="">Select Gender</option>
-                        <option value="Male" ${pet.gender === 'Male' ? 'selected' : ''}>Male</option>
-                        <option value="Female" ${pet.gender === 'Female' ? 'selected' : ''}>Female</option>
-                    </select>
+
+                <!-- Gender and Weight Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div class="form-group">
+                        <label for="petGender" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Gender *</label>
+                        <select id="petGender" name="gender" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                            <option value="">Select Gender</option>
+                            <option value="Male" ${pet.gender === 'Male' ? 'selected' : ''}>♂️ Male</option>
+                            <option value="Female" ${pet.gender === 'Female' ? 'selected' : ''}>♀️ Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="petWeight" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Weight (kg)</label>
+                        <input type="number" id="petWeight" name="weight" value="${pet.weight || ''}" step="0.1" min="0" placeholder="e.g., 5.5" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="editPetColor">Color</label>
-                    <input type="text" id="editPetColor" name="color" value="${pet.color || ''}">
+
+                <!-- Color -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="petColor" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Color</label>
+                    <input type="text" id="petColor" name="color" value="${pet.color || ''}" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter color (optional)">
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                    <button type="submit" class="btn-primary">Update Pet</button>
+
+                <!-- Form Actions -->
+                <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                    <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">CANCEL</button>
+                    <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+                        <i class="fas fa-save" style="margin-right: 8px;"></i> UPDATE PET
+                    </button>
                 </div>
             </form>
         `;
@@ -1477,6 +1783,13 @@ class Dashboard {
 
     async handleEditPet(form) {
         try {
+            // Prevent multiple submissions
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Pet...';
+            }
+
             const formData = new FormData(form);
             const petData = {
                 action: 'update_pet',
@@ -1486,8 +1799,11 @@ class Dashboard {
                 breed: formData.get('breed'),
                 birthdate: formData.get('birthdate'),
                 gender: formData.get('gender'),
+                weight: formData.get('weight'),
                 color: formData.get('color')
             };
+
+            console.log('🔄 Updating pet with data:', petData);
 
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
@@ -1495,18 +1811,33 @@ class Dashboard {
                 body: JSON.stringify(petData)
             });
 
+            console.log('📡 Update response status:', response.status);
             const result = await response.json();
+            console.log('📊 Update response:', result);
 
             if (result.success) {
+                console.log('✅ Pet updated successfully');
                 this.showToast('Pet updated successfully!', 'success');
                 form.closest('.modal').remove();
-                this.loadDashboardData(); // Refresh dashboard
+
+                // Reload pets section after a short delay
+                setTimeout(() => {
+                    this.loadPetsSection();
+                    this.loadDashboardData(); // Refresh dashboard data
+                }, 500);
             } else {
+                console.error('❌ Update failed:', result.message);
                 this.showToast(result.message || 'Failed to update pet', 'error');
             }
         } catch (error) {
             console.error('Error updating pet:', error);
             this.showToast('Failed to update pet. Please try again.', 'error');
+        } finally {
+            // Re-enable submit button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> UPDATE PET';
+            }
         }
     }
 
@@ -1531,7 +1862,12 @@ class Dashboard {
 
             if (result.success) {
                 this.showToast('Pet deleted successfully!', 'success');
-                this.loadDashboardData(); // Refresh dashboard
+
+                // Reload pets section after a short delay
+                setTimeout(() => {
+                    this.loadPetsSection();
+                    this.loadDashboardData(); // Refresh dashboard data
+                }, 500);
             } else {
                 this.showToast(result.message || 'Failed to delete pet', 'error');
             }
@@ -1539,6 +1875,24 @@ class Dashboard {
             console.error('Error deleting pet:', error);
             this.showToast('Failed to delete pet. Please try again.', 'error');
         }
+    }
+
+    getSpeciesIcon(species) {
+        // Map species to FontAwesome icon classes
+        const iconMap = {
+            'Dog': 'fas fa-dog',
+            'Cat': 'fas fa-cat',
+            'Bird': 'fas fa-dove',
+            'Rabbit': 'fas fa-rabbit',
+            'Other': 'fas fa-paw',
+            'dog': 'fas fa-dog',
+            'cat': 'fas fa-cat',
+            'bird': 'fas fa-dove',
+            'rabbit': 'fas fa-rabbit',
+            'other': 'fas fa-paw'
+        };
+
+        return iconMap[species] || 'fas fa-paw'; // Default to paw icon if species not found
     }
 
     async loadPetsSection() {
@@ -1552,21 +1906,52 @@ class Dashboard {
             const result = await response.json();
             const petsGrid = document.getElementById('petsGrid');
 
+            if (!petsGrid) {
+                console.error('Pets grid element not found');
+                return;
+            }
+
             if (result.success && result.data && result.data.length > 0) {
-                petsGrid.innerHTML = result.data.map(pet => `
-                    <div class="dashboard-card pet-card" data-pet-id="${pet.id}">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-paw"></i> ${pet.name}
-                            </div>
+                // Clear existing content
+                petsGrid.innerHTML = '';
+
+                // Create a document fragment for better performance
+                const fragment = document.createDocumentFragment();
+
+                result.data.forEach(pet => {
+                    const petCard = document.createElement('div');
+                    petCard.className = 'pet-card';
+                    petCard.setAttribute('data-pet-id', pet.id);
+
+                    // Get species icon for the minimal design
+                    const speciesIcon = this.getSpeciesIcon(pet.species);
+
+                    // Format birthdate for display
+                    let birthdateDisplay = 'Not recorded';
+                    if (pet.birthdate) {
+                        const birthDate = new Date(pet.birthdate);
+                        birthdateDisplay = birthDate.toLocaleDateString();
+                    }
+
+                    // Format weight for display - handle both numeric and string values
+                    let weightDisplay = 'Not recorded';
+                    if (pet.weight !== null && pet.weight !== undefined && pet.weight !== '') {
+                        const weightValue = parseFloat(pet.weight);
+                        if (!isNaN(weightValue) && weightValue > 0) {
+                            weightDisplay = `${weightValue} kg`;
+                        }
+                    }
+
+                    petCard.innerHTML = `
+                        <div class="pet-icon">
+                            <i class="${speciesIcon}"></i>
                         </div>
-                        <div class="pet-info">
-                            <p><strong>Species:</strong> ${pet.species}</p>
-                            <p><strong>Breed:</strong> ${pet.breed || 'Not specified'}</p>
-                            <p><strong>Birthdate:</strong> ${pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not specified'}</p>
-                            <p><strong>Gender:</strong> ${pet.gender}</p>
-                            ${pet.weight ? `<p><strong>Weight:</strong> ${pet.weight} kg</p>` : ''}
-                        </div>
+                        <h3 class="pet-name">${pet.name}</h3>
+                        <p><strong>Species:</strong> ${pet.species}</p>
+                        <p><strong>Breed:</strong> ${pet.breed || 'Not specified'}</p>
+                        <p><strong>Birthdate:</strong> ${birthdateDisplay}</p>
+                        <p><strong>Gender:</strong> ${pet.gender || 'Not specified'}</p>
+                        <p><strong>Weight:</strong> ${weightDisplay}</p>
                         <div class="pet-actions">
                             <button class="action-btn edit" onclick="editPet(${pet.id})" title="Edit Pet">
                                 <i class="fas fa-edit"></i> Edit
@@ -1575,26 +1960,33 @@ class Dashboard {
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+
+                    fragment.appendChild(petCard);
+                });
+
+                // Append all cards at once
+                petsGrid.appendChild(fragment);
             } else {
                 petsGrid.innerHTML = `
                     <div class="empty-state full-width">
                         <i class="fas fa-paw"></i>
-                        <h3>No Pets Registered</h3>
-                        <p>You haven't added any pets yet. Add your first pet to start booking appointments!</p>
+                        <h3>No Pets Found</h3>
+                        <p>You haven't registered any pets yet. Add your first pet to get started!</p>
                     </div>
                 `;
             }
         } catch (error) {
             console.error('Failed to load pets:', error);
             const petsGrid = document.getElementById('petsGrid');
-            petsGrid.innerHTML = `
-                <div class="error-state full-width">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Failed to load pets</p>
-                </div>
-            `;
+            if (petsGrid) {
+                petsGrid.innerHTML = `
+                    <div class="error-state full-width">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load pets</p>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -1655,7 +2047,7 @@ class Dashboard {
             } else {
                 appointmentsTableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state-table">
+                        <td colspan="7" class="empty-state-table">
                             <div class="empty-state">
                                 <i class="fas fa-calendar-times"></i>
                                 <h3>No Appointments</h3>
@@ -1670,7 +2062,7 @@ class Dashboard {
             const appointmentsTableBody = document.getElementById('appointmentsTableBody');
             appointmentsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="error-state-table">
+                    <td colspan="7" class="error-state-table">
                         <div class="error-state">
                             <i class="fas fa-exclamation-triangle"></i>
                             <p>Failed to load appointments</p>
@@ -2408,12 +2800,97 @@ class Dashboard {
 
         return isValid;
     }
+
+    // ====================
+    // NOTIFICATION METHODS
+    // ====================
+
+    async triggerNotification(type, data = null, priority = 'normal') {
+        if (!this.userData) return;
+
+        try {
+            // Create notification for current user
+            const notificationData = {
+                action: 'create_notification',
+                user_id: this.userData.user.id,
+                type: type,
+                title: this.getNotificationTitle(type, data),
+                message: this.getNotificationMessage(type, data),
+                priority: priority,
+                data: data
+            };
+
+            // Send notification to API (for staff notifications or system notifications)
+            if (this.userType === 'staff') {
+                await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_notification',
+                        user_id: this.userData.user.id,
+                        type: type,
+                        title: notificationData.title,
+                        message: notificationData.message,
+                        priority: priority,
+                        data: data
+                    })
+                });
+            }
+        } catch (error) {
+            console.error('Failed to trigger notification:', error);
+        }
+    }
+
+    getNotificationTitle(type, data = null) {
+        const titles = {
+            'appointment_new': 'New Appointment Booked',
+            'appointment_status_change': 'Appointment Status Updated',
+            'appointment_reminder': 'Appointment Reminder',
+            'pet_registration': 'New Pet Registered',
+            'medical_history_update': 'Medical History Updated',
+            'order_new': 'New Order Placed',
+            'order_status_change': 'Order Status Updated',
+            'product_stock_alert': 'Low Stock Alert',
+            'system_announcement': 'System Announcement'
+        };
+
+        return titles[type] || 'Notification';
+    }
+
+    getNotificationMessage(type, data = null) {
+        const messages = {
+            'appointment_new': `A new appointment has been scheduled for ${data?.service_name || 'a service'}.`,
+            'appointment_status_change': `Your appointment status has been updated to: ${data?.new_status || 'Updated'}.`,
+            'appointment_reminder': `You have an upcoming appointment tomorrow at ${data?.appointment_time || 'scheduled time'}.`,
+            'pet_registration': `New pet "${data?.pet_name}" (${data?.species}) has been registered.`,
+            'medical_history_update': `Medical history has been updated for ${data?.pet_name || 'your pet'}.`,
+            'order_new': `New order placed for ${data?.item_count || 0} items totaling ₱${data?.total_amount || '0.00'}.`,
+            'order_status_change': `Your order status has been updated to: ${data?.new_status || 'Updated'}.`,
+            'product_stock_alert': `Product "${data?.product_name}" is running low on stock (${data?.stock_count} remaining).`,
+            'system_announcement': data?.message || 'New system announcement available.'
+        };
+
+        return messages[type] || 'You have a new notification.';
+    }
 }
 
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Dashboard initialization started');
     window.dashboardInstance = new Dashboard();
+
+    // Load notification system
+    console.log('📱 Loading notification system...');
+    const notificationScript = document.createElement('script');
+    notificationScript.src = '../assets/js/modules/notifications.js';
+    notificationScript.onload = () => {
+        console.log('✅ Notification system loaded successfully');
+    };
+    notificationScript.onerror = () => {
+        console.error('❌ Failed to load notification system');
+    };
+    document.head.appendChild(notificationScript);
 });
 
 // Global function to handle edit appointment button clicks

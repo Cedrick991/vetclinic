@@ -11,6 +11,205 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="description" content="Staff Dashboard - Tattao Veterinary Clinic Management System">
+  <style>
+    /* Styling for cancelled appointments */
+    .status-select[disabled] {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+      cursor: not-allowed !important;
+      opacity: 0.7 !important;
+    }
+
+    .status-select[disabled] option {
+      background-color: #f8f9fa !important;
+      color: #6c757d !important;
+    }
+
+    .btn-primary[disabled] {
+      background-color: #6c757d !important;
+      cursor: not-allowed !important;
+      opacity: 0.7 !important;
+    }
+
+    .btn-primary[disabled]:hover {
+      background-color: #6c757d !important;
+      transform: none !important;
+    }
+
+    /* Visual indicator for cancelled appointment rows */
+    tr:has(.status-select[disabled]) {
+      background-color: rgba(220, 53, 69, 0.05) !important;
+      opacity: 0.8;
+    }
+
+    /* Status badge styling for cancelled */
+    .status-cancelled {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+      color: white !important;
+      padding: 6px 12px !important;
+      border-radius: 20px !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    /* Empty message styling for pets grid */
+    .empty-message {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      padding: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+
+    .empty-message i {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 8px;
+      opacity: 0.6;
+    }
+
+    .empty-message p {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    /* Clean Blue Pet Card Styling */
+    .pets-grid .pet-card,
+    #petsGrid .pet-card {
+       background: linear-gradient(145deg, #2E5BAA, #1E3F7A) !important;
+       border-radius: 16px !important;
+       padding: 20px !important;
+       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25) !important;
+       color: #fff !important;
+       text-align: left !important;
+       width: 260px !important;
+       transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+       position: relative !important;
+       display: flex !important;
+       flex-direction: column !important;
+       gap: 12px !important;
+     }
+
+     .pets-grid .pet-card:hover,
+     #petsGrid .pet-card:hover {
+       transform: translateY(-4px) !important;
+       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+     }
+
+     /* Allow pet action buttons to be visible */
+     .pet-card .pet-actions button {
+       display: inline-flex !important;
+     }
+
+     .pet-icon {
+       background: rgba(255, 255, 255, 0.08) !important;
+       width: 60px !important;
+       height: 60px !important;
+       border-radius: 50% !important;
+       display: flex !important;
+       align-items: center !important;
+       justify-content: center !important;
+       margin-bottom: 10px !important;
+     }
+
+     .pet-icon i {
+       color: #9BA9FF !important;
+       font-size: 1.6rem !important;
+     }
+
+     .pet-name {
+       color: #B3B8FF !important;
+       font-weight: 600 !important;
+       font-size: 1.2rem !important;
+       margin-bottom: 10px !important;
+       margin-top: 0 !important;
+     }
+
+     .pet-card p {
+       margin: 6px 0 !important;
+       font-size: 0.95rem !important;
+       color: rgba(255, 255, 255, 0.85) !important;
+       line-height: 1.4 !important;
+     }
+
+     .pet-card strong {
+       color: #f0f0f0 !important;
+     }
+
+     /* Pet actions removed - clean minimal design */
+
+     /* Pets Grid Layout */
+     #petsGrid {
+       display: grid !important;
+       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+       gap: 20px !important;
+       margin-top: 20px !important;
+     }
+
+     /* Responsive design for pet cards */
+     @media (max-width: 768px) {
+       .pets-grid .pet-card,
+       #petsGrid .pet-card {
+         width: 100% !important;
+         max-width: 320px !important;
+         margin: 0 auto 16px auto !important;
+       }
+
+       #petsGrid {
+         grid-template-columns: 1fr !important;
+         gap: 16px !important;
+       }
+     }
+
+     /* Dashboard responsive design */
+     @media (max-width: 768px) {
+       .dashboard-grid {
+         grid-template-columns: 1fr 1fr !important;
+         gap: 16px !important;
+       }
+     }
+
+     @media (max-width: 480px) {
+       .dashboard-grid {
+         grid-template-columns: 1fr !important;
+       }
+     }
+
+     /* Cancellation request styling */
+     tr.cancellation-request {
+       background-color: rgba(220, 53, 69, 0.05) !important;
+       border-left: 4px solid #dc3545 !important;
+     }
+
+     .cancellation-indicator {
+       background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+       color: white;
+       padding: 2px 8px;
+       border-radius: 12px;
+       font-size: 10px;
+       font-weight: 600;
+       text-transform: uppercase;
+       display: inline-flex;
+       align-items: center;
+       gap: 4px;
+       margin-top: 4px;
+     }
+
+     .btn-warning {
+       background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+       color: white !important;
+     }
+
+     .btn-warning:hover {
+       background: linear-gradient(135deg, #e0a800 0%, #d7690a 100%) !important;
+     }
+  </style>
 </head>
 <body>
 
@@ -72,7 +271,7 @@
 
       <!-- Header Bar -->
       <header class="header-bar">
-        <div class="header-content" style="display: flex; justify-content: flex-start; align-items: center; width: 100%;">
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
 
           <!-- Left Group with Title, Search, and Back Button -->
           <div class="left-group" style="display: flex; align-items: center; gap: 20px;">
@@ -143,7 +342,7 @@
              <div class="card-title" style="color: white;">
                <i class="fas fa-dollar-sign" style="color: white;"></i> Monthly Revenue
              </div>
-             <div class="card-value" style="color: #ffffff;">₱0.00</div>
+             <div class="card-value" style="color: #ffffff;">-</div>
              <div class="card-subtitle" style="color: rgba(255, 255, 255, 0.8);">Current month</div>
            </div>
 
@@ -166,12 +365,13 @@
                  <th>Client</th>
                  <th>Pet</th>
                  <th>Service</th>
+                 <th>Duration</th>
                  <th>Status</th>
                </tr>
              </thead>
              <tbody id="appointmentsTableBody">
                <tr>
-                 <td colspan="6" class="loading">
+                 <td colspan="7" class="loading">
                    <div class="spinner"></div>
                    Loading appointments...
                  </td>
@@ -197,52 +397,25 @@
        </section>
 
        <!-- Pets Section -->
-       <section id="petsSection" class="content-section" style="display: none; padding: 16px 20px;">
+       <section id="petsSection" class="content-section" style="display: none;">
          <div class="section-header">
            <h2 class="section-title">
              <i class="fas fa-paw"></i> Pets Management
            </h2>
-           <button class="header-btn" onclick="showAddPetModal()">
-             <i class="fas fa-plus"></i> Add Pet
-           </button>
          </div>
 
          <!-- Pets Grid -->
-         <div class="pets-grid" id="petsGrid">
-           <div class="pet-card">
-             <div class="pet-header">
-               <div class="pet-avatar">
-                 <i class="fas fa-cat"></i>
-               </div>
-               <h3 class="pet-name">hakdog</h3>
-               <p class="pet-breed">husky</p>
-             </div>
-             <div class="pet-details">
-               <div class="pet-info-row">
-                 <span class="info-label">Species:</span>
-                 <span class="info-value">Cat</span>
-               </div>
-               <div class="pet-info-row">
-                 <span class="info-label">Breed:</span>
-                 <span class="info-value">husky</span>
-               </div>
-               <div class="pet-info-row">
-                 <span class="info-label">Birthdate:</span>
-                 <span class="info-value">3/10/2022</span>
-               </div>
-               <div class="pet-info-row">
-                 <span class="info-label">Gender:</span>
-                 <span class="info-value">Male</span>
-               </div>
-             </div>
-             <div class="pet-actions">
-               <button class="edit-btn" onclick="editPet('1')">
-                 <i class="fas fa-edit"></i> Edit
-               </button>
-               <button class="delete-btn" onclick="deletePet('1')">
-                 <i class="fas fa-trash"></i> Delete
-               </button>
-             </div>
+         <div id="petsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 20px;">
+           <!-- Loading state initially -->
+           <div class="loading" id="petsLoadingState" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.7);">
+             <div class="spinner" style="display: inline-block; margin-right: 10px;"></div>
+             Loading pets...
+           </div>
+
+           <!-- Empty state message - hidden initially, shown inside petsGrid when no pets -->
+           <div class="empty-message" id="petsEmptyMessage" style="display: none; grid-column: 1 / -1; text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; padding: 40px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
+             <i class="fas fa-box-open" style="font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.6;"></i>
+             <p style="margin: 0;">No pets available yet.</p>
            </div>
          </div>
        </section>
@@ -283,36 +456,43 @@
        <section id="reportsSection" class="content-section" style="display: none;">
            <div class="section-header">
              <h2 class="section-title">
-               <i class="fas fa-chart-bar"></i> Reports & Analytics
+               <i class="fas fa-file-pdf"></i> Pet Reports
              </h2>
-             <button class="header-btn" onclick="showPetReportModal()">
-               <i class="fas fa-plus"></i> Generate Pet Report
-             </button>
            </div>
 
-           <!-- Reports Overview -->
-           <div class="reports-overview">
-             <div class="reports-grid">
-               <div class="report-card" onclick="showPetReportModal()">
-                 <div class="report-icon">
-                   <i class="fas fa-file-pdf"></i>
-                 </div>
-                 <h3>Pet Medical Reports</h3>
-                 <p>Generate downloadable PDF medical reports for pets including appointment history, vaccination records, and health information.</p>
-                 <button class="action-btn view" onclick="showPetReportModal()">
-                   <i class="fas fa-print"></i> Print Report
-                 </button>
+           <!-- Pet Reports Interface -->
+           <div class="pet-reports-container" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+             <!-- Select Pet Section -->
+             <div class="pet-select-section" style="background: #08355f; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+               <div class="section-title" style="color: #ffffff; font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                 <i class="fas fa-paw" style="color: #ffffff;"></i>
+                 Select Pet for Report
                </div>
 
-               <div class="report-card" onclick="showAnalyticsModal()">
-                 <div class="report-icon">
-                   <i class="fas fa-chart-line"></i>
-                 </div>
-                 <h3>Analytics Dashboard</h3>
-                 <p>View clinic performance metrics, appointment trends, and revenue analytics.</p>
-                 <button class="btn-secondary">
-                   <i class="fas fa-chart-bar"></i> View Analytics
+               <div class="form-group" style="margin-bottom: 20px;">
+                 <label for="petSelect" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block;">Choose a Pet:</label>
+                 <select id="petSelect" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                   <option value="">Select a pet...</option>
+                 </select>
+               </div>
+
+               <div class="form-actions" style="text-align: right;">
+                 <button class="header-btn" onclick="generatePetReport()" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
+                   <i class="fas fa-file-pdf"></i> Generate Report
                  </button>
+               </div>
+             </div>
+
+             <!-- Report Preview Section -->
+             <div class="report-preview-section" style="background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+               <div class="section-title" style="color: #333; font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                 <i class="fas fa-eye" style="color: #667eea;"></i>
+                 Report Preview
+               </div>
+
+               <div id="reportPreview" class="report-preview-content" style="min-height: 200px; padding: 40px; text-align: center; color: #999; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                 <i class="fas fa-file-alt" style="font-size: 48px; color: #dee2e6; margin-bottom: 16px;"></i>
+                 <p style="margin: 0; font-size: 16px;">Select a pet and click "Generate Report" to preview the pet report here.</p>
                </div>
              </div>
            </div>
@@ -462,10 +642,6 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="productPrice">Price (₱) *</label>
-            <input type="number" id="productPrice" name="price" step="0.01" min="0" required>
-          </div>
-          <div class="form-group">
             <label for="productStock">Stock Quantity *</label>
             <input type="number" id="productStock" name="stock" min="0" value="0" required>
           </div>
@@ -527,10 +703,6 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="editProductPrice">Price (₱) *</label>
-            <input type="number" id="editProductPrice" name="price" step="0.01" min="0" required>
-          </div>
-          <div class="form-group">
             <label for="editProductStock">Stock Quantity *</label>
             <input type="number" id="editProductStock" name="stock" min="0" required>
           </div>
@@ -573,7 +745,7 @@
   <div id="petReportModal" class="modal" style="display: none;">
     <div class="modal-content pet-report-modal">
       <h2><i class="fas fa-file-medical"></i> Generate Pet Medical Report</h2>
-      <span class="close" onclick="closePetReportModal()">&times;</span>
+      <span class="close" onclick="staffDashboard.closeModal('petReportModal')">&times;</span>
 
       <div class="pet-report-content">
         <div class="pet-search-section">
@@ -604,7 +776,7 @@
         </div>
 
         <div class="report-actions">
-          <button type="button" class="btn-secondary" onclick="closePetReportModal()">
+          <button type="button" class="btn-secondary" onclick="staffDashboard.closeModal('petReportModal')">
             <i class="fas fa-times"></i> Cancel
           </button>
           <button type="button" class="action-btn view" onclick="downloadPDFReport()" id="downloadBtn" style="display: inline-flex;" title="Print Report">
@@ -635,7 +807,7 @@
   <div id="medicalHistoryModal" class="modal" style="display: none;">
     <div class="modal-content pet-report-modal">
       <h2><i class="fas fa-file-medical"></i> Add Medical History</h2>
-      <span class="close" onclick="closeMedicalHistoryModal()">&times;</span>
+      <span class="close" onclick="if(window.staffDashboard) window.staffDashboard.closeMedicalHistoryModal()">&times;</span>
 
       <div class="pet-report-content">
         <div class="appointment-info" id="medicalHistoryAppointmentInfo">
@@ -673,6 +845,13 @@
 
           <div class="form-row">
             <div class="form-group">
+              <label for="appointmentDuration">Appointment Duration (minutes) *</label>
+              <input type="number" id="appointmentDuration" name="appointment_duration" min="1" max="480" required placeholder="e.g., 30">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
               <label for="followUpDate">Follow-up Date</label>
               <input type="date" id="followUpDate" name="follow_up_date" min="${new Date().toISOString().split('T')[0]}">
             </div>
@@ -686,7 +865,7 @@
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" onclick="closeMedicalHistoryModal()">
+            <button type="button" class="btn-secondary" onclick="if(window.staffDashboard) window.staffDashboard.closeMedicalHistoryModal()">
               <i class="fas fa-times"></i> Cancel
             </button>
             <button type="submit" class="btn-primary">
@@ -705,6 +884,7 @@
 
   <!-- Include staff dashboard functionality -->
   <script src="../assets/js/staff-dashboard.js"></script>
+  <script src="../assets/js/modules/notifications.js"></script>
 
   <!-- Debug script to check if dashboard loads -->
   <script>
@@ -730,6 +910,257 @@
 
   <!-- Debug script to check if dashboard loads -->
   <script>
+    // Global variables for pet reports
+    let currentReportData = null;
+    let selectedPetId = null;
+
+    // Load pets for the dropdown when reports section is shown
+    async function loadPetsDropdown() {
+      try {
+        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=100');
+        const result = await response.json();
+
+        if (result.success) {
+          const petSelect = document.getElementById('petSelect');
+          petSelect.innerHTML = '<option value="">Select a pet...</option>';
+
+          result.data.forEach(pet => {
+            const option = document.createElement('option');
+            option.value = pet.id;
+            option.textContent = `${pet.name} (${pet.species}) - Owner: ${pet.first_name} ${pet.last_name}`;
+            petSelect.appendChild(option);
+          });
+        } else {
+          console.error('Failed to load pets:', result.message);
+        }
+      } catch (error) {
+        console.error('Error loading pets:', error);
+      }
+    }
+
+    // Generate pet report
+    async function generatePetReport() {
+      const petSelect = document.getElementById('petSelect');
+      const selectedPetId = petSelect.value;
+
+      if (!selectedPetId) {
+        toast('Please select a pet first', 'warning');
+        return;
+      }
+
+      try {
+        const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${selectedPetId}`);
+        const result = await response.json();
+
+        if (result.success) {
+          currentReportData = result.data;
+          displaySimpleReportPreview(result.data);
+          toast('Report generated successfully!', 'success');
+        } else {
+          toast('Error generating report: ' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('Error generating report:', error);
+        toast('Error generating report. Please try again.', 'error');
+      }
+    }
+
+    // Display simple report preview
+    function displaySimpleReportPreview(data) {
+      const reportPreview = document.getElementById('reportPreview');
+
+      if (!reportPreview) return;
+
+      const pet = data.pet;
+      const owner = data.owner;
+
+      reportPreview.innerHTML = `
+        <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-paw" style="color: #667eea;"></i>
+              Pet Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${pet.name}</div>
+              <div><strong>Species:</strong> ${pet.species}</div>
+              <div><strong>Breed:</strong> ${pet.breed || 'Not specified'}</div>
+              <div><strong>Gender:</strong> ${pet.gender || 'Not specified'}</div>
+              ${pet.weight ? `<div><strong>Weight:</strong> ${pet.weight} kg</div>` : ''}
+              ${pet.color ? `<div><strong>Color:</strong> ${pet.color}</div>` : ''}
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-user" style="color: #667eea;"></i>
+              Owner Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${owner.name}</div>
+              <div><strong>Email:</strong> ${owner.email}</div>
+              ${owner.phone ? `<div><strong>Phone:</strong> ${owner.phone}</div>` : ''}
+              ${owner.address ? `<div><strong>Address:</strong> ${owner.address}</div>` : ''}
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-chart-bar" style="color: #667eea;"></i>
+              Statistics
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Total Appointments:</strong> ${data.statistics.total_appointments}</div>
+              <div><strong>Total Vaccinations:</strong> ${data.statistics.total_vaccinations}</div>
+              <div><strong>Last Visit:</strong> ${data.statistics.last_visit ? new Date(data.statistics.last_visit).toLocaleDateString() : 'Never'}</div>
+              <div><strong>Report Generated:</strong> ${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 20px;">
+            <button onclick="downloadSimplePDFReport()" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+              <i class="fas fa-download"></i> Download PDF Report
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Download simple PDF report
+    async function downloadSimplePDFReport() {
+      if (!currentReportData) {
+        toast('No report data available', 'error');
+        return;
+      }
+
+      try {
+        // Load jsPDF library dynamically if not already loaded
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+          await loadJSPDFLibrary();
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        const pet = currentReportData.pet;
+        const owner = currentReportData.owner;
+
+        // Header
+        pdf.setFontSize(20);
+        pdf.text('Tattoo Veterinary Clinic', 105, 20, { align: 'center' });
+        pdf.setFontSize(16);
+        pdf.text('Pet Medical Report', 105, 30, { align: 'center' });
+
+        let yPosition = 50;
+
+        // Pet Information
+        pdf.setFontSize(14);
+        pdf.text('Pet Information', 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        const petInfo = [
+          ['Name:', pet.name],
+          ['Species:', pet.species],
+          ['Breed:', pet.breed || 'Not specified'],
+          ['Gender:', pet.gender || 'Not specified'],
+          ['Weight:', pet.weight ? `${pet.weight} kg` : 'Not recorded'],
+          ['Color:', pet.color || 'Not specified']
+        ];
+
+        petInfo.forEach(([label, value]) => {
+          pdf.text(`${label} ${value}`, 20, yPosition);
+          yPosition += 6;
+        });
+
+        // Owner Information
+        yPosition += 5;
+        pdf.setFontSize(14);
+        pdf.text('Owner Information', 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        const ownerInfo = [
+          ['Name:', owner.name],
+          ['Email:', owner.email],
+          ['Phone:', owner.phone || 'Not provided'],
+          ['Address:', owner.address || 'Not provided']
+        ];
+
+        ownerInfo.forEach(([label, value]) => {
+          pdf.text(`${label} ${value}`, 20, yPosition);
+          yPosition += 6;
+        });
+
+        // Statistics
+        yPosition += 5;
+        pdf.setFontSize(14);
+        pdf.text('Statistics', 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        const stats = [
+          ['Total Appointments:', currentReportData.statistics.total_appointments.toString()],
+          ['Total Vaccinations:', currentReportData.statistics.total_vaccinations.toString()],
+          ['Last Visit:', currentReportData.statistics.last_visit ? new Date(currentReportData.statistics.last_visit).toLocaleDateString() : 'Never']
+        ];
+
+        stats.forEach(([label, value]) => {
+          pdf.text(`${label} ${value}`, 20, yPosition);
+          yPosition += 6;
+        });
+
+        // Footer
+        pdf.setFontSize(8);
+        pdf.text(`Report generated: ${new Date().toLocaleString()}`, 20, 280);
+        pdf.text('This report contains confidential medical information.', 20, 285);
+
+        // Download
+        const filename = `pet_report_${pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
+
+        toast('PDF downloaded successfully!', 'success');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        toast('Error generating PDF. Please try again.', 'error');
+      }
+    }
+
+    // Global function for downloading PDF reports
+    async function downloadPDFReport() {
+      if (!currentReportData) {
+        toast('No report data available', 'error');
+        return;
+      }
+
+      // Show loading state
+      const downloadBtn = document.getElementById('downloadBtn');
+      const originalText = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+      downloadBtn.disabled = true;
+
+      try {
+        // Generate PDF using client-side jsPDF
+        await generateClientSidePDF(currentReportData);
+
+        toast('PDF downloaded successfully!', 'success');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+
+        // Fallback: try to generate a simple HTML report
+        if (error.message.includes('jsPDF')) {
+          toast('PDF library failed to load. Generating HTML report instead.', 'warning');
+          generateHTMLReport(currentReportData);
+        } else {
+          toast('Error generating PDF. Please try again.', 'error');
+        }
+      } finally {
+        // Reset button state
+        downloadBtn.innerHTML = originalText;
+        downloadBtn.disabled = false;
+      }
+    }
+
     console.log('Staff HTML loaded');
     console.log('Staff dashboard script loading...');
 
@@ -908,15 +1339,31 @@
             console.warn('⚠️ StaffDashboard or loadSettingsData not available');
           }
         }
+
+        // Load pets dropdown when reports section is shown
+        if (sectionName === 'reports') {
+          console.log('📋 Loading reports section...');
+          loadPetsDropdown();
+        }
  
      // Load pets when pets section is shown
      if (sectionName === 'pets') {
        console.log('🐾 Loading pets section...');
+       console.log('🐾 Pets section element:', document.getElementById('petsSection'));
+       console.log('🐾 Pets grid element:', document.getElementById('petsGrid'));
+       console.log('🐾 Empty state element:', document.getElementById('petsEmptyState'));
+
        // Call loadPetsSection function via staffDashboard instance
        if (window.staffDashboard && typeof window.staffDashboard.loadPetsSection === 'function') {
-         window.staffDashboard.loadPetsSection();
+         console.log('🐾 Calling loadPetsSection function...');
+         window.staffDashboard.loadPetsSection().then(() => {
+           console.log('🐾 loadPetsSection completed');
+         }).catch(error => {
+           console.error('🐾 loadPetsSection failed:', error);
+         });
        } else {
          console.warn('⚠️ StaffDashboard or loadPetsSection not available');
+         console.log('🐾 Available staffDashboard methods:', window.staffDashboard ? Object.getOwnPropertyNames(Object.getPrototypeOf(window.staffDashboard)).filter(name => typeof window.staffDashboard[name] === 'function') : 'No staffDashboard');
        }
      }
 
@@ -1229,87 +1676,7 @@
     }
 
 
-    async function loadPetsList() {
-      const petList = document.getElementById('petList');
-      if (!petList) return;
-
-      try {
-        petList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading pets...</div>';
-
-        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=100');
-        const result = await response.json();
-
-        if (result.success) {
-          displayPetsList(result.data);
-        } else {
-          petList.innerHTML = '<div class="loading">Error loading pets: ' + result.message + '</div>';
-        }
-      } catch (error) {
-        console.error('Error loading pets:', error);
-        petList.innerHTML = '<div class="loading">Error loading pets. Please try again.</div>';
-      }
-    }
-
-    function displayPetsList(pets) {
-      const petList = document.getElementById('petList');
-      if (!petList) return;
-
-      if (pets.length === 0) {
-        petList.innerHTML = '<div class="loading">No pets found.</div>';
-        return;
-      }
-
-      petList.innerHTML = '';
-
-      pets.forEach(pet => {
-        const petItem = document.createElement('div');
-        petItem.className = 'pet-item';
-        petItem.onclick = () => selectPet(pet.id);
-
-        const speciesIcon = getSpeciesIcon(pet.species);
-
-        petItem.innerHTML = `
-          <div class="pet-avatar">
-            <i class="${speciesIcon}"></i>
-          </div>
-          <div class="pet-info">
-            <h4>${pet.name}</h4>
-            <p>${pet.species} • ${pet.breed || 'Mixed'} • Owner: ${pet.first_name} ${pet.last_name}</p>
-          </div>
-        `;
-
-        petList.appendChild(petItem);
-      });
-    }
-
-    function getSpeciesIcon(species) {
-      const icons = {
-        'dog': 'fas fa-dog',
-        'cat': 'fas fa-cat',
-        'bird': 'fas fa-dove',
-        'rabbit': 'fas fa-paw',
-        'hamster': 'fas fa-paw',
-        'fish': 'fas fa-fish',
-        'reptile': 'fas fa-paw',
-        'other': 'fas fa-paw'
-      };
-      return icons[species.toLowerCase()] || 'fas fa-paw';
-    }
-
-    function selectPet(petId) {
-      selectedPetId = petId;
-
-      // Remove previous selection
-      document.querySelectorAll('.pet-item').forEach(item => {
-        item.classList.remove('selected');
-      });
-
-      // Add selection to clicked item
-      event.target.closest('.pet-item').classList.add('selected');
-
-      // Load and display report
-      loadPetReport(petId);
-    }
+    // Pet list functions are handled by staff-dashboard.js
 
     async function loadPetReport(petId) {
       try {
@@ -3079,76 +3446,9 @@ async function loadStaffDashboardData() {
     }
 
 
-    function showAddProductModal() {
-      if (typeof window.staffDashboard !== 'undefined' && typeof window.staffDashboard.showAddProductModal === 'function') {
-        window.staffDashboard.showAddProductModal();
-      } else {
-        toast('Add product feature coming soon!', 'info');
-      }
-    }
+    // Modal functions are handled by staff-dashboard.js
 
-    function showEditProductModal(productId) {
-      if (typeof window.staffDashboard !== 'undefined' && typeof window.staffDashboard.showEditProductModal === 'function') {
-        window.staffDashboard.showEditProductModal(productId);
-      } else {
-        toast('Edit product feature coming soon!', 'info');
-      }
-    }
-
-    function showAddAppointmentModal() {
-      // This will be handled by staff-dashboard.js
-      if (typeof openModal === 'function') {
-        openModal('addAppointmentModal');
-      } else {
-        toast('Appointment booking feature coming soon!', 'info');
-      }
-    }
-
-    function showAddPetModal() {
-      if (typeof openModal === 'function') {
-        openModal('addPetModal');
-      } else {
-        toast('Add pet feature coming soon!', 'info');
-      }
-    }
-
-    // Pet Report Functions
-    let selectedPetId = null;
-    let currentReportData = null;
-
-    function showPetReportModal() {
-      const modal = document.getElementById('petReportModal');
-      if (modal) {
-        modal.style.display = 'block';
-        loadPetsList();
-      }
-    }
-
-    function closePetReportModal() {
-      const modal = document.getElementById('petReportModal');
-      if (modal) {
-        modal.style.display = 'none';
-        selectedPetId = null;
-        currentReportData = null;
-        document.getElementById('reportPreview').style.display = 'none';
-        document.getElementById('generateBtn').style.display = 'none';
-        document.getElementById('printBtn').style.display = 'none';
-      }
-    }
-
-    function showAnalyticsModal() {
-      const modal = document.getElementById('analyticsModal');
-      if (modal) {
-        modal.style.display = 'block';
-      }
-    }
-
-    function closeAnalyticsModal() {
-      const modal = document.getElementById('analyticsModal');
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
+    // Pet Report Functions are handled by staff-dashboard.js
 
     async function loadPetsList() {
       const petList = document.getElementById('petList');

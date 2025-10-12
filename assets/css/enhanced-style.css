@@ -401,11 +401,15 @@
     z-index: 150;
     opacity: 0;
     transition: all 0.3s ease;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: auto;
   }
 
   .mobile-overlay.active {
-    display: block;
+    display: block !important;
     opacity: 1;
+    pointer-events: auto;
   }
 
   /* Mobile Menu Toggle Button */
@@ -417,19 +421,20 @@
     padding: 12px;
     color: white;
     font-size: 18px;
-    cursor: pointer;
+    cursor: pointer !important;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 300;
+    z-index: 1000;
     width: 48px;
     height: 48px;
-    display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto !important;
+    touch-action: manipulation;
   }
 
   .mobile-menu-toggle:hover {
@@ -444,20 +449,23 @@
       display: flex;
     }
 
-    .staff-container {
+    .staff-container,
+    .client-container {
       position: relative;
     }
 
     .sidebar {
-      position: fixed;
+      position: fixed !important;
       top: 0;
       left: 0;
       height: 100vh;
-      width: 280px;
+      width: 280px !important;
+      max-width: 280px !important;
       transform: translateX(-100%);
       z-index: 250;
       box-shadow: none;
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
     }
 
     .sidebar.mobile-open {
@@ -2956,5 +2964,247 @@
 
     .appointment-info-card .info-label {
       min-width: auto;
+    }
+  }
+
+  /* Comprehensive Pet Report Modal Styles */
+  .pet-report-modal .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .pet-report-modal .report-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+  }
+
+  .pet-report-modal .report-item.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .pet-report-modal .report-item label {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .pet-report-modal .report-item span {
+    color: #555;
+    font-size: 14px;
+  }
+
+  .pet-report-modal .statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .pet-report-modal .stat-item {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .pet-report-modal .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+
+  .pet-report-modal .stat-label {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pet-report-modal .appointments-table {
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+
+  .pet-report-modal .appointments-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .pet-report-modal .appointments-table th,
+  .pet-report-modal .appointments-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .pet-report-modal .appointments-table th {
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pet-report-modal .appointments-table tr:hover {
+    background: #f8f9fa;
+  }
+
+  .pet-report-modal .medical-records {
+    margin: 20px 0;
+  }
+
+  .pet-report-modal .medical-record {
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .pet-report-modal .record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e1e5e9;
+  }
+
+  .pet-report-modal .record-date {
+    font-weight: 600;
+    color: #667eea;
+  }
+
+  .pet-report-modal .record-service {
+    background: #667eea;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .pet-report-modal .record-details p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .pet-report-modal .vaccination-records {
+    margin: 20px 0;
+  }
+
+  .pet-report-modal .vaccination-record {
+    background: #e8f5e8;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pet-report-modal .vac-date {
+    font-weight: 600;
+    color: #28a745;
+  }
+
+  .pet-report-modal .vac-details {
+    text-align: right;
+  }
+
+  .pet-report-modal .report-info {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+  }
+
+  .pet-report-modal .report-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #856404;
+  }
+
+  /* Status badges in pet report */
+  .pet-report-modal .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .pet-report-modal .status-completed {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .pet-report-modal .status-pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .pet-report-modal .status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  /* Mobile responsiveness for comprehensive pet report */
+  @media (max-width: 768px) {
+    .pet-report-modal .report-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .pet-report-modal .statistics-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .pet-report-modal .stat-item {
+      padding: 15px;
+    }
+
+    .pet-report-modal .stat-value {
+      font-size: 24px;
+    }
+
+    .pet-report-modal .appointments-table {
+      font-size: 12px;
+    }
+
+    .pet-report-modal .appointments-table th,
+    .pet-report-modal .appointments-table td {
+      padding: 8px;
+    }
+
+    .pet-report-modal .record-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .pet-report-modal .vaccination-record {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .pet-report-modal .vac-details {
+      text-align: left;
     }
   }

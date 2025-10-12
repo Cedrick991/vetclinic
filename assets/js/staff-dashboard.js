@@ -10,6 +10,7 @@ class StaffDashboard {
         this.sessionCheckInterval = null;
         this.sessionWarningShown = false;
         this.pendingStatusChanges = {};
+        this.isSubmittingAppointment = false; // Flag to prevent duplicate submissions
         this.init();
     }
 
@@ -330,6 +331,7 @@ class StaffDashboard {
             await this.loadClientsSection();
             await this.loadPetsSection();
             await this.loadServicesSection();
+
             console.log('✅ All sections loaded');
         } catch (error) {
             console.error('❌ Error loading dashboard data:', error);
@@ -541,7 +543,7 @@ class StaffDashboard {
     }
 
     setupFormEventListeners() {
-        // Add appointment form
+        // Add appointment form (modal)
         const addAppointmentForm = document.getElementById('addAppointmentForm');
         if (addAppointmentForm) {
             addAppointmentForm.addEventListener('submit', (e) => {
@@ -549,6 +551,7 @@ class StaffDashboard {
                 this.handleAddAppointment(addAppointmentForm);
             });
         }
+
 
 
         // Add pet form
@@ -678,11 +681,9 @@ class StaffDashboard {
         }
     }
 
-    // Global modal functions (made available to inline onclick handlers)
+    // Booking functionality now integrated directly into dashboard
     showAddAppointmentModal() {
-        const modal = this.createAddAppointmentModal();
-        document.body.appendChild(modal);
-        this.openModal('addAppointmentModal');
+        this.showToast('Booking form is now integrated directly into the dashboard!', 'info');
     }
 
     showAddPetModal() {
@@ -1154,50 +1155,82 @@ class StaffDashboard {
         modal.id = 'addAppointmentModal';
         modal.className = 'modal';
         modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-calendar-plus"></i> Schedule New Appointment</h3>
-                    <span class="close" onclick="staffDashboard.closeModal('addAppointmentModal')">&times;</span>
+            <div class="modal-content booking-modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 id="staffBookingModalTitle" style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-calendar-plus" style="color: #9BA9FF; font-size: 1.5rem;"></i>
+                        Schedule New Appointment
+                    </h3>
+                    <span class="close" onclick="staffDashboard.closeModal('addAppointmentModal')" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 24px;">
+
+                    <!-- Appointment Form -->
                     <form id="addAppointmentForm" class="booking-form">
-                        <div class="form-group">
-                            <label for="appointmentClient">Client *</label>
-                            <select id="appointmentClient" name="client_id" required>
-                                <option value="">Select a client</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="appointmentPet">Pet *</label>
-                            <select id="appointmentPet" name="pet_id" required>
-                                <option value="">Select a pet</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                             <div class="form-group">
-                                <label for="appointmentDate">Date *</label>
-                                <input type="date" id="appointmentDate" name="appointment_date" required min="${new Date().toISOString().split('T')[0]}">
+                                <label for="appointmentClient" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                    <i class="fas fa-user" style="color: #5DADE2; margin-right: 8px;"></i> Select Client *
+                                </label>
+                                <select id="appointmentClient" name="client_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                                    <option value="">Loading clients...</option>
+                                </select>
                             </div>
+
                             <div class="form-group">
-                                <label for="appointmentTime">Time *</label>
-                                <select id="appointmentTime" name="appointment_time" required>
-                                    <option value="">Select time</option>
+                                <label for="appointmentPet" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                    <i class="fas fa-paw" style="color: #5DADE2; margin-right: 8px;"></i> Select Pet *
+                                </label>
+                                <select id="appointmentPet" name="pet_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                                    <option value="">Select client first</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="appointmentService">Service *</label>
-                            <select id="appointmentService" name="service_id" required>
-                                <option value="">Select a service</option>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group">
+                                <label for="appointmentDate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                    <i class="fas fa-calendar" style="color: #5DADE2; margin-right: 8px;"></i> Appointment Date *
+                                </label>
+                                <input type="date" id="appointmentDate" name="appointment_date" required min="" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="appointmentTime" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                    <i class="fas fa-clock" style="color: #5DADE2; margin-right: 8px;"></i> Appointment Time *
+                                </label>
+                                <select id="appointmentTime" name="appointment_time" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                                    <option value="">Select date first</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label for="appointmentService" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                <i class="fas fa-stethoscope" style="color: #5DADE2; margin-right: 8px;"></i> Select Service *
+                            </label>
+                            <select id="appointmentService" name="service_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                                <option value="">Loading services...</option>
                             </select>
+                            <button type="button" onclick="refreshAppointmentServices()" title="Refresh services" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px;">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="appointmentNotes">Notes (Optional)</label>
-                            <textarea id="appointmentNotes" name="notes" rows="3" placeholder="Any special instructions..."></textarea>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="appointmentNotes" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                <i class="fas fa-sticky-note" style="color: #5DADE2; margin-right: 8px;"></i> Notes (Optional)
+                            </label>
+                            <textarea id="appointmentNotes" name="notes" rows="3" placeholder="Any special instructions or concerns..." style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; resize: vertical; min-height: 80px;" title="Enter any special instructions or concerns"></textarea>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn-secondary btn-small" onclick="staffDashboard.closeModal('addAppointmentModal')">CANCEL</button>
-                            <button type="submit" class="btn-primary btn-small">SCHEDULE APPOINTMENT</button>
+
+                        <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                            <button type="button" class="btn-secondary" onclick="staffDashboard.closeModal('addAppointmentModal')" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+                                <i class="fas fa-times"></i> CANCEL
+                            </button>
+                            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+                                <i class="fas fa-calendar-plus"></i> SCHEDULE APPOINTMENT
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -1206,11 +1239,74 @@ class StaffDashboard {
 
         // Load clients and services when modal opens
         setTimeout(() => {
+            console.log('🔄 Loading appointment modal data...');
             this.loadClientsForAppointment();
             this.loadServicesForAppointment();
+            this.initializeAppointmentDateTime();
+            console.log('✅ Appointment modal data loaded');
         }, 100);
 
         return modal;
+    }
+
+    initializeAppointmentDateTime() {
+        // Set minimum date to today
+        const dateInput = document.getElementById('appointmentDate');
+        if (dateInput) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+
+            // Add event listener for date changes
+            dateInput.addEventListener('change', () => this.loadAvailableTimeSlotsForAppointment());
+        }
+    }
+
+    async loadAvailableTimeSlotsForAppointment() {
+        const dateInput = document.getElementById('appointmentDate');
+        const timeSelect = document.getElementById('appointmentTime');
+        const selectedDate = dateInput.value;
+
+        if (!selectedDate) {
+            timeSelect.innerHTML = '<option value="">Select date first</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_available_times',
+                    date: selectedDate
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.length > 0) {
+                timeSelect.innerHTML = '<option value="">Select a time</option>';
+                result.data.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = this.formatTimeForAppointment(time);
+                    timeSelect.appendChild(option);
+                });
+            } else {
+                timeSelect.innerHTML = '<option value="">No available time slots</option>';
+            }
+        } catch (error) {
+            console.error('Error loading time slots:', error);
+            timeSelect.innerHTML = '<option value="">Error loading times</option>';
+        }
+    }
+
+    formatTimeForAppointment(time) {
+        const [hours, minutes] = time.split(':');
+        const hour12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hour12}:${minutes} ${ampm}`;
     }
 
 
@@ -1259,13 +1355,19 @@ class StaffDashboard {
                                 <input type="date" id="petBirthdate" name="birthdate" max="${new Date().toISOString().split('T')[0]}">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="petGender">Gender *</label>
-                            <select id="petGender" name="gender" required>
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="petGender">Gender *</label>
+                                <select id="petGender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="petWeight">Weight (kg)</label>
+                                <input type="number" id="petWeight" name="weight" step="0.1" min="0" placeholder="e.g., 5.5">
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="petColor">Color</label>
@@ -1308,14 +1410,57 @@ class StaffDashboard {
                     option.textContent = `${client.first_name} ${client.last_name}`;
                     clientSelect.appendChild(option);
                 });
+
+                // Add event listener for client selection to load pets
+                clientSelect.addEventListener('change', () => this.loadPetsForAppointment());
             }
         } catch (error) {
             console.error('Error loading clients:', error);
         }
     }
 
+    async loadPetsForAppointment() {
+        const clientSelect = document.getElementById('appointmentClient');
+        const petSelect = document.getElementById('appointmentPet');
+        const selectedClientId = clientSelect.value;
+
+        if (!selectedClientId) {
+            petSelect.innerHTML = '<option value="">Select client first</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_client_pets',
+                    client_id: selectedClientId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                petSelect.innerHTML = '<option value="">Select a pet</option>';
+                result.data.forEach(pet => {
+                    const option = document.createElement('option');
+                    option.value = pet.pet_id || pet.id;
+                    option.textContent = `${pet.pet_name || pet.name} (${pet.species})`;
+                    petSelect.appendChild(option);
+                });
+            } else {
+                petSelect.innerHTML = '<option value="">No pets found for this client</option>';
+            }
+        } catch (error) {
+            console.error('Error loading pets:', error);
+            petSelect.innerHTML = '<option value="">Error loading pets</option>';
+        }
+    }
+
     async loadServicesForAppointment() {
         try {
+            console.log('Loading services for staff appointment booking...');
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1325,17 +1470,45 @@ class StaffDashboard {
             const result = await response.json();
             const serviceSelect = document.getElementById('appointmentService');
 
+            console.log('Staff appointment services API response:', result);
+
             if (result.success && result.data) {
+                console.log('Staff appointment services data received:', result.data.length, 'services');
+
+                // Filter to show only active services (same as services section)
+                const activeServices = result.data.filter(service => service.is_active === 1 || service.is_active === "1");
+                console.log('Active services for appointment booking:', activeServices.length);
+
                 serviceSelect.innerHTML = '<option value="">Select a service</option>';
-                result.data.forEach(service => {
+
+                activeServices.forEach((service, index) => {
+                    console.log(`Staff appointment service ${index + 1}:`, service);
+
                     const option = document.createElement('option');
-                    option.value = service.id;
-                    option.textContent = service.name;
+                    option.value = service.id || service.service_id;
+
+                    // Show service name and description if available
+                    const description = service.description ? ` - ${service.description}` : '';
+                    const serviceName = service.name || service.service_name || 'Unnamed Service';
+                    const serviceText = `${serviceName}${description}`;
+
+                    option.textContent = serviceText;
+                    option.title = serviceText; // Add tooltip for long service names
+
                     serviceSelect.appendChild(option);
                 });
+
+                console.log('Staff appointment services loaded successfully into dropdown');
+            } else {
+                console.error('Failed to load staff appointment services:', result);
+                serviceSelect.innerHTML = '<option value="">No active services available</option>';
+                this.showToast('Failed to load services. Please refresh and try again.', 'error');
             }
         } catch (error) {
-            console.error('Error loading services:', error);
+            console.error('Error loading staff appointment services:', error);
+            const serviceSelect = document.getElementById('appointmentService');
+            serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+            this.showToast('Connection error while loading services.', 'error');
         }
     }
 
@@ -1367,7 +1540,16 @@ class StaffDashboard {
     // Form handling functions
     async handleAddAppointment(form) {
         try {
+            // Prevent duplicate submissions
+            if (this.isSubmittingAppointment) {
+                console.log('Appointment submission already in progress, ignoring duplicate...');
+                return;
+            }
+
+            this.isSubmittingAppointment = true;
+
             const formData = new FormData(form);
+
             const appointmentData = {
                 action: 'book_appointment',
                 client_id: formData.get('client_id'),
@@ -1375,27 +1557,155 @@ class StaffDashboard {
                 service_id: formData.get('service_id'),
                 appointment_date: formData.get('appointment_date'),
                 appointment_time: formData.get('appointment_time'),
-                notes: formData.get('notes')
+                notes: formData.get('notes') || ''
             };
 
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(appointmentData)
+            console.log('=== STAFF APPOINTMENT FORM SUBMISSION ===');
+            console.log('Appointment data:', appointmentData);
+
+            // Enhanced validation with debugging
+            console.log('=== STAFF APPOINTMENT FORM VALIDATION ===');
+            console.log('Form data received:');
+            console.log('client_id (raw):', formData.get('client_id'));
+            console.log('pet_id (raw):', formData.get('pet_id'));
+            console.log('service_id (raw):', formData.get('service_id'));
+            console.log('appointment_date (raw):', formData.get('appointment_date'));
+            console.log('appointment_time (raw):', formData.get('appointment_time'));
+
+            console.log('Processed appointment data:');
+            console.log('client_id:', JSON.stringify(appointmentData.client_id));
+            console.log('pet_id:', JSON.stringify(appointmentData.pet_id));
+            console.log('service_id:', JSON.stringify(appointmentData.service_id));
+            console.log('appointment_date:', JSON.stringify(appointmentData.appointment_date));
+            console.log('appointment_time:', JSON.stringify(appointmentData.appointment_time));
+
+            // Check client selection
+            const clientSelect = document.getElementById('appointmentClient');
+            const selectedClientOption = clientSelect.options[clientSelect.selectedIndex];
+            console.log('Selected client option:', {
+                value: selectedClientOption?.value,
+                text: selectedClientOption?.textContent,
+                index: clientSelect.selectedIndex
             });
 
-            const result = await response.json();
+            // Check pet selection
+            const petSelect = document.getElementById('appointmentPet');
+            const selectedPetOption = petSelect.options[petSelect.selectedIndex];
+            console.log('Selected pet option:', {
+                value: selectedPetOption?.value,
+                text: selectedPetOption?.textContent,
+                index: petSelect.selectedIndex
+            });
 
-            if (result.success) {
-                this.showToast('Appointment scheduled successfully!', 'success');
-                this.closeModal('addAppointmentModal');
-                this.loadDashboardData(); // Refresh dashboard
-            } else {
-                this.showToast(result.message || 'Failed to schedule appointment', 'error');
+            // Check service selection
+            const serviceSelect = document.getElementById('appointmentService');
+            const selectedServiceOption = serviceSelect.options[serviceSelect.selectedIndex];
+            console.log('Selected service option:', {
+                value: selectedServiceOption?.value,
+                text: selectedServiceOption?.textContent,
+                index: serviceSelect.selectedIndex
+            });
+
+            const missingAppointmentFields = [];
+            if (!appointmentData.client_id) missingAppointmentFields.push('Client');
+            if (!appointmentData.pet_id) missingAppointmentFields.push('Pet');
+            if (!appointmentData.service_id) missingAppointmentFields.push('Service');
+            if (!appointmentData.appointment_date) missingAppointmentFields.push('Date');
+            if (!appointmentData.appointment_time) missingAppointmentFields.push('Time');
+
+            if (missingAppointmentFields.length > 0) {
+                const errorMsg = `Please fill in all required fields. Missing: ${missingAppointmentFields.join(', ')}`;
+                console.log('Appointment validation failed:', errorMsg);
+                this.showToast(errorMsg, 'error');
+                return;
+            }
+
+            // Check if selections are valid (not the placeholder option)
+            if (!selectedClientOption || selectedClientOption.textContent.includes('Loading clients') ||
+                selectedClientOption.textContent.includes('Select a client')) {
+                this.showToast('Please select a valid client from the dropdown.', 'error');
+                return;
+            }
+
+            // Check if pet selection is valid (not the placeholder option)
+            if (!selectedPetOption || selectedPetOption.textContent.includes('Select client first') ||
+                selectedPetOption.textContent.includes('Select a pet') ||
+                selectedPetOption.textContent.includes('No pets found')) {
+                this.showToast('Please select a valid pet or ensure the client has registered pets.', 'error');
+                return;
+            }
+
+            // Check if service selection is valid (not the placeholder option)
+            if (!selectedServiceOption || selectedServiceOption.textContent.includes('Loading services') ||
+                selectedServiceOption.textContent.includes('Select a service') ||
+                selectedServiceOption.textContent.includes('No services available') ||
+                selectedServiceOption.textContent.includes('Error loading services') ||
+                selectedServiceOption.textContent.includes('undefined')) {
+                this.showToast('Please select a valid service from the dropdown.', 'error');
+                return;
+            }
+
+            console.log('All validations passed, submitting appointment...');
+
+            try {
+                console.log('Sending appointment data to API:', appointmentData);
+                const response = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appointmentData)
+                });
+
+                console.log('Appointment API response status:', response.status);
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    console.error('Appointment API error response:', errorText);
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        return { success: false, message: errorJson.message || 'API request failed' };
+                    } catch (e) {
+                        return { success: false, message: 'API error: ' + errorText };
+                    }
+                }
+
+                const result = await response.json();
+                console.log('Appointment API response:', result);
+
+                if (result.success) {
+                    this.showToast('Appointment scheduled successfully!', 'success');
+                    this.closeModal('addAppointmentModal');
+                    form.reset();
+                    console.log('Appointment form reset and modal closed');
+
+                    // Refresh appointments and dashboard data
+                    await this.loadAppointmentsSection();
+                    await this.loadDashboardData();
+                } else {
+                    console.error('Appointment scheduling failed:', result);
+                    // Handle specific error messages
+                    if (result.message && result.message.includes('Invalid pet selection')) {
+                        this.showToast('The selected pet is not valid for this client. Please select a different pet.', 'error');
+                        await this.loadPetsForAppointment();
+                    } else if (result.message && result.message.includes('Invalid service')) {
+                        this.showToast('The selected service is not valid. Please select a different service.', 'error');
+                        await this.loadServicesForAppointment();
+                    } else if (result.message && result.message.includes('Invalid client')) {
+                        this.showToast('The selected client is not valid. Please select a different client.', 'error');
+                        await this.loadClientsForAppointment();
+                    } else {
+                        this.showToast(result.message || 'Failed to schedule appointment.', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Appointment scheduling error:', error);
+                this.showToast('Connection error. Please try again.', 'error');
             }
         } catch (error) {
             console.error('Add appointment error:', error);
             this.showToast('Failed to schedule appointment. Please try again.', 'error');
+        } finally {
+            // Reset the submission flag
+            this.isSubmittingAppointment = false;
         }
     }
 
@@ -1411,7 +1721,7 @@ class StaffDashboard {
                 breed: formData.get('breed'),
                 birthdate: formData.get('birthdate'),
                 gender: formData.get('gender'),
-                weight: formData.get('weight'),
+                weight: formData.get('weight') ? parseFloat(formData.get('weight')) : null,
                 color: formData.get('color')
             };
 
@@ -1434,6 +1744,215 @@ class StaffDashboard {
             console.error('Add pet error:', error);
             this.showToast('Failed to add pet. Please try again.', 'error');
         }
+    }
+
+    // Dashboard booking form functions
+    async loadDashboardClients() {
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_clients' })
+            });
+
+            const result = await response.json();
+            const clientSelect = document.getElementById('dashboardClient');
+
+            if (result.success && result.data) {
+                clientSelect.innerHTML = '<option value="">Select a client</option>';
+                result.data.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.first_name} ${client.last_name}`;
+                    clientSelect.appendChild(option);
+                });
+
+                // Add event listener for client selection to load pets
+                clientSelect.addEventListener('change', () => this.loadDashboardPets());
+            }
+        } catch (error) {
+            console.error('Error loading dashboard clients:', error);
+        }
+    }
+
+    async loadDashboardPets() {
+        const clientSelect = document.getElementById('dashboardClient');
+        const petSelect = document.getElementById('dashboardPet');
+        const selectedClientId = clientSelect.value;
+
+        if (!selectedClientId) {
+            petSelect.innerHTML = '<option value="">Select client first</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_client_pets',
+                    client_id: selectedClientId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                petSelect.innerHTML = '<option value="">Select a pet</option>';
+                result.data.forEach(pet => {
+                    const option = document.createElement('option');
+                    option.value = pet.pet_id || pet.id;
+                    option.textContent = `${pet.pet_name || pet.name} (${pet.species})`;
+                    petSelect.appendChild(option);
+                });
+            } else {
+                petSelect.innerHTML = '<option value="">No pets found for this client</option>';
+            }
+        } catch (error) {
+            console.error('Error loading dashboard pets:', error);
+            petSelect.innerHTML = '<option value="">Error loading pets</option>';
+        }
+    }
+
+    async loadDashboardServices() {
+        try {
+            console.log('Loading services for dashboard booking...');
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_services' })
+            });
+
+            const result = await response.json();
+            const serviceSelect = document.getElementById('dashboardService');
+
+            console.log('Dashboard services API response:', result);
+
+            if (result.success && result.data) {
+                console.log('Dashboard services data received:', result.data.length, 'services');
+
+                // Filter to show only active services (same as services section)
+                const activeServices = result.data.filter(service => service.is_active === 1 || service.is_active === "1");
+                console.log('Active services for dashboard booking:', activeServices.length);
+
+                serviceSelect.innerHTML = '<option value="">Select a service</option>';
+
+                activeServices.forEach((service, index) => {
+                    console.log(`Dashboard service ${index + 1}:`, service);
+
+                    const option = document.createElement('option');
+                    option.value = service.id || service.service_id;
+
+                    // Show service name and description if available
+                    const description = service.description ? ` - ${service.description}` : '';
+                    const serviceName = service.name || service.service_name || 'Unnamed Service';
+                    const serviceText = `${serviceName}${description}`;
+
+                    option.textContent = serviceText;
+                    option.title = serviceText; // Add tooltip for long service names
+
+                    serviceSelect.appendChild(option);
+                });
+
+                console.log('Dashboard services loaded successfully into dropdown');
+            } else {
+                console.error('Failed to load dashboard services:', result);
+                serviceSelect.innerHTML = '<option value="">No active services available</option>';
+                this.showToast('Failed to load services. Please refresh and try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading dashboard services:', error);
+            const serviceSelect = document.getElementById('dashboardService');
+            serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+            this.showToast('Connection error while loading services.', 'error');
+        }
+    }
+
+    initializeDashboardDateTime() {
+        // Set minimum date to tomorrow
+        const dateInput = document.getElementById('dashboardDate');
+        if (dateInput) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.min = tomorrow.toISOString().split('T')[0];
+
+            // Add event listener for date changes
+            dateInput.addEventListener('change', () => this.loadDashboardTimeSlots());
+        }
+    }
+
+    async loadDashboardTimeSlots() {
+        const dateInput = document.getElementById('dashboardDate');
+        const timeSelect = document.getElementById('dashboardTime');
+        const selectedDate = dateInput.value;
+
+        if (!selectedDate) {
+            timeSelect.innerHTML = '<option value="">Select date first</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_available_times',
+                    date: selectedDate
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.length > 0) {
+                timeSelect.innerHTML = '<option value="">Select a time</option>';
+                result.data.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = this.formatTimeForDashboard(time);
+                    timeSelect.appendChild(option);
+                });
+            } else {
+                timeSelect.innerHTML = '<option value="">No available time slots</option>';
+            }
+        } catch (error) {
+            console.error('Error loading dashboard time slots:', error);
+            timeSelect.innerHTML = '<option value="">Error loading times</option>';
+        }
+    }
+
+    formatTimeForDashboard(time) {
+        const [hours, minutes] = time.split(':');
+        const hour12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hour12}:${minutes} ${ampm}`;
+    }
+
+    clearDashboardBookingForm() {
+        const form = document.getElementById('dashboardBookingForm');
+        if (form) {
+            form.reset();
+
+            // Reset dependent dropdowns
+            const petSelect = document.getElementById('dashboardPet');
+            const timeSelect = document.getElementById('dashboardTime');
+
+            if (petSelect) petSelect.innerHTML = '<option value="">Select client first</option>';
+            if (timeSelect) timeSelect.innerHTML = '<option value="">Select date first</option>';
+
+            this.showToast('Form cleared', 'info');
+        }
+    }
+
+    initializeDashboardBookingForm() {
+        console.log('🔄 Initializing dashboard booking form...');
+
+        // Load initial data
+        this.loadDashboardClients();
+        this.loadDashboardServices();
+        this.initializeDashboardDateTime();
+
+        console.log('✅ Dashboard booking form initialized');
     }
 
     async handleAddService(form) {
@@ -1566,13 +2085,22 @@ class StaffDashboard {
                 medications: formData.get('medications'),
                 notes: formData.get('notes'),
                 follow_up_date: formData.get('follow_up_date'),
-                follow_up_instructions: formData.get('follow_up_instructions')
+                follow_up_instructions: formData.get('follow_up_instructions'),
+                appointment_duration: parseInt(formData.get('appointment_duration')) || null
             };
 
             // Validate required fields
             if (!medicalHistoryData.diagnosis || !medicalHistoryData.treatment) {
                 this.showToast('Diagnosis and treatment are required', 'error');
                 return;
+            }
+
+            // Validate duration if provided
+            if (medicalHistoryData.appointment_duration !== null) {
+                if (medicalHistoryData.appointment_duration < 1 || medicalHistoryData.appointment_duration > 480) {
+                    this.showToast('Appointment duration must be between 1 and 480 minutes', 'error');
+                    return;
+                }
             }
 
             const response = await fetch('../api/vet_api.php', {
@@ -1611,16 +2139,39 @@ class StaffDashboard {
             const appointmentsTableBody = document.getElementById('appointmentsTableBody');
 
             if (result.success && result.data && result.data.length > 0) {
-                appointmentsTableBody.innerHTML = result.data.map(appointment => `
-                    <tr>
+                appointmentsTableBody.innerHTML = result.data.map(appointment => {
+                    const isCancelled = appointment.status === 'cancelled';
+                    const isPendingCancellation = appointment.status === 'pending_cancellation';
+                    const hasCancellationRequest = appointment.cancellation_requested;
+
+                    // Determine button text and functionality
+                    let buttonText = 'UPDATE';
+                    let buttonAction = `staffDashboard.updateAppointmentStatus(${appointment.id})`;
+                    let buttonTitle = 'Update Status';
+                    let buttonClass = '';
+
+                    if (isCancelled) {
+                        buttonText = 'LOCKED';
+                        buttonAction = '#';
+                        buttonTitle = 'Appointment is cancelled and locked';
+                        buttonClass = 'btn-locked';
+                    } else if (hasCancellationRequest) {
+                        buttonText = 'REVIEW CANCELLATION';
+                        buttonAction = `staffDashboard.reviewCancellationRequest(${appointment.id})`;
+                        buttonTitle = 'Review cancellation request from client';
+                    }
+
+                    return `
+                    <tr class="${hasCancellationRequest ? 'cancellation-request' : ''}">
                         <td>${appointment.appointment_date}</td>
                         <td>${appointment.appointment_time}</td>
                         <td>${appointment.first_name} ${appointment.last_name}</td>
                         <td>${appointment.pet_name} (${appointment.species})</td>
                         <td>${appointment.service_name}</td>
+                        <td>${appointment.appointment_duration ? `${appointment.appointment_duration} min` : '-'}</td>
                         <td>
                             <div class="status-container">
-                                <select class="status-select" data-appointment-id="${appointment.id}" onchange="staffDashboard.changeAppointmentStatus(${appointment.id}, this.value)">
+                                <select class="status-select" data-appointment-id="${appointment.id}" onchange="staffDashboard.changeAppointmentStatus(${appointment.id}, this.value)" ${isCancelled ? 'disabled' : ''}>
                                     <option value="pending" ${appointment.status === 'pending' ? 'selected' : ''}>Pending</option>
                                     <option value="confirmed" ${appointment.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                                     <option value="in-progress" ${appointment.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
@@ -1628,17 +2179,18 @@ class StaffDashboard {
                                     <option value="cancelled" ${appointment.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                                     <option value="no-show" ${appointment.status === 'no-show' ? 'selected' : ''}>No Show</option>
                                 </select>
-                                <button class="btn-primary btn-small" onclick="staffDashboard.updateAppointmentStatus(${appointment.id})" title="Update Status">
-                                    <i class="fas fa-check"></i> UPDATE
+                                <button class="btn-primary btn-small ${hasCancellationRequest ? 'btn-warning' : ''} ${buttonClass || ''}" onclick="${buttonAction}" title="${buttonTitle}" ${isCancelled ? 'disabled' : ''}>
+                                    <i class="fas fa-${hasCancellationRequest ? 'exclamation-triangle' : (isCancelled ? 'lock' : 'check')}"></i> ${buttonText}
                                 </button>
+                                ${hasCancellationRequest ? `<div class="cancellation-indicator" title="Client has requested cancellation"><i class="fas fa-flag"></i> Cancellation Requested</div>` : ''}
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                `}).join('');
             } else {
                 appointmentsTableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="empty-state-table">
+                        <td colspan="7" class="empty-state-table">
                             <div class="empty-state">
                                 <i class="fas fa-calendar-times"></i>
                                 <h3>No Appointments</h3>
@@ -1680,7 +2232,8 @@ class StaffDashboard {
                 pet_name: 'Whiskers',
                 species: 'Cat',
                 service_name: 'Vaccination',
-                status: 'pending'
+                status: 'pending',
+                cancellation_requested: true
             },
             {
                 id: 3,
@@ -1691,20 +2244,42 @@ class StaffDashboard {
                 pet_name: 'Max',
                 species: 'Dog',
                 service_name: 'Dental Cleaning',
-                status: 'in-progress'
+                status: 'cancelled'
             }
         ];
 
-        appointmentsTableBody.innerHTML = mockAppointments.map(appointment => `
-            <tr>
+        appointmentsTableBody.innerHTML = mockAppointments.map(appointment => {
+            const isCancelled = appointment.status === 'cancelled';
+            const hasCancellationRequest = appointment.cancellation_requested;
+
+            // Determine button text and functionality
+            let buttonText = 'UPDATE';
+            let buttonAction = `staffDashboard.updateAppointmentStatus(${appointment.id})`;
+            let buttonTitle = 'Update Status';
+            let buttonClass = '';
+
+            if (isCancelled) {
+                buttonText = 'LOCKED';
+                buttonAction = '#';
+                buttonTitle = 'Appointment is cancelled and locked';
+                buttonClass = 'btn-locked';
+            } else if (hasCancellationRequest) {
+                buttonText = 'REVIEW CANCELLATION';
+                buttonAction = `staffDashboard.reviewCancellationRequest(${appointment.id})`;
+                buttonTitle = 'Review cancellation request from client';
+            }
+
+            return `
+            <tr class="${hasCancellationRequest ? 'cancellation-request' : ''}">
                 <td>${appointment.appointment_date}</td>
                 <td>${appointment.appointment_time}</td>
                 <td>${appointment.first_name} ${appointment.last_name}</td>
                 <td>${appointment.pet_name} (${appointment.species})</td>
                 <td>${appointment.service_name}</td>
+                <td>${appointment.appointment_duration ? `${appointment.appointment_duration} min` : '-'}</td>
                 <td>
                     <div class="status-container">
-                        <select class="status-select" data-appointment-id="${appointment.id}" onchange="staffDashboard.changeAppointmentStatus(${appointment.id}, this.value)">
+                        <select class="status-select" data-appointment-id="${appointment.id}" onchange="staffDashboard.changeAppointmentStatus(${appointment.id}, this.value)" ${isCancelled ? 'disabled' : ''}>
                             <option value="pending" ${appointment.status === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="confirmed" ${appointment.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                             <option value="in-progress" ${appointment.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
@@ -1712,13 +2287,14 @@ class StaffDashboard {
                             <option value="cancelled" ${appointment.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             <option value="no-show" ${appointment.status === 'no-show' ? 'selected' : ''}>No Show</option>
                         </select>
-                        <button class="btn-primary btn-small" onclick="staffDashboard.updateAppointmentStatus(${appointment.id})" title="Update Status">
-                            <i class="fas fa-check"></i> UPDATE
+                        <button class="btn-primary btn-small ${hasCancellationRequest ? 'btn-warning' : ''} ${buttonClass || ''}" onclick="${buttonAction}" title="${buttonTitle}" ${isCancelled ? 'disabled' : ''}>
+                            <i class="fas fa-${hasCancellationRequest ? 'exclamation-triangle' : (isCancelled ? 'lock' : 'check')}"></i> ${buttonText}
                         </button>
+                        ${hasCancellationRequest ? `<div class="cancellation-indicator" title="Client has requested cancellation"><i class="fas fa-flag"></i> Cancellation Requested</div>` : ''}
                     </div>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
     }
 
     async loadClientsSection() {
@@ -1854,6 +2430,29 @@ class StaffDashboard {
 
     async loadPetsSection() {
         try {
+            console.log('🐾 Starting to load pets section...');
+
+            const petsGrid = document.getElementById('petsGrid');
+            const petsLoadingState = document.getElementById('petsLoadingState');
+            const petsEmptyMessage = document.getElementById('petsEmptyMessage');
+
+            if (!petsGrid) {
+                console.error('❌ petsGrid element not found');
+                return;
+            }
+
+            console.log('🐾 Found pets grid, showing loading state...');
+
+            // Show loading state and hide empty message
+            if (petsLoadingState) {
+                petsLoadingState.style.display = 'block';
+                console.log('🐾 Loading state shown');
+            }
+            if (petsEmptyMessage) {
+                petsEmptyMessage.style.display = 'none';
+                console.log('🐾 Empty message hidden');
+            }
+
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1861,182 +2460,158 @@ class StaffDashboard {
             });
 
             const result = await response.json();
-            const petsGrid = document.getElementById('petsGrid');
+            console.log('🐾 API response received:', result);
+
+            // Hide loading state
+            if (petsLoadingState) {
+                petsLoadingState.style.display = 'none';
+                console.log('🐾 Loading state hidden');
+            }
 
             if (result.success && result.data && result.data.length > 0) {
-                petsGrid.innerHTML = result.data.map(pet => this.createPetCard(pet)).join('');
+                console.log('🐾 Pets found:', result.data.length, 'pets');
+
+                // Hide empty message and show pets
+                if (petsEmptyMessage) {
+                    petsEmptyMessage.style.display = 'none';
+                    console.log('🐾 Empty message hidden');
+                }
+
+                const petsHtml = result.data.map(pet => this.createPetCard(pet)).join('');
+                petsGrid.innerHTML = petsHtml;
+                console.log('🐾 Pet cards rendered');
             } else {
-                // Fallback to mock data
-                await this.loadPetsSectionMock();
+                console.log('🐾 No pets found, showing empty message');
+
+                // Show empty message when no pets found
+                if (petsEmptyMessage) {
+                    petsEmptyMessage.style.display = 'flex';
+                    console.log('🐾 Empty message shown');
+                }
+                petsGrid.innerHTML = ''; // Clear any existing content
             }
         } catch (error) {
-            console.error('Failed to load pets:', error);
-            // Fallback to mock data
-            await this.loadPetsSectionMock();
+            console.error('❌ Failed to load pets:', error);
+
+            // Hide loading state and show empty message on error
+            const petsGrid = document.getElementById('petsGrid');
+            const petsLoadingState = document.getElementById('petsLoadingState');
+            const petsEmptyMessage = document.getElementById('petsEmptyMessage');
+
+            if (petsLoadingState) {
+                petsLoadingState.style.display = 'none';
+            }
+            if (petsEmptyMessage) {
+                petsEmptyMessage.style.display = 'flex';
+            }
+            if (petsGrid) {
+                petsGrid.innerHTML = '';
+            }
+        }
+    }
+
+    // Helper function to check if pets grid is empty and update empty message
+    checkAndUpdateEmptyState() {
+        const petsGrid = document.getElementById('petsGrid');
+        const petsEmptyMessage = document.getElementById('petsEmptyMessage');
+
+        if (!petsGrid || !petsEmptyMessage) return;
+
+        // Check if there are any pet cards in the grid
+        const petCards = petsGrid.querySelectorAll('.pet-card');
+        const hasPets = petCards.length > 0;
+
+        console.log('🐾 Checking pets grid state - Pet cards found:', petCards.length, 'Has pets:', hasPets);
+
+        if (hasPets) {
+            petsEmptyMessage.style.display = 'none';
+            console.log('🐾 Hiding empty message - pets found');
+        } else {
+            petsEmptyMessage.style.display = 'flex';
+            console.log('🐾 Showing empty message - no pets found');
+        }
+    }
+
+    // Reports section functions
+    showPetReportModal() {
+        console.log('📋 Opening pet report modal...');
+        const modal = document.getElementById('petReportModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            console.log('✅ Pet report modal opened');
+        } else {
+            console.error('❌ Pet report modal not found');
+            this.showToast('Pet report modal not available', 'error');
+        }
+    }
+
+    showAnalyticsModal() {
+        console.log('📊 Opening analytics modal...');
+        const modal = document.getElementById('analyticsModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            console.log('✅ Analytics modal opened');
+        } else {
+            console.error('❌ Analytics modal not found');
+            this.showToast('Analytics modal not available', 'error');
         }
     }
 
     async loadPetsSectionMock() {
         const petsGrid = document.getElementById('petsGrid');
+        const petsLoadingState = document.getElementById('petsLoadingState');
+        const petsEmptyMessage = document.getElementById('petsEmptyMessage');
+
         if (!petsGrid) return;
 
-        const mockPets = [
-            {
-                id: 1,
-                name: 'Buddy',
-                species: 'Dog',
-                breed: 'Golden Retriever',
-                first_name: 'John',
-                last_name: 'Doe',
-                birthdate: '2020-03-15',
-                gender: 'Male',
-                weight: 25,
-                color: 'Golden'
-            },
-            {
-                id: 2,
-                name: 'Whiskers',
-                species: 'Cat',
-                breed: 'Persian',
-                first_name: 'Jane',
-                last_name: 'Smith',
-                birthdate: '2021-07-22',
-                gender: 'Female',
-                weight: 4,
-                color: 'White'
-            }
-        ];
+        // Hide loading state
+        if (petsLoadingState) {
+            petsLoadingState.style.display = 'none';
+        }
 
-        petsGrid.innerHTML = mockPets.map(pet => this.createPetCard(pet)).join('');
+        // For demo purposes, show empty message instead of mock pets
+        // This ensures the empty state functionality works correctly
+        if (petsEmptyMessage) {
+            petsEmptyMessage.style.display = 'flex';
+        }
+        petsGrid.innerHTML = '';
     }
 
     createPetCard(pet) {
-        // Get species-specific styling and icon
-        const speciesInfo = this.getSpeciesStyling(pet.species);
+        // Get species icon for the new design
+        const speciesIcon = this.getSpeciesIcon(pet.species);
 
-        // Calculate age if birthdate is available
-        let ageInfo = '';
+        // Format birthdate for display
+        let birthdateDisplay = 'Not recorded';
         if (pet.birthdate) {
             const birthDate = new Date(pet.birthdate);
-            const today = new Date();
-            const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-            const years = Math.floor(ageInMonths / 12);
-            const months = ageInMonths % 12;
-
-            if (years > 0) {
-                ageInfo = years === 1 ? '1 year' : `${years} years`;
-                if (months > 0) ageInfo += ` ${months} month${months > 1 ? 's' : ''}`;
-            } else if (months > 0) {
-                ageInfo = months === 1 ? '1 month' : `${months} months`;
-            } else {
-                ageInfo = 'Newborn';
-            }
+            birthdateDisplay = birthDate.toLocaleDateString();
         }
 
-        // Create status badges for additional info
-        const statusBadges = [];
+        // Format weight for display
+        let weightDisplay = 'Not recorded';
         if (pet.weight) {
-            const weightClass = pet.weight > 20 ? 'heavy' : pet.weight > 10 ? 'medium' : 'light';
-            statusBadges.push(`<span class="pet-badge weight-badge ${weightClass}">${pet.weight}kg</span>`);
-        }
-        if (ageInfo) {
-            statusBadges.push(`<span class="pet-badge age-badge">${ageInfo}</span>`);
-        }
-        if (pet.color) {
-            statusBadges.push(`<span class="pet-badge color-badge">${pet.color}</span>`);
+            weightDisplay = `${pet.weight} kg`;
         }
 
-        return `
-            <div class="pet-card" data-pet-id="${pet.id}">
-                <div class="pet-card-header">
-                    <div class="pet-avatar-container">
-                        <div class="pet-avatar ${speciesInfo.class}">
-                            <i class="${speciesInfo.icon}"></i>
-                        </div>
-                        <div class="pet-species-badge ${speciesInfo.badgeClass}">
-                            <i class="${speciesInfo.icon}"></i>
-                            ${pet.species}
-                        </div>
-                    </div>
-                    <div class="pet-name-section">
-                        <h3 class="pet-name">${pet.name}</h3>
-                        ${pet.breed ? `<p class="pet-breed">${pet.breed}</p>` : `<p class="pet-breed">${pet.species}</p>`}
-                    </div>
-                </div>
+        // Get owner name
+        let ownerName = 'Not specified';
+        if (pet.first_name && pet.last_name) {
+            ownerName = `${pet.first_name} ${pet.last_name}`;
+        }
 
-                <div class="pet-card-body">
-                    <div class="pet-info-grid">
-                        <div class="info-group">
-                            <div class="info-label">
-                                <i class="fas fa-user"></i>
-                                Owner
-                            </div>
-                            <div class="info-value">${pet.first_name} ${pet.last_name}</div>
-                        </div>
-
-                        ${pet.birthdate ? `
-                        <div class="info-group">
-                            <div class="info-label">
-                                <i class="fas fa-calendar"></i>
-                                Birthdate
-                            </div>
-                            <div class="info-value">${new Date(pet.birthdate).toLocaleDateString()}</div>
-                        </div>
-                        ` : ''}
-
-                        <div class="info-group">
-                            <div class="info-label">
-                                <i class="fas fa-venus-mars"></i>
-                                Gender
-                            </div>
-                            <div class="info-value">${pet.gender}</div>
-                        </div>
-
-                        ${pet.weight ? `
-                        <div class="info-group">
-                            <div class="info-label">
-                                <i class="fas fa-weight"></i>
-                                Weight
-                            </div>
-                            <div class="info-value">${pet.weight} kg</div>
-                        </div>
-                        ` : ''}
-
-                        ${pet.color ? `
-                        <div class="info-group">
-                            <div class="info-label">
-                                <i class="fas fa-palette"></i>
-                                Color
-                            </div>
-                            <div class="info-value">${pet.color}</div>
-                        </div>
-                        ` : ''}
-
-                        ${pet.notes ? `
-                        <div class="info-group full-width">
-                            <div class="info-label">
-                                <i class="fas fa-sticky-note"></i>
-                                Notes
-                            </div>
-                            <div class="info-value notes-value">${pet.notes}</div>
-                        </div>
-                        ` : ''}
-                    </div>
-
-                    ${statusBadges.length > 0 ? `
-                    <div class="pet-badges">
-                        ${statusBadges.join('')}
-                    </div>
-                    ` : ''}
-                    <div class="pet-actions">
-                        <button class="action-btn history-btn" onclick="showPetMedicalHistory(${pet.id})" title="Medical History">
-                            <i class="fas fa-file-medical"></i>
-                            <span>Medical History</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+        return `<div class="pet-card">
+            <div class="pet-icon"><i class="${speciesIcon}"></i></div>
+            <h3 class="pet-name">${pet.name}</h3>
+            <p><strong>Species:</strong> ${pet.species}</p>
+            <p><strong>Breed:</strong> ${pet.breed || 'Not specified'}</p>
+            <p><strong>Birthdate:</strong> ${birthdateDisplay}</p>
+            <p><strong>Gender:</strong> ${pet.gender || 'Not specified'}</p>
+            <p><strong>Weight:</strong> ${weightDisplay}</p>
+            <p><strong>Owner:</strong> ${ownerName}</p>
+        </div>`;
     }
 
     getSpeciesIcon(species) {
@@ -2805,16 +3380,16 @@ class StaffDashboard {
                 if (activeServices.length > 0) {
                     servicesTableBody.innerHTML = activeServices.map(service => `
                         <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name}</td>
+                            <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name || service.service_name || 'Unnamed Service'}</td>
                             <td style="padding: 16px 12px; text-align: center;">
                                 <span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">ACTIVE</span>
                             </td>
                             <td style="padding: 16px 12px; text-align: center;">
                                 <div style="display: flex; gap: 8px; justify-content: center;">
-                                    <button onclick="staffDashboard.editService(${service.id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                    <button onclick="staffDashboard.editService(${service.id || service.service_id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
                                         <i class="fas fa-edit"></i> EDIT
                                     </button>
-                                    <button onclick="staffDashboard.deleteService(${service.id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                    <button onclick="staffDashboard.deleteService(${service.id || service.service_id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
                                         <i class="fas fa-trash"></i> DELETE
                                     </button>
                                 </div>
@@ -2878,16 +3453,16 @@ class StaffDashboard {
         if (activeServices.length > 0) {
             servicesTableBody.innerHTML = activeServices.map(service => `
                 <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                    <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name}</td>
+                    <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name || service.service_name || 'Unnamed Service'}</td>
                     <td style="padding: 16px 12px; text-align: center;">
                         <span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">ACTIVE</span>
                     </td>
                     <td style="padding: 16px 12px; text-align: center;">
                         <div style="display: flex; gap: 8px; justify-content: center;">
-                            <button onclick="staffDashboard.editService(${service.id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                            <button onclick="staffDashboard.editService(${service.id || service.service_id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
                                 <i class="fas fa-edit"></i> EDIT
                             </button>
-                            <button onclick="staffDashboard.deleteService(${service.id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
+                            <button onclick="staffDashboard.deleteService(${service.id || service.service_id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
                                 <i class="fas fa-trash"></i> DELETE
                             </button>
                         </div>
@@ -3116,10 +3691,40 @@ class StaffDashboard {
         this.pendingStatusChanges[appointmentId] = newStatus;
     }
 
+    getCurrentAppointmentStatus(appointmentId) {
+        // Find the current status from the UI
+        const statusSelects = document.querySelectorAll('.status-select');
+        for (let select of statusSelects) {
+            if (select.getAttribute('data-appointment-id') == appointmentId) {
+                return select.value;
+            }
+        }
+        return null;
+    }
+
     async updateAppointmentStatus(appointmentId) {
         const newStatus = this.pendingStatusChanges?.[appointmentId];
         if (!newStatus) {
             this.showToast('Please select a status first', 'warning');
+            return;
+        }
+
+        // Additional validation: prevent changing completed appointments back to other statuses
+        const currentStatus = this.getCurrentAppointmentStatus(appointmentId);
+        if (currentStatus === 'completed' && newStatus !== 'cancelled') {
+            this.showToast('Completed appointments can only be cancelled, not modified to other statuses', 'error');
+            return;
+        }
+
+        // Additional validation: prevent modifying cancelled appointments to other statuses
+        if (currentStatus === 'cancelled' && newStatus !== 'cancelled') {
+            this.showToast('Attempted to modify cancelled appointment. Cancelled appointments are locked and cannot be modified to other statuses.', 'error');
+            return;
+        }
+
+        // If cancelling appointment, show reason modal first
+        if (newStatus === 'cancelled') {
+            this.showCancellationReasonModal(appointmentId);
             return;
         }
 
@@ -3141,6 +3746,15 @@ class StaffDashboard {
 
                 // If appointment is marked as completed, show medical history modal
                 if (newStatus === 'completed') {
+                    // Set default duration based on service type (this would be enhanced with actual service data)
+                    setTimeout(() => {
+                        const durationInput = document.getElementById('appointmentDuration');
+                        if (durationInput && !durationInput.value) {
+                            // Set a reasonable default duration (30 minutes for most services)
+                            durationInput.value = '30';
+                        }
+                    }, 500); // Wait for modal to fully load
+
                     this.showMedicalHistoryModal(appointmentId);
                 }
 
@@ -3157,6 +3771,194 @@ class StaffDashboard {
         }
     }
 
+    showCancellationReasonModal(appointmentId) {
+        // Get appointment details first
+        this.getAppointmentDetailsForCancellation(appointmentId).then(appointment => {
+            if (!appointment) {
+                this.showToast('Failed to load appointment details', 'error');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'cancellationReasonModal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                    <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ff6b6b; font-size: 1.5rem;"></i>
+                            Cancel Appointment
+                        </h3>
+                        <span class="close" onclick="document.getElementById('cancellationReasonModal')?.remove()" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
+                    </div>
+                    <div class="modal-body" style="padding: 24px;">
+                        <div class="appointment-info" style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="color: #ffffff; margin: 0 0 12px 0; font-size: 16px;">
+                                <i class="fas fa-calendar-alt" style="color: #5DADE2; margin-right: 8px;"></i>
+                                Appointment Details
+                            </h4>
+                            <div style="color: #B3B8FF; font-size: 14px; line-height: 1.5;">
+                                <p style="margin: 4px 0;"><strong>Client:</strong> ${appointment.first_name} ${appointment.last_name}</p>
+                                <p style="margin: 4px 0;"><strong>Pet:</strong> ${appointment.pet_name} (${appointment.species})</p>
+                                <p style="margin: 4px 0;"><strong>Date:</strong> ${appointment.appointment_date}</p>
+                                <p style="margin: 4px 0;"><strong>Time:</strong> ${appointment.appointment_time}</p>
+                                <p style="margin: 4px 0;"><strong>Service:</strong> ${appointment.service_name}</p>
+                            </div>
+                        </div>
+
+                        <form id="cancellationReasonForm">
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label for="cancellationReason" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                                    <i class="fas fa-comment" style="color: #5DADE2; margin-right: 8px;"></i>
+                                    Reason for Cancellation *
+                                </label>
+                                <textarea id="cancellationReason" name="cancellation_reason" rows="4" required
+                                    placeholder="Please provide a reason for cancelling this appointment. This will be sent to the client."
+                                    style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; resize: vertical; min-height: 100px;"
+                                    title="Provide a reason for cancelling this appointment"></textarea>
+                            </div>
+
+                            <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('cancellationReasonModal')?.remove()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+                                    <i class="fas fa-times"></i> KEEP APPOINTMENT
+                                </button>
+                                <button type="submit" class="btn-danger" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(220, 53, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(220, 53, 69, 0.3)'">
+                                    <i class="fas fa-ban"></i> CONFIRM CANCELLATION
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add event listener for form submission
+            const form = document.getElementById('cancellationReasonForm');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.confirmCancellationWithReason(appointmentId);
+                });
+            }
+        });
+    }
+
+    async getAppointmentDetailsForCancellation(appointmentId) {
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_appointment_details',
+                    appointment_id: appointmentId
+                })
+            });
+
+            const result = await response.json();
+            return result.success ? result.data : null;
+        } catch (error) {
+            console.error('Error loading appointment details for cancellation:', error);
+            return null;
+        }
+    }
+
+    async confirmCancellationWithReason(appointmentId) {
+        const reasonInput = document.getElementById('cancellationReason');
+        const reason = reasonInput?.value?.trim();
+
+        if (!reason) {
+            this.showToast('Please provide a reason for cancellation', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_appointment_status_with_reason',
+                    appointment_id: appointmentId,
+                    status: 'cancelled',
+                    cancellation_reason: reason
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Appointment cancelled successfully!', 'success');
+
+                // Send notification with reason
+                await this.sendCancellationNotificationWithReason(appointmentId, reason);
+
+                // Close modal and refresh
+                document.getElementById('cancellationReasonModal')?.remove();
+                delete this.pendingStatusChanges[appointmentId];
+                await this.loadAppointmentsSection();
+            } else {
+                this.showToast(result.message || 'Failed to cancel appointment', 'error');
+            }
+        } catch (error) {
+            console.error('Error cancelling appointment:', error);
+            this.showToast('Failed to cancel appointment. Please try again.', 'error');
+        }
+    }
+
+    async sendCancellationNotificationWithReason(appointmentId, reason) {
+        try {
+            console.log('Sending cancellation notification with reason for appointment:', appointmentId);
+
+            // Get appointment details to include in notification
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_appointment_details',
+                    appointment_id: appointmentId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const appointment = result.data;
+
+                // Send notification to user with reason
+                const notificationResponse = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_notification',
+                        user_id: appointment.user_id || appointment.client_id,
+                        type: 'appointment_cancelled',
+                        title: 'Appointment Cancelled',
+                        message: `Your appointment for ${appointment.pet_name} on ${appointment.appointment_date} at ${appointment.appointment_time} has been cancelled. Reason: ${reason}`,
+                        priority: 'high',
+                        data: {
+                            appointment_id: appointmentId,
+                            pet_name: appointment.pet_name,
+                            appointment_date: appointment.appointment_date,
+                            appointment_time: appointment.appointment_time,
+                            service_name: appointment.service_name,
+                            cancellation_reason: reason
+                        }
+                    })
+                });
+
+                const notificationResult = await notificationResponse.json();
+
+                if (notificationResult.success) {
+                    console.log('Cancellation notification with reason sent successfully');
+                } else {
+                    console.warn('Failed to send cancellation notification:', notificationResult.message);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending cancellation notification with reason:', error);
+        }
+    }
+
     // Placeholder functions for features not yet implemented
     editAppointment(appointmentId) {
         this.showToast('Edit appointment feature coming soon!', 'info');
@@ -3165,6 +3967,149 @@ class StaffDashboard {
     cancelAppointment(appointmentId) {
         if (confirm('Are you sure you want to cancel this appointment?')) {
             this.showToast('Cancel appointment feature coming soon!', 'info');
+        }
+    }
+
+    async reviewCancellationRequest(appointmentId) {
+        if (!appointmentId) {
+            this.showToast('Invalid appointment ID', 'error');
+            return;
+        }
+
+        try {
+            // Get appointment details first
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_appointment_details',
+                    appointment_id: appointmentId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const appointment = result.data;
+                const confirmMessage = `Client ${appointment.first_name} ${appointment.last_name} has requested to cancel their appointment for ${appointment.pet_name} on ${appointment.appointment_date} at ${appointment.appointment_time}.\n\nDo you want to approve this cancellation request?`;
+
+                if (confirm(confirmMessage)) {
+                    // Approve cancellation - set status to cancelled
+                    await this.approveCancellation(appointmentId);
+                } else {
+                    // Deny cancellation - revert to previous status or keep as pending
+                    await this.denyCancellation(appointmentId);
+                }
+            } else {
+                this.showToast('Failed to load appointment details', 'error');
+            }
+        } catch (error) {
+            console.error('Error reviewing cancellation request:', error);
+            this.showToast('Error processing cancellation request. Please try again.', 'error');
+        }
+    }
+
+    async approveCancellation(appointmentId) {
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_appointment_status',
+                    appointment_id: appointmentId,
+                    status: 'cancelled'
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Cancellation request approved successfully!', 'success');
+                await this.loadAppointmentsSection(); // Refresh the appointments list
+            } else {
+                this.showToast(result.message || 'Failed to approve cancellation', 'error');
+            }
+        } catch (error) {
+            console.error('Error approving cancellation:', error);
+            this.showToast('Error approving cancellation. Please try again.', 'error');
+        }
+    }
+
+    async denyCancellation(appointmentId) {
+        try {
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'deny_cancellation_request',
+                    appointment_id: appointmentId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.showToast('Cancellation request denied. Appointment status restored.', 'success');
+                await this.loadAppointmentsSection(); // Refresh the appointments list
+            } else {
+                this.showToast(result.message || 'Failed to deny cancellation request', 'error');
+            }
+        } catch (error) {
+            console.error('Error denying cancellation:', error);
+            this.showToast('Error denying cancellation request. Please try again.', 'error');
+        }
+    }
+
+    async sendCancellationNotification(appointmentId) {
+        try {
+            console.log('Sending cancellation notification for appointment:', appointmentId);
+
+            // Get appointment details to include in notification
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_appointment_details',
+                    appointment_id: appointmentId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                const appointment = result.data;
+
+                // Send notification to user
+                const notificationResponse = await fetch('../api/vet_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_notification',
+                        user_id: appointment.user_id || appointment.client_id,
+                        type: 'appointment_cancelled',
+                        title: 'Appointment Cancelled',
+                        message: `Your appointment for ${appointment.pet_name} on ${appointment.appointment_date} at ${appointment.appointment_time} has been cancelled.`,
+                        priority: 'high',
+                        data: {
+                            appointment_id: appointmentId,
+                            pet_name: appointment.pet_name,
+                            appointment_date: appointment.appointment_date,
+                            appointment_time: appointment.appointment_time,
+                            service_name: appointment.service_name
+                        }
+                    })
+                });
+
+                const notificationResult = await notificationResponse.json();
+
+                if (notificationResult.success) {
+                    console.log('Cancellation notification sent successfully');
+                } else {
+                    console.warn('Failed to send cancellation notification:', notificationResult.message);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending cancellation notification:', error);
         }
     }
 
@@ -4135,6 +5080,66 @@ function downloadPetMedicalReport(petId) {
             window.toast('Download feature not available. Please refresh the page.', 'error');
         } else {
             alert('Download feature not available. Please refresh the page.');
+        }
+    }
+}
+
+// Global function to refresh appointment services
+function refreshAppointmentServices() {
+    console.log('🔄 Manual service refresh requested for staff appointment');
+    if (window.staffDashboard && window.staffDashboard.loadServicesForAppointment) {
+        window.staffDashboard.loadServicesForAppointment();
+        window.staffDashboard.showToast('Services refreshed!', 'success');
+    } else {
+        console.error('❌ StaffDashboard not available for service refresh');
+        if (window.toast) {
+            window.toast('Service refresh not available. Please refresh the page.', 'error');
+        } else {
+            alert('Service refresh not available. Please refresh the page.');
+        }
+    }
+}
+
+// Global function to refresh dashboard services
+function refreshDashboardServices() {
+    console.log('🔄 Manual service refresh requested for dashboard booking');
+    if (window.staffDashboard && window.staffDashboard.loadDashboardServices) {
+        window.staffDashboard.loadDashboardServices();
+        window.staffDashboard.showToast('Services refreshed!', 'success');
+    } else {
+        console.error('❌ StaffDashboard not available for dashboard service refresh');
+        if (window.toast) {
+            window.toast('Service refresh not available. Please refresh the page.', 'error');
+        } else {
+            alert('Service refresh not available. Please refresh the page.');
+        }
+    }
+}
+
+// Global function to clear dashboard booking form
+function clearDashboardBookingForm() {
+    console.log('🔄 Clearing dashboard booking form');
+    if (window.staffDashboard && window.staffDashboard.clearDashboardBookingForm) {
+        window.staffDashboard.clearDashboardBookingForm();
+    } else {
+        console.error('❌ StaffDashboard not available for form clearing');
+        // Fallback implementation
+        const form = document.getElementById('dashboardBookingForm');
+        if (form) {
+            form.reset();
+
+            // Reset dependent dropdowns
+            const petSelect = document.getElementById('dashboardPet');
+            const timeSelect = document.getElementById('dashboardTime');
+
+            if (petSelect) petSelect.innerHTML = '<option value="">Select client first</option>';
+            if (timeSelect) timeSelect.innerHTML = '<option value="">Select date first</option>';
+
+            if (window.toast) {
+                window.toast('Form cleared', 'info');
+            } else {
+                alert('Form cleared');
+            }
         }
     }
 }

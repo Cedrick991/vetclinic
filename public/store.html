@@ -131,11 +131,10 @@
             <div class="product-category">${product.category}</div>
             <h3 class="product-name">${product.name}</h3>
             <p class="product-description">${product.description || 'No description available'}</p>
-            <div class="product-price">₱${parseFloat(product.price).toFixed(2)}</div>
             <div class="product-stock ${getStockClass(product.stock)}">
               ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
             </div>
-            <button class="add-to-cart-btn" ${product.stock <= 0 ? 'disabled' : ''} onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
+            <button class="add-to-cart-btn" ${product.stock <= 0 ? 'disabled' : ''} onclick="addToCart(${product.id}, '${product.name}')">
               ${product.stock <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
           </div>
@@ -231,10 +230,10 @@
       displayProducts(filteredProducts);
     }
 
-    function addToCart(productId, productName, price) {
+    function addToCart(productId, productName) {
       // Simple cart functionality - you can expand this
       alert(`${productName} added to cart! (This is a demo - cart functionality would be implemented here)`);
-      console.log('Adding product to cart:', { productId, productName, price });
+      console.log('Adding product to cart:', { productId, productName });
     }
 
     // Add some sample products if API fails (for demo purposes)
@@ -245,7 +244,6 @@
           name: "Premium Dog Food",
           description: "High-quality dog food with balanced nutrition",
           category: "food",
-          price: "1250.00",
           stock: 15,
           image: "assets/images/products/product_1_1758624466.jpg"
         },
@@ -254,7 +252,6 @@
           name: "Cat Grooming Kit",
           description: "Complete grooming kit for cats",
           category: "grooming",
-          price: "850.00",
           stock: 8,
           image: "assets/images/products/product_7_1758628396.jpg"
         },
@@ -263,7 +260,6 @@
           name: "Dog Collar",
           description: "Comfortable and stylish dog collar",
           category: "accessories",
-          price: "350.00",
           stock: 25,
           image: "assets/images/products/product_8_1758629447.jpg"
         }

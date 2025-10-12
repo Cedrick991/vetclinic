@@ -151,6 +151,9 @@ class VetDatabase {
                     appointment_time TIME NOT NULL,
                     status TEXT DEFAULT 'pending',
                     notes TEXT,
+                    cancellation_requested INTEGER DEFAULT 0,
+                    cancellation_reason TEXT,
+                    appointment_duration INTEGER,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (client_id) REFERENCES users(id),
                     FOREIGN KEY (pet_id) REFERENCES pets(id),
@@ -233,6 +236,53 @@ class VetDatabase {
                 )
             ",
 
+            // Notifications table
+            'notifications' => "
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    type TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    data TEXT,
+                    priority TEXT DEFAULT 'normal',
+                    is_read INTEGER DEFAULT 0,
+                    read_at DATETIME,
+                    expires_at DATETIME,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                )
+            ",
+
+            // Notification preferences table
+            'notification_preferences' => "
+                CREATE TABLE IF NOT EXISTS notification_preferences (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    notification_type TEXT NOT NULL,
+                    is_enabled INTEGER DEFAULT 1,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id),
+                    UNIQUE(user_id, notification_type)
+                )
+            ",
+
+            // Notification read status table (for tracking read status per user)
+            'notification_read_status' => "
+                CREATE TABLE IF NOT EXISTS notification_read_status (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    notification_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
+                    is_read INTEGER DEFAULT 0,
+                    read_at DATETIME,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (notification_id) REFERENCES notifications(id),
+                    FOREIGN KEY (user_id) REFERENCES users(id),
+                    UNIQUE(notification_id, user_id)
+                )
+            ",
+
         ];
         
         foreach ($tables as $name => $sql) {
@@ -301,6 +351,61 @@ class VetDatabase {
                 (4, 'Bella', 'Dog', 'Beagle', '2020-09-25', 4, 'Female', 12.5, 'Tri-color'),
                 (5, 'Charlie', 'Dog', 'Poodle', '2022-01-30', 2, 'Male', 8.0, 'White'),
                 (5, 'Milo', 'Cat', 'Maine Coon', '2021-12-03', 3, 'Male', 6.5, 'Gray')
+            ");
+
+            // Insert default notification preferences for all users
+            $this->pdo->exec("
+                INSERT OR IGNORE INTO notification_preferences (user_id, notification_type, is_enabled) VALUES
+                -- Admin user preferences
+                (1, 'appointment_new', 1),
+                (1, 'appointment_status_change', 1),
+                (1, 'appointment_reminder', 1),
+                (1, 'pet_registration', 1),
+                (1, 'medical_history_update', 1),
+                (1, 'order_new', 1),
+                (1, 'product_stock_alert', 1),
+                (1, 'system_announcement', 1),
+
+                -- Client users preferences (IDs 2-6)
+                (2, 'appointment_new', 1),
+                (2, 'appointment_status_change', 1),
+                (2, 'appointment_reminder', 1),
+                (2, 'medical_history_update', 1),
+                (2, 'order_new', 1),
+                (2, 'order_status_change', 1),
+                (2, 'system_announcement', 1),
+
+                (3, 'appointment_new', 1),
+                (3, 'appointment_status_change', 1),
+                (3, 'appointment_reminder', 1),
+                (3, 'medical_history_update', 1),
+                (3, 'order_new', 1),
+                (3, 'order_status_change', 1),
+                (3, 'system_announcement', 1),
+
+                (4, 'appointment_new', 1),
+                (4, 'appointment_status_change', 1),
+                (4, 'appointment_reminder', 1),
+                (4, 'medical_history_update', 1),
+                (4, 'order_new', 1),
+                (4, 'order_status_change', 1),
+                (4, 'system_announcement', 1),
+
+                (5, 'appointment_new', 1),
+                (5, 'appointment_status_change', 1),
+                (5, 'appointment_reminder', 1),
+                (5, 'medical_history_update', 1),
+                (5, 'order_new', 1),
+                (5, 'order_status_change', 1),
+                (5, 'system_announcement', 1),
+
+                (6, 'appointment_new', 1),
+                (6, 'appointment_status_change', 1),
+                (6, 'appointment_reminder', 1),
+                (6, 'medical_history_update', 1),
+                (6, 'order_new', 1),
+                (6, 'order_status_change', 1),
+                (6, 'system_announcement', 1)
             ");
         }
     }
@@ -402,6 +507,69 @@ class VetDatabase {
             try {
                 $this->pdo->exec("ALTER TABLE pets ADD COLUMN birthdate DATE");
                 echo "✅ Added missing birthdate column to pets table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if appointments table has cancellation_requested column
+        $columns = $this->pdo->query("PRAGMA table_info(appointments)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasCancellationRequested = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'cancellation_requested') {
+                $hasCancellationRequested = true;
+                break;
+            }
+        }
+
+        // Add cancellation_requested column if missing
+        if (!$hasCancellationRequested) {
+            try {
+                $this->pdo->exec("ALTER TABLE appointments ADD COLUMN cancellation_requested INTEGER DEFAULT 0");
+                echo "✅ Added missing cancellation_requested column to appointments table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if appointments table has appointment_duration column
+        $columns = $this->pdo->query("PRAGMA table_info(appointments)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasAppointmentDuration = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'appointment_duration') {
+                $hasAppointmentDuration = true;
+                break;
+            }
+        }
+
+        // Add appointment_duration column if missing
+        if (!$hasAppointmentDuration) {
+            try {
+                $this->pdo->exec("ALTER TABLE appointments ADD COLUMN appointment_duration INTEGER");
+                echo "✅ Added missing appointment_duration column to appointments table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if appointments table has cancellation_reason column
+        $columns = $this->pdo->query("PRAGMA table_info(appointments)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasCancellationReason = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'cancellation_reason') {
+                $hasCancellationReason = true;
+                break;
+            }
+        }
+
+        // Add cancellation_reason column if missing
+        if (!$hasCancellationReason) {
+            try {
+                $this->pdo->exec("ALTER TABLE appointments ADD COLUMN cancellation_reason TEXT");
+                echo "✅ Added missing cancellation_reason column to appointments table\n";
             } catch (Exception $e) {
                 // Column might already exist, continue silently
             }

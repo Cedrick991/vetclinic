@@ -11,7 +11,230 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="description" content="Client Dashboard - Tattao Veterinary Clinic Management System">
-    </style>
+  <style>
+    /* Enhanced pet card action button styling */
+    .pet-card .action-btn {
+      background: transparent;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      pointer-events: auto;
+      z-index: 10;
+      position: relative;
+    }
+
+    .pet-card .action-btn.edit {
+      background: #3498db;
+      color: white;
+    }
+
+    .pet-card .action-btn.delete {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .pet-card .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Modal enhancements */
+    .modal-content {
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(90vh - 120px);
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Mobile responsive modal */
+    @media (max-width: 768px) {
+      .modal-content {
+        max-height: 95vh;
+        margin: 2.5vh 10px;
+        border-radius: 12px;
+      }
+
+      .modal-body {
+        max-height: calc(95vh - 140px);
+        padding: 16px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Ensure pet cards are properly interactive */
+    .pet-card {
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pet-card * {
+      pointer-events: auto;
+    }
+
+    .pet-card .pet-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+      pointer-events: auto;
+    }
+
+    .pet-card .pet-actions .action-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      min-width: 60px;
+      justify-content: center;
+    }
+
+    .pet-card .pet-actions .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+    }
+
+    .pet-card .pet-actions .action-btn.edit {
+      background: rgba(52, 152, 219, 0.2);
+      border-color: #3498db;
+    }
+
+    .pet-card .pet-actions .action-btn.edit:hover {
+      background: rgba(52, 152, 219, 0.3);
+    }
+
+    .pet-card .pet-actions .action-btn.delete {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: #e74c3c;
+    }
+
+    .pet-card .pet-actions .action-btn.delete:hover {
+      background: rgba(231, 76, 60, 0.3);
+    }
+
+    /* Pulse animation for Book New button highlight */
+    @keyframes highlightPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+        transform: scale(1.05);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        transform: scale(1);
+      }
+    }
+
+    /* Pulse animation for Book New button highlight */
+    @keyframes highlightPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+        transform: scale(1.05);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        transform: scale(1);
+      }
+    }
+
+    /* Status badge styling for client appointments */
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: white;
+    }
+
+    .status-confirmed {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .status-in-progress {
+      background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+      color: white;
+    }
+
+    .status-completed {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .status-cancelled {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+
+    .status-requested {
+      background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+      color: white;
+    }
+
+    .status-text {
+      color: #6c757d;
+      font-size: 12px;
+      font-style: italic;
+    }
+  </style>
    </head>
 <body>
   <!-- Client Dashboard Container -->
@@ -50,7 +273,7 @@
         <a href="#settings" class="nav-item" data-section="settings">
           <i class="fas fa-cog"></i> <span>Settings</span>
         </a>
-        <a href="#" class="nav-item" data-section="logout">
+        <a href="#" class="nav-item" data-section="logout" onclick="handleLogout()">
           <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
         </a>
       </div>
@@ -62,7 +285,7 @@
       <!-- Header Bar -->
       <header class="header-bar">
         <!-- Mobile Menu Toggle -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleSidebar(); return false;">
+        <button class="mobile-menu-toggle" id="clientMobileMenuToggle" onclick="toggleClientMobileSidebar()">
           <i class="fas fa-bars"></i>
         </button>
 
@@ -155,7 +378,7 @@
             <h2 class="section-title">
               <i class="fas fa-calendar-alt"></i> My Appointments
             </h2>
-            <button class="header-btn" data-action="book-appointment">
+            <button class="header-btn" onclick="clientDashboard.showBookingModal()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
               <i class="fas fa-plus"></i> Book New
             </button>
           </div>
@@ -188,7 +411,7 @@
             <h2 class="section-title">
               <i class="fas fa-paw"></i> My Pets
             </h2>
-            <button class="header-btn" data-action="add-pet">
+            <button class="header-btn" onclick="showAddPetModal()">
               <i class="fas fa-plus"></i> Add Pet
             </button>
           </div>
@@ -196,6 +419,98 @@
             <div class="loading">
               <div class="spinner"></div>
               Loading pets...
+            </div>
+          </div>
+        </section>
+
+        <!-- Add Pet Modal for Client - Simplified -->
+        <div id="clientAddPetModal" class="modal" style="display: none;">
+          <div class="modal-content" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+            <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-paw" style="color: #9BA9FF; font-size: 1.5rem;"></i>
+                Add New Pet
+              </h3>
+              <span class="close" onclick="closeClientAddPetModal()" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
+            </div>
+            <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 24px;">
+              <form id="clientAddPetForm">
+                <!-- Pet Name and Species Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientAddPetName" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Pet Name *</label>
+                    <input type="text" id="clientAddPetName" name="pet_name" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter pet name">
+                  </div>
+                  <div class="form-group">
+                    <label for="clientPetSpecies" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Species *</label>
+                    <select id="clientAddPetSpecies" name="species" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Select Species</option>
+                      <option value="Dog">🐶 Dog</option>
+                      <option value="Cat">🐱 Cat</option>
+                      <option value="Bird">🐦 Bird</option>
+                      <option value="Rabbit">🐰 Rabbit</option>
+                      <option value="Other">🐾 Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Breed and Birthdate Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientAddPetBreed" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Breed</label>
+                    <input type="text" id="clientAddPetBreed" name="breed" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter breed (optional)">
+                  </div>
+                  <div class="form-group">
+                    <label for="clientAddPetBirthdate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Birthdate</label>
+                    <input type="date" id="clientAddPetBirthdate" name="birthdate" max="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                </div>
+
+                <!-- Gender and Weight Row -->
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientAddPetGender" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Gender *</label>
+                    <select id="clientAddPetGender" name="gender" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Select Gender</option>
+                      <option value="Male">♂️ Male</option>
+                      <option value="Female">♀️ Female</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="clientAddPetWeight" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Weight (kg)</label>
+                    <input type="number" id="clientAddPetWeight" name="weight" step="0.1" min="0" placeholder="e.g., 5.5" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                </div>
+
+                <!-- Color -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                  <label for="clientAddPetColor" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Color</label>
+                  <input type="text" id="clientAddPetColor" name="color" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter color (optional)">
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                  <button type="button" class="btn-secondary" onclick="closeClientAddPetModal()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">CANCEL</button>
+                  <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+                    <i class="fas fa-plus" style="margin-right: 8px;"></i> ADD PET
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store Section -->
+        <section id="storeSection" class="content-section" style="display: none;">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-store"></i> Pet Store
+            </h2>
+          </div>
+          <div id="clientProductsGrid" class="products-grid">
+            <div class="loading">
+              <div class="spinner"></div>
+              Loading products...
             </div>
           </div>
         </section>
@@ -365,74 +680,302 @@
           </div>
         </section>
 
+        <!-- Booking Modal for Client Dashboard -->
+        <div id="clientBookingModal" class="modal" style="display: none;">
+          <div class="modal-content booking-modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+            <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <h3 id="clientBookingModalTitle" style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-calendar-plus" style="color: #9BA9FF; font-size: 1.5rem;"></i>
+                Book an Appointment
+              </h3>
+              <span class="close" onclick="closeClientBookingModal()" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
+            </div>
+            <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 24px;">
+
+              <!-- Booking Form -->
+              <form id="clientBookingForm">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientBookingService" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                      <i class="fas fa-stethoscope" style="color: #5DADE2; margin-right: 8px;"></i> Select Service *
+                    </label>
+                    <select id="clientBookingService" name="service_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Loading services...</option>
+                    </select>
+                    <button type="button" onclick="refreshClientServices()" title="Refresh services" style="background: #f39c12; color: white; border: none; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-size: 12px;">
+                      <i class="fas fa-sync-alt"></i>
+                    </button>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="clientBookingPet" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                      <i class="fas fa-paw" style="color: #5DADE2; margin-right: 8px;"></i> Select Pet *
+                    </label>
+                    <select id="clientBookingPet" name="pet_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Loading pets...</option>
+                    </select>
+                    <button type="button" onclick="showClientAddPetForm()" title="Add a new pet" style="background: #4169e1; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-left: 10px;">
+                      <i class="fas fa-plus"></i> Add New Pet
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientBookingDate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                      <i class="fas fa-calendar" style="color: #5DADE2; margin-right: 8px;"></i> Appointment Date *
+                    </label>
+                    <input type="date" id="clientBookingDate" name="appointment_date" required min="" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="clientBookingTime" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                      <i class="fas fa-clock" style="color: #5DADE2; margin-right: 8px;"></i> Appointment Time *
+                    </label>
+                    <select id="clientBookingTime" name="appointment_time" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Select date first</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                  <label for="clientBookingNotes" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">
+                    <i class="fas fa-sticky-note" style="color: #5DADE2; margin-right: 8px;"></i> Notes (Optional)
+                  </label>
+                  <textarea id="clientBookingNotes" name="notes" rows="3" placeholder="Any special instructions or concerns..." style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; resize: vertical; min-height: 80px;" title="Enter any special instructions or concerns"></textarea>
+                </div>
+
+                <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                  <button type="button" class="btn-secondary" onclick="closeClientBookingModal()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+                    <i class="fas fa-times"></i> CANCEL
+                  </button>
+                  <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+                    <i class="fas fa-calendar-plus"></i> BOOK APPOINTMENT
+                  </button>
+                </div>
+              </form>
+
+              <!-- Add Pet Form (Hidden) -->
+              <div id="clientAddPetForm" style="display: none; border-top: 1px solid rgba(255,215,0,0.3); padding-top: 20px; margin-top: 20px;">
+                <h3 style="color: #ffd700; margin: 0 0 20px 0;">
+                  <i class="fas fa-paw"></i> Add New Pet
+                </h3>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientBookingPetName" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Pet Name *</label>
+                    <input type="text" id="clientBookingPetName" placeholder="Enter pet name" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                  <div class="form-group">
+                    <label for="clientBookingPetSpecies" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Species *</label>
+                    <select id="clientBookingPetSpecies" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Select Species</option>
+                      <option value="Dog">🐶 Dog</option>
+                      <option value="Cat">🐱 Cat</option>
+                      <option value="Bird">🐦 Bird</option>
+                      <option value="Rabbit">🐰 Rabbit</option>
+                      <option value="Other">🐾 Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientBookingPetBreed" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Breed</label>
+                    <input type="text" id="clientBookingPetBreed" placeholder="Enter breed (optional)" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                  <div class="form-group">
+                    <label for="clientBookingPetBirthdate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Birthdate</label>
+                    <input type="date" id="clientBookingPetBirthdate" max="" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                  <div class="form-group">
+                    <label for="clientBookingPetGender" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Gender *</label>
+                    <select id="clientBookingPetGender" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                      <option value="">Select Gender</option>
+                      <option value="Male">♂️ Male</option>
+                      <option value="Female">♀️ Female</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="clientBookingPetWeight" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Weight (kg)</label>
+                    <input type="number" id="clientBookingPetWeight" step="0.1" min="0" placeholder="e.g., 5.5" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                  <label for="clientBookingPetColor" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Color</label>
+                  <input type="text" id="clientBookingPetColor" placeholder="Enter color (optional)" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                  <button type="button" onclick="addClientPet()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px;">
+                    <i class="fas fa-plus"></i> Add Pet
+                  </button>
+                  <button type="button" onclick="hideClientAddPetForm()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
+
+  <!-- Staff Add Pet Modal - Commented out since this is client page -->
+  <!--
+  <div id="staffAddPetModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+      <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+          <i class="fas fa-paw" style="color: #9BA9FF; font-size: 1.5rem;"></i>
+          Add New Pet (Staff)
+        </h3>
+        <span class="close" onclick="closeStaffAddPetModal()" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
+      </div>
+      <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 24px;">
+        <form id="staffAddPetForm">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="staffPetOwner" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Owner *</label>
+            <select id="staffPetOwner" name="owner_id" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+              <option value="">Select an owner</option>
+            </select>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+              <label for="staffPetName" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Pet Name *</label>
+              <input type="text" id="staffPetName" name="pet_name" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter pet name">
+            </div>
+            <div class="form-group">
+              <label for="staffPetSpecies" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Species *</label>
+              <select id="staffPetSpecies" name="species" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                <option value="">Select Species</option>
+                <option value="Dog">🐶 Dog</option>
+                <option value="Cat">🐱 Cat</option>
+                <option value="Bird">🐦 Bird</option>
+                <option value="Rabbit">🐰 Rabbit</option>
+                <option value="Other">🐾 Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+              <label for="staffPetBreed" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Breed</label>
+              <input type="text" id="staffPetBreed" name="breed" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter breed (optional)">
+            </div>
+            <div class="form-group">
+              <label for="staffPetBirthdate" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Birthdate</label>
+              <input type="date" id="staffPetBirthdate" name="birthdate" max="${new Date().toISOString().split('T')[0]}" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-group">
+              <label for="staffPetGender" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Gender *</label>
+              <select id="staffPetGender" name="gender" required style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
+                <option value="">Select Gender</option>
+                <option value="Male">♂️ Male</option>
+                <option value="Female">♀️ Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="staffPetWeight" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Weight (kg)</label>
+              <input type="number" id="staffPetWeight" name="weight" step="0.1" min="0" placeholder="e.g., 5.5" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="staffPetColor" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block; font-weight: 500;">Color</label>
+            <input type="text" id="staffPetColor" name="color" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px;" placeholder="Enter color (optional)">
+          </div>
+
+          <div class="form-actions" style="text-align: right; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+            <button type="button" class="btn-secondary" onclick="closeStaffAddPetModal()" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-right: 12px; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">CANCEL</button>
+            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+              <i class="fas fa-plus" style="margin-right: 8px;"></i> ADD PET
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  -->
 
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
 
   <!-- Mobile Overlay -->
-  <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+  <div class="mobile-overlay" id="clientMobileOverlay" onclick="toggleClientMobileSidebar()"></div>
 
 
   <!-- Dashboard JavaScript -->
   <script src="../assets/js/dashboard.js"></script>
   <script src="../assets/js/client-dashboard.js"></script>
+  <script src="../assets/js/modules/notifications.js"></script>
 <script>
   // Mobile sidebar toggle functionality
-  function toggleSidebar() {
-    console.log('Toggle sidebar clicked!'); // Debug log
+  function toggleClientMobileSidebar() {
+    console.log('🔧 toggleClientMobileSidebar called!');
 
     const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileOverlay');
-    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const overlay = document.getElementById('clientMobileOverlay');
+    const toggleBtn = document.getElementById('clientMobileMenuToggle');
 
-    console.log('Elements found:', { sidebar, overlay, toggleBtn }); // Debug log
+    console.log('📱 Client Elements found:', {
+      sidebar: !!sidebar,
+      overlay: !!overlay,
+      toggleBtn: !!toggleBtn,
+      sidebarClass: sidebar ? sidebar.className : 'not found',
+      overlayClass: overlay ? overlay.className : 'not found'
+    });
 
-    if (sidebar && overlay) {
+    if (sidebar && overlay && toggleBtn) {
       const isOpen = sidebar.classList.contains('mobile-open');
-      console.log('Sidebar is open:', isOpen); // Debug log
+      console.log('🔍 Client Sidebar is open:', isOpen);
 
       if (isOpen) {
+        console.log('🔒 Closing client sidebar...');
         // Close sidebar
         sidebar.classList.remove('mobile-open');
         overlay.classList.remove('active');
-        if (toggleBtn) {
-          toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-          toggleBtn.setAttribute('aria-expanded', 'false');
-        }
-        console.log('Sidebar closed'); // Debug log
+        toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        console.log('✅ Client sidebar closed');
       } else {
+        console.log('🔓 Opening client sidebar...');
         // Open sidebar
         sidebar.classList.add('mobile-open');
         overlay.classList.add('active');
-        if (toggleBtn) {
-          toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
-          toggleBtn.setAttribute('aria-expanded', 'true');
-        }
-        console.log('Sidebar opened'); // Debug log
+        toggleBtn.innerHTML = '<i class="fas fa-times"></i>';
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        console.log('✅ Client sidebar opened');
       }
     } else {
-      console.error('Sidebar or overlay elements not found!'); // Debug log
+      console.error('❌ Missing client elements:', {
+        sidebar: !sidebar,
+        overlay: !overlay,
+        toggleBtn: !toggleBtn
+      });
     }
   }
 
   // Alternative event listener for better mobile support
   document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const toggleBtn = document.getElementById('clientMobileMenuToggle');
     if (toggleBtn) {
       // Add touch event support for mobile devices
       toggleBtn.addEventListener('touchstart', function(e) {
         e.preventDefault();
-        toggleSidebar();
+        toggleClientMobileSidebar();
       }, { passive: false });
 
       // Add keyboard support
       toggleBtn.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          toggleSidebar();
+          toggleClientMobileSidebar();
         }
       });
 
@@ -446,8 +989,8 @@
   // Close sidebar when clicking outside on mobile
   document.addEventListener('click', function(event) {
     const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobileOverlay');
-    const toggleBtn = document.getElementById('mobileMenuToggle');
+    const overlay = document.getElementById('clientMobileOverlay');
+    const toggleBtn = document.getElementById('clientMobileMenuToggle');
 
     if (window.innerWidth <= 768) {
       if (sidebar && overlay && toggleBtn) {
@@ -455,6 +998,7 @@
           sidebar.classList.remove('mobile-open');
           overlay.classList.remove('active');
           toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+          toggleBtn.setAttribute('aria-expanded', 'false');
         }
       }
     }
@@ -474,15 +1018,15 @@
         const result = await response.json();
 
         if (result.success) {
-          window.location.href = '../public/homepage.html';
+          window.location.href = '../index.html';
         } else {
           alert('Logout failed. Redirecting anyway...');
-          window.location.href = '../public/homepage.html';
+          window.location.href = '../index.html';
         }
       } catch (error) {
         console.error('Logout error:', error);
         alert('Logout failed. Redirecting anyway...');
-        window.location.href = '../public/homepage.html';
+        window.location.href = '../index.html';
       }
     }
   }
@@ -520,6 +1064,9 @@
           loadClientSettingsData();
         } else if (sectionName === 'orders') {
           loadOrders();
+        } else if (sectionName === 'logout') {
+          handleLogout();
+          return;
         }
       }
 
@@ -964,9 +1511,179 @@
       }, 3000);
     }
 
+    // Client Add Pet Modal Functions
+    function showAddPetModal() {
+      const modal = document.getElementById('clientAddPetModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        loadClientPetOwners();
+      }
+    }
+
+    function closeClientAddPetModal() {
+      const modal = document.getElementById('clientAddPetModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        // Clear form
+        document.getElementById('clientAddPetForm').reset();
+      }
+    }
+
+    async function loadClientPetOwners() {
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_user_info' })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.data && result.data.user) {
+          // Auto-populate with current user (no owner selection needed for client)
+          console.log('Client pet form - owner auto-populated');
+        }
+      } catch (error) {
+        console.error('Error loading client pet owners:', error);
+      }
+    }
+
+    // Handle client add pet form submission
+    document.getElementById('clientAddPetForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Prevent multiple submissions
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Pet...';
+      }
+
+      const formData = new FormData(e.target);
+      const petData = {
+        action: 'add_pet',
+        owner_id: formData.get('owner_id'),
+        pet_name: formData.get('pet_name'),
+        species: formData.get('species'),
+        breed: formData.get('breed'),
+        birthdate: formData.get('birthdate'),
+        gender: formData.get('gender'),
+        weight: formData.get('weight') ? parseFloat(formData.get('weight')) : null,
+        color: formData.get('color')
+      };
+
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(petData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast('Pet added successfully!', 'success');
+          closeClientAddPetModal();
+          // Reload pets to show the new pet
+          setTimeout(() => {
+            loadClientPets();
+          }, 500); // Small delay to ensure database is updated
+        } else {
+          showToast(result.message || 'Failed to add pet', 'error');
+        }
+      } catch (error) {
+        console.error('Error adding pet:', error);
+        showToast('Failed to add pet. Please try again.', 'error');
+      } finally {
+        // Re-enable submit button
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-plus"></i> ADD PET';
+        }
+      }
+    });
+
+    // Client Add Pet Modal Functions (consolidated)
+    function showClientAddPetModal() {
+      const modal = document.getElementById('clientAddPetModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        loadClientPetOwnerInfo();
+      }
+    }
+
+    function closeClientAddPetModal() {
+      const modal = document.getElementById('clientAddPetModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        // Clear form
+        const form = document.getElementById('clientAddPetForm');
+        if (form) form.reset();
+      }
+    }
+
+    async function loadClientPetOwnerInfo() {
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_user_info' })
+        });
+
+        const result = await response.json();
+        if (result.success && result.data && result.data.user) {
+          // Auto-populate owner info if needed
+          console.log('Client owner info loaded for pet modal');
+        }
+      } catch (error) {
+        console.error('Error loading client owner info:', error);
+      }
+    }
+
+    // Check for appointments redirect and highlight Book New button
+    function checkForAppointmentsRedirect() {
+      // Check if URL contains appointments hash
+      if (window.location.hash === '#appointments') {
+        console.log('🔄 Appointments redirect detected, navigating to appointments section...');
+
+        // Navigate to appointments section
+        showSection('appointments');
+
+        // Highlight the Book New button for 3 seconds
+        setTimeout(() => {
+          const bookNewBtn = document.querySelector('.header-btn');
+          if (bookNewBtn) {
+            console.log('🎯 Highlighting Book New button...');
+
+            // Add highlight animation
+            bookNewBtn.style.animation = 'highlightPulse 3s ease-in-out';
+            bookNewBtn.style.boxShadow = '0 0 20px rgba(40, 167, 69, 0.8)';
+
+            // Remove highlight after 3 seconds
+            setTimeout(() => {
+              bookNewBtn.style.animation = '';
+              bookNewBtn.style.boxShadow = '';
+              console.log('✅ Book New button highlight removed');
+            }, 3000);
+
+            console.log('✅ Book New button highlighted for 3 seconds');
+          } else {
+            console.warn('⚠️ Book New button not found for highlighting');
+          }
+        }, 500); // Small delay to ensure section is loaded
+      }
+    }
+
     // Initialize cart count and load orders on page load
     document.addEventListener('DOMContentLoaded', function() {
       updateCartCount();
+
+      // Check if we should navigate to appointments section and highlight Book New button
+      checkForAppointmentsRedirect();
 
       // Load dashboard data if we're on the dashboard section
       if (document.getElementById('dashboardSection') && document.getElementById('dashboardSection').style.display === 'block') {
@@ -988,7 +1705,11 @@
         console.log('Loading client dashboard data...');
 
         // Load pets data
-        const petsResponse = await fetch('../api/pet_reports_api.php?action=get_pet_list');
+        const petsResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_pets' })
+        });
         const petsResult = await petsResponse.json();
 
         if (petsResult.success && petsResult.data) {
@@ -1816,9 +2537,10 @@
       if (!petSelect) return;
 
       try {
-        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_pets' })
         });
 
         if (!response.ok) {
@@ -1832,7 +2554,7 @@
           petSelect.innerHTML = '<option value="">Select a pet...</option>';
 
           if (result.data.length === 0) {
-            petSelect.innerHTML += '<option value="" disabled>No pets available</option>';
+            petSelect.innerHTML += '<option value="" disabled>No pets available - Please add a pet first</option>';
             document.getElementById('generateReportBtn').disabled = true;
           } else {
             // Add pet options
@@ -2496,9 +3218,10 @@
       try {
         petsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading pets...</div>';
 
-        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_pets' })
         });
 
         if (!response.ok) {
@@ -2529,84 +3252,64 @@
       if (!petsGrid) return;
 
       if (pets.length === 0) {
-        petsGrid.innerHTML = '<div class="loading"><p>No pets found.</p></div>';
+        petsGrid.innerHTML = '<div class="empty-state"><i class="fas fa-paw"></i><h3>No Pets Found</h3><p>You haven\'t registered any pets yet. Add your first pet to get started!</p></div>';
         return;
       }
 
+      // Clear existing content
       petsGrid.innerHTML = '';
 
-      pets.forEach(pet => {
+      // Create a document fragment for better performance
+      const fragment = document.createDocumentFragment();
+
+      pets.forEach((pet, index) => {
         const petCard = createClientPetCard(pet);
-        petsGrid.appendChild(petCard);
+        if (petCard) {
+          fragment.appendChild(petCard);
+        }
       });
+
+      // Append all cards at once
+      petsGrid.appendChild(fragment);
     }
 
     function createClientPetCard(pet) {
       const card = document.createElement('div');
       card.className = 'pet-card';
 
-      // Handle image with fallback
-      let imageHtml = '';
-      let placeholderHtml = `<div class="pet-image-placeholder"><i class="${getSpeciesIcon(pet.species)}"></i></div>`;
+      // Get species icon for the minimal design
+      const speciesIcon = getSpeciesIcon(pet.species);
 
-      if (pet.image && pet.image.trim() !== '' && pet.image !== null && pet.image !== 'null') {
-        imageHtml = `<img src="../${pet.image}" alt="${pet.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+      // Format birthdate for display
+      let birthdateDisplay = 'Not recorded';
+      if (pet.birthdate) {
+        const birthDate = new Date(pet.birthdate);
+        birthdateDisplay = birthDate.toLocaleDateString();
+      }
+
+      // Format weight for display
+      let weightDisplay = 'Not recorded';
+      if (pet.weight) {
+        weightDisplay = `${pet.weight} kg`;
+      }
+
+      // Get owner name
+      let ownerName = 'Not specified';
+      if (pet.first_name && pet.last_name) {
+        ownerName = `${pet.first_name} ${pet.last_name}`;
       }
 
       card.innerHTML = `
-        <div class="pet-card-header">
-          <h3 class="pet-name">
-            <i class="${getSpeciesIcon(pet.species)}"></i>
-            ${pet.name}
-          </h3>
-          <div class="pet-species">${pet.species}</div>
+        <div class="pet-icon">
+          <i class="${speciesIcon}"></i>
         </div>
-        <div class="pet-card-body">
-          <div class="pet-info-sections">
-            <div class="pet-info-section">
-              <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
-              <div class="pet-info-item">
-                <i class="fas fa-dna"></i>
-                <span class="pet-info-label">Breed:</span>
-                <span class="pet-info-value">${pet.breed || 'Not specified'}</span>
-              </div>
-              <div class="pet-info-item">
-                <i class="fas fa-venus-mars"></i>
-                <span class="pet-info-label">Gender:</span>
-                <span class="pet-info-value">${pet.gender || 'Not specified'}</span>
-              </div>
-            </div>
-            <div class="pet-info-section">
-              <h4><i class="fas fa-heart"></i> Physical Details</h4>
-              <div class="pet-info-item">
-                <i class="fas fa-calendar"></i>
-                <span class="pet-info-label">Birthdate:</span>
-                <span class="pet-info-value">${pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not recorded'}</span>
-              </div>
-              <div class="pet-info-item">
-                <i class="fas fa-palette"></i>
-                <span class="pet-info-label">Color:</span>
-                <span class="pet-info-value">${pet.color || 'Not specified'}</span>
-              </div>
-            </div>
-          </div>
-          ${pet.notes ? `
-          <div class="pet-notes-section">
-            <h4 class="pet-notes-title"><i class="fas fa-sticky-note"></i> Notes</h4>
-            <p class="pet-notes">${pet.notes}</p>
-          </div>
-          ` : ''}
-        </div>
-        <div class="pet-card-footer">
-          <div class="pet-actions">
-            <button class="action-btn edit" onclick="editClientPet('${pet.id}')">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="action-btn delete" onclick="deleteClientPet('${pet.id}', '${pet.name}')">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
-        </div>
+        <h3 class="pet-name">${pet.name}</h3>
+        <p><strong>Species:</strong> ${pet.species}</p>
+        <p><strong>Breed:</strong> ${pet.breed || 'Not specified'}</p>
+        <p><strong>Birthdate:</strong> ${birthdateDisplay}</p>
+        <p><strong>Gender:</strong> ${pet.gender || 'Not specified'}</p>
+        <p><strong>Weight:</strong> ${weightDisplay}</p>
+        <p><strong>Owner:</strong> ${ownerName}</p>
       `;
 
       return card;
@@ -2638,264 +3341,7 @@
       console.log('View medical history for pet ID:', petId);
     }
 
-    function editClientPet(petId) {
-      // Create edit pet modal
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-          <div class="modal-header">
-            <h3><i class="fas fa-edit"></i> Edit Pet Information</h3>
-            <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
-          </div>
-          <div class="modal-body">
-            <form id="editPetForm">
-              <input type="hidden" id="editPetId" name="pet_id" value="${petId}">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="editPetName">Pet Name *</label>
-                  <input type="text" id="editPetName" name="name" required>
-                </div>
-                <div class="form-group">
-                  <label for="editPetSpecies">Species *</label>
-                  <select id="editPetSpecies" name="species" required>
-                    <option value="">Select Species</option>
-                    <option value="dog">Dog</option>
-                    <option value="cat">Cat</option>
-                    <option value="bird">Bird</option>
-                    <option value="rabbit">Rabbit</option>
-                    <option value="hamster">Hamster</option>
-                    <option value="fish">Fish</option>
-                    <option value="reptile">Reptile</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="editPetBreed">Breed</label>
-                  <input type="text" id="editPetBreed" name="breed">
-                </div>
-                <div class="form-group">
-                  <label for="editPetBirthdate">Birthdate</label>
-                  <input type="date" id="editPetBirthdate" name="birthdate">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="editPetGender">Gender *</label>
-                  <select id="editPetGender" name="gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="editPetColor">Color</label>
-                  <input type="text" id="editPetColor" name="color">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="editPetNotes">Notes</label>
-                <textarea id="editPetNotes" name="notes" rows="3" placeholder="Any additional notes about your pet..."></textarea>
-              </div>
-              <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
-                <button type="submit" class="btn-primary">
-                  <i class="fas fa-save"></i> Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `;
 
-      document.body.appendChild(modal);
-      modal.style.display = 'block';
-
-      // Load current pet data
-      loadPetDataForEdit(petId);
-
-      // Setup form submission
-      const editForm = document.getElementById('editPetForm');
-      editForm.addEventListener('submit', handleEditPetSubmit);
-    }
-
-    async function loadPetDataForEdit(petId) {
-      try {
-        console.log('Loading pet data for ID:', petId);
-
-        // Try multiple possible API endpoints
-        const endpoints = [
-          `../api/pet_reports_api.php?action=get_pet_details&pet_id=${petId}`,
-          `../api/vet_api.php`,
-          `../api/pet_reports_api.php`
-        ];
-
-        let response;
-        let result = null;
-
-        for (const endpoint of endpoints) {
-          try {
-            console.log('Trying endpoint:', endpoint);
-            if (endpoint.includes('vet_api.php')) {
-              // Use POST method for vet_api.php
-              response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_pet_details', pet_id: petId })
-              });
-            } else {
-              // Use GET method for pet_reports_api.php
-              response = await fetch(endpoint + (endpoint.includes('?') ? '&' : '?') + `pet_id=${petId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-              });
-            }
-
-            if (response.ok) {
-              const endpointResult = await response.json();
-              console.log('Success with endpoint:', endpoint, 'Result:', endpointResult);
-              if (endpointResult.success && endpointResult.data) {
-                result = endpointResult; // Success, use this result
-                break; // Success, exit the loop
-              }
-            } else {
-              console.log('Failed endpoint:', endpoint, 'Status:', response.status);
-            }
-          } catch (error) {
-            console.log('Error with endpoint:', endpoint, 'Error:', error.message);
-          }
-        }
-
-        console.log('Load pet data response:', result);
-
-        if (result && (result.success && result.data)) {
-          const pet = result.data;
-          console.log('Pet data received:', pet);
-
-          // Handle different possible data structures
-          const petData = pet.pet || pet; // Handle nested structure
-          console.log('Using pet data:', petData);
-
-          // Set form values with null checks
-          const nameField = document.getElementById('editPetName');
-          const speciesField = document.getElementById('editPetSpecies');
-          const breedField = document.getElementById('editPetBreed');
-          const birthdateField = document.getElementById('editPetBirthdate');
-          const genderField = document.getElementById('editPetGender');
-          const colorField = document.getElementById('editPetColor');
-          const notesField = document.getElementById('editPetNotes');
-
-          if (nameField) {
-            nameField.value = petData.name || '';
-            console.log('Set name to:', petData.name);
-          }
-          if (speciesField) {
-            speciesField.value = petData.species || '';
-            console.log('Set species to:', petData.species);
-          }
-          if (breedField) {
-            breedField.value = petData.breed || '';
-            console.log('Set breed to:', petData.breed);
-          }
-          if (birthdateField) {
-            // Handle different date formats
-            let birthdateValue = '';
-            if (petData.birthdate) {
-              if (petData.birthdate instanceof Date) {
-                birthdateValue = petData.birthdate.toISOString().split('T')[0];
-              } else if (typeof petData.birthdate === 'string' && petData.birthdate !== '0000-00-00') {
-                birthdateValue = petData.birthdate.split('T')[0]; // Remove time part if present
-              }
-            }
-            birthdateField.value = birthdateValue;
-            console.log('Set birthdate to:', birthdateValue, 'from:', petData.birthdate);
-          }
-          if (genderField) {
-            genderField.value = petData.gender || '';
-            console.log('Set gender to:', petData.gender);
-          }
-          if (colorField) {
-            colorField.value = petData.color || '';
-            console.log('Set color to:', petData.color);
-          }
-          if (notesField) {
-            notesField.value = petData.notes || '';
-            console.log('Set notes to:', petData.notes);
-          }
-
-          console.log('Form fields populated successfully');
-        } else {
-          console.error('Failed to load pet data:', result);
-          showToast('Failed to load pet data: ' + (result.message || 'Unknown error'), 'error');
-        }
-      } catch (error) {
-        console.error('Error loading pet data:', error);
-        showToast('Error loading pet data', 'error');
-      }
-    }
-
-    async function handleEditPetSubmit(e) {
-      e.preventDefault();
-
-      const formData = new FormData(e.target);
-      const petData = {
-        action: 'update_pet',
-        pet_id: formData.get('pet_id'),
-        name: formData.get('name'),
-        species: formData.get('species'),
-        breed: formData.get('breed'),
-        birthdate: formData.get('birthdate'),
-        gender: formData.get('gender'),
-        color: formData.get('color'),
-        notes: formData.get('notes')
-      };
-
-      // Debug: Log the data being sent
-      console.log('Sending pet update data:', petData);
-      console.log('Pet ID being updated:', petData.pet_id);
-
-      try {
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(petData)
-        });
-
-        console.log('Update response status:', response.status);
-        console.log('Update response headers:', Object.fromEntries(response.headers.entries()));
-
-        const result = await response.json();
-        console.log('Update response:', result);
-
-        if (result.success) {
-          showToast('Pet information updated successfully!', 'success');
-          e.target.closest('.modal').remove();
-          // Reload pets to show updated information
-          loadClientPets();
-        } else {
-          console.error('Update failed:', result);
-          showToast(result.message || 'Failed to update pet information', 'error');
-        }
-      } catch (error) {
-        console.error('Error updating pet:', error);
-        showToast('Error updating pet information. Check console for details.', 'error');
-
-        // Additional debugging for network errors
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          console.error('Network error - check if API endpoint exists');
-          showToast('Network error - cannot connect to server', 'error');
-        }
-
-        // Show additional troubleshooting info
-        console.log('Troubleshooting tips:');
-        console.log('1. Check if ../api/vet_api.php exists');
-        console.log('2. Check if the API has update_pet action implemented');
-        console.log('3. Check PHP error logs for server-side errors');
-        console.log('4. Try the test function: testUpdateAPI(petId, testData)');
-      }
-    }
 
     function deleteClientPet(petId, petName) {
       if (confirm(`Are you sure you want to delete ${petName}? This action cannot be undone.`)) {
@@ -3010,6 +3456,70 @@
 
     // Add to window for console access
     window.testUpdateAPI = testUpdateAPI;
+
+
+    // Client-specific functions
+    async function cancelAppointment(appointmentId) {
+      if (!appointmentId) {
+        showToast('Invalid appointment ID', 'error');
+        return;
+      }
+
+      // Confirm cancellation with user
+      if (!confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        console.log('Client requesting appointment cancellation for ID:', appointmentId);
+
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'cancel_appointment',
+            appointment_id: appointmentId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Cancellation response:', result);
+
+        if (result.success) {
+          showToast('Appointment cancellation request submitted successfully! Staff will review and confirm.', 'success');
+
+          // Update the appointment status in the UI
+          updateAppointmentStatusInUI(appointmentId, 'cancelled');
+
+          // Reload appointments to reflect the changes
+          if (window.dashboardInstance && typeof window.dashboardInstance.loadAppointmentsSection === 'function') {
+            window.dashboardInstance.loadAppointmentsSection();
+          }
+        } else {
+          showToast(result.message || 'Failed to cancel appointment', 'error');
+        }
+      } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        showToast('Error cancelling appointment. Please try again or contact the clinic staff.', 'error');
+      }
+    }
+
+    // Helper function to update appointment status in UI
+    function updateAppointmentStatusInUI(appointmentId, newStatus) {
+      // Find and update the appointment row in the table
+      const appointmentRows = document.querySelectorAll('#appointmentsTableBody tr');
+      appointmentRows.forEach(row => {
+        const statusCell = row.querySelector('.appointment-status');
+        if (statusCell && statusCell.getAttribute('data-appointment-id') == appointmentId) {
+          statusCell.textContent = newStatus;
+          statusCell.className = `appointment-status status-${newStatus.toLowerCase()}`;
+        }
+      });
+    }
   </script>
 </body>
 </html>
