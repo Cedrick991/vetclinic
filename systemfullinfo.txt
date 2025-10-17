@@ -1,0 +1,475 @@
+# TATTAO VETERINARY CLINIC MANAGEMENT SYSTEM
+## Complete System Documentation
+
+### SYSTEM OVERVIEW
+Tattao Veterinary Clinic Management System is a comprehensive web-based application designed to manage all aspects of a veterinary clinic's operations. The system provides both client-facing and staff-facing interfaces for efficient clinic management.
+
+**System Type**: Web-based Veterinary Clinic Management System
+**Architecture**: Client-Server with SQLite Database
+**Primary Location**: Zone 2 National Highway, Alimanac, Penablanca, Cagayan
+**Contact**: tattaoveterinaryclinic@gmail.com | 0917-519-4639 | 0975-339-7908
+
+---
+
+### DATABASE ARCHITECTURE
+
+#### Database Technology
+- **Database Type**: SQLite 3.x
+- **File Location**: `db/vet_clinic.db`
+- **Schema**: 12 Core Tables with proper relationships and constraints
+
+#### Core Database Tables
+
+1. **users** - User accounts and authentication
+   - Fields: id, first_name, last_name, email, phone, password, user_type, employee_id, address, profile_picture, is_active, created_at
+   - User Types: 'staff', 'client'
+   - Authentication: Password hashing with PHP password_hash()
+
+2. **pets** - Pet registration and information
+   - Fields: id, owner_id, name, species, breed, birthdate, age, gender, weight, color, notes, is_active, created_at
+   - Relationships: Foreign key to users(id) as owner_id
+
+3. **services** - Available veterinary services
+   - Fields: id, name, description, duration, is_active, created_at
+   - Default Services: 19 pre-configured services including checkups, vaccinations, grooming, surgery, etc.
+
+4. **appointments** - Appointment scheduling and management
+   - Fields: id, client_id, pet_id, service_id, staff_id, appointment_date, appointment_time, status, notes, cancellation_requested, cancellation_reason, appointment_duration, created_at
+   - Status Values: pending, confirmed, in-progress, completed, cancelled, no-show
+
+5. **products** - Inventory management
+   - Fields: id, name, description, category, price, stock, image, is_active, created_at
+   - Categories: Food, Toys, Grooming, Accessories
+
+6. **cart** - Shopping cart functionality
+   - Fields: id, user_id, product_id, quantity, created_at
+   - Constraints: Unique user_id + product_id combination
+
+7. **orders** - Purchase orders
+   - Fields: id, user_id, total_amount, status, payment_method, order_date
+   - Payment Methods: gcash, bank, cash_on_visit
+
+8. **order_items** - Order line items
+   - Fields: id, order_id, product_id, quantity, price
+
+9. **medical_history** - Pet medical records
+   - Fields: id, appointment_id, pet_id, staff_id, diagnosis, treatment, medications, notes, follow_up_date, follow_up_instructions, created_at
+
+10. **notifications** - System notifications
+    - Fields: id, user_id, type, title, message, data, priority, is_read, read_at, expires_at, created_at
+    - Priority Levels: low, normal, high, urgent
+
+11. **notification_preferences** - User notification settings
+    - Fields: id, user_id, notification_type, is_enabled, created_at, updated_at
+
+12. **notification_read_status** - Individual notification read status
+    - Fields: id, notification_id, user_id, is_read, read_at, created_at
+
+13. **login_attempts** - Security and login tracking
+    - Fields: id, email, ip_address, user_agent, attempt_time, is_successful, lockout_until, created_at
+
+---
+
+### BACKEND API ARCHITECTURE
+
+#### API Technology Stack
+- **Language**: PHP 8.x
+- **File**: `api/vet_api.php`
+- **Protocol**: RESTful API with JSON responses
+- **Security**: CSRF protection, session management, input validation
+
+#### API Endpoints (50+ Functions)
+
+##### Authentication & User Management
+- `register` - User registration (clients only)
+- `login` - User authentication with security features
+- `logout` - Session termination
+- `get_user_info` - Session validation and user data retrieval
+- `check_session` - Session status verification
+- `update_profile` - Profile information updates
+- `update_password` - Password change functionality
+- `upload_profile_picture` - Profile image management
+
+##### Dashboard & Data Retrieval
+- `get_dashboard_data` - Dashboard statistics for both user types
+- `get_services` - Available services list
+- `get_pets` - Pet information (owner-specific for clients, all for staff)
+- `get_clients` - Client management (staff only)
+- `get_appointments` - Appointment listings
+- `get_products` - Product catalog
+- `get_all_products` - Complete product management (staff only)
+
+##### Pet Management
+- `add_pet` - Pet registration
+- `update_pet` - Pet information updates (client)
+- `update_pet_admin` - Administrative pet updates (staff)
+- `delete_pet` - Pet record deactivation
+- `delete_pet_admin` - Administrative pet deletion (staff)
+
+##### Appointment Management
+- `book_appointment` - Appointment scheduling
+- `update_appointment` - Appointment modifications
+- `cancel_appointment` - Appointment cancellation
+- `request_appointment_cancellation` - Cancellation requests
+- `deny_cancellation_request` - Cancellation request denial
+- `update_appointment_status` - Status updates
+- `update_appointment_status_with_reason` - Status updates with reasons
+- `get_available_times` - Time slot availability
+- `get_appointment_details` - Detailed appointment information
+
+##### Shopping Cart & E-commerce
+- `add_to_cart` - Cart item addition
+- `get_cart` - Cart contents retrieval
+- `update_cart` - Cart item modifications
+- `remove_from_cart` - Cart item removal
+- `checkout` - Cart checkout process
+- `buy_now` - Direct purchase functionality
+- `buy_cart` - Cart purchase processing
+- `add_to_order` - Manual order creation
+- `get_orders` - Order history
+- `get_all_orders` - All orders (staff)
+- `get_client_orders` - Client-specific orders
+- `update_order_status` - Order status management
+
+##### Product Management (Staff Only)
+- `add_product` - Product creation
+- `update_product` - Product modifications
+- `delete_product` - Product deactivation
+- `upload_product_image` - Product image management
+
+##### Medical Records
+- `add_medical_history` - Medical record creation
+- `get_medical_history` - Medical history retrieval
+
+##### Notification System
+- `get_notifications` - Notification retrieval
+- `mark_notification_read` - Read status updates
+- `mark_all_notifications_read` - Bulk read status updates
+- `get_unread_count` - Unread notification count
+- `get_notification_preferences` - Notification settings
+- `update_notification_preferences` - Settings updates
+- `send_notification` - Manual notification sending
+- `delete_notification` - Notification removal
+- `clear_all_notifications` - Bulk notification clearing
+
+##### Security Features
+- Account lockout after 5 failed login attempts
+- 15-minute lockout duration
+- Login attempt logging with IP tracking
+- Session timeout (24 hours)
+- CSRF token protection
+
+---
+
+### FRONTEND ARCHITECTURE
+
+#### Technology Stack
+- **HTML5**: Semantic markup with accessibility features
+- **CSS3**: Modern styling with animations and responsive design
+- **JavaScript (ES6+)**: Modular architecture with classes
+- **Architecture**: Single Page Application with multiple interfaces
+
+#### Core Interface Files
+1. **index.html** - Public homepage and main landing page
+2. **public/client.html** - Client dashboard and interface
+3. **public/staff.html** - Staff dashboard and management interface
+4. **public/store.html** - E-commerce store interface
+
+#### JavaScript Modules
+- **assets/js/modules/ui.js** - UI components and animations
+- **assets/js/modules/auth.js** - Authentication handling
+- **assets/js/modules/data.js** - Data management utilities
+- **assets/js/modules/notifications.js** - Real-time notifications
+- **assets/js/modules/utils.js** - Utility functions
+
+#### CSS Architecture
+- **assets/css/style.css** - Main styling framework
+- **assets/css/modern-dashboard.css** - Dashboard styling
+- **assets/css/enhanced-style.css** - Enhanced UI components
+- **assets/css/client-style.css** - Client-specific styling
+
+---
+
+### USER ROLES AND ACCESS LEVELS
+
+#### 1. CLIENT Role
+**Access Level**: Standard user access
+**Primary Interface**: `public/client.html`
+
+**Capabilities**:
+- Pet registration and management
+- Appointment booking and management
+- Medical history viewing
+- Product browsing and purchasing
+- Shopping cart management
+- Order history viewing
+- Profile management
+- Notification preferences
+
+**Restrictions**:
+- Cannot access staff-only areas
+- Cannot modify other clients' data
+- Cannot manage system settings
+- Cannot access administrative functions
+
+#### 2. STAFF Role
+**Access Level**: Administrative access
+**Primary Interface**: `public/staff.html`
+
+**Capabilities**:
+- All client capabilities
+- Client and pet management
+- Appointment scheduling and management
+- Medical record management
+- Product inventory management
+- Order processing
+- System notifications management
+- Service management
+- Dashboard analytics
+
+**Administrative Functions**:
+- User account management
+- System configuration
+- Data export/import
+- Security monitoring
+- Notification broadcasting
+
+---
+
+### CORE SYSTEM FEATURES
+
+#### 1. Appointment Management System
+- **Online Booking**: Clients can book appointments through web interface
+- **Staff Scheduling**: Staff can view and manage all appointments
+- **Status Tracking**: Real-time appointment status updates
+- **Cancellation Management**: Request and approval workflow
+- **Time Slot Management**: Automated availability checking
+- **Notification System**: Automated reminders and updates
+
+#### 2. Pet Management System
+- **Pet Registration**: Complete pet profile creation
+- **Medical Records**: Comprehensive health history tracking
+- **Multiple Pets**: Support for multiple pets per client
+- **Photo Management**: Profile picture storage
+- **Health Tracking**: Vaccination and treatment records
+
+#### 3. E-commerce System
+- **Product Catalog**: Browseable product inventory
+- **Shopping Cart**: Add, modify, remove items
+- **Order Processing**: Complete checkout workflow
+- **Payment Integration**: Multiple payment methods
+- **Inventory Management**: Real-time stock tracking
+- **Order History**: Complete purchase tracking
+
+#### 4. Notification System
+- **Real-time Updates**: Server-sent events (SSE) for live notifications
+- **Multiple Types**: Appointment, medical, order, system notifications
+- **Priority Levels**: Low, normal, high, urgent
+- **User Preferences**: Customizable notification settings
+- **Read Status**: Individual notification tracking
+
+#### 5. Medical Records System
+- **Visit Documentation**: Complete appointment records
+- **Treatment History**: Detailed treatment tracking
+- **Medication Records**: Prescription and dosage tracking
+- **Follow-up Care**: Scheduled follow-up appointments
+- **Diagnostic Records**: Test results and findings
+
+#### 6. Security Features
+- **Account Protection**: Login attempt monitoring
+- **Session Management**: Secure session handling
+- **Input Validation**: Comprehensive data validation
+- **Access Control**: Role-based permissions
+- **Audit Logging**: Login attempt tracking
+
+---
+
+### SYSTEM WORKFLOWS
+
+#### Client Registration Workflow
+1. User visits homepage
+2. Clicks "Sign Up" button
+3. Fills registration form with personal details
+4. Email verification (if implemented)
+5. Account activation
+6. Login and profile completion
+
+#### Appointment Booking Workflow
+1. Client logs in to dashboard
+2. Navigates to appointments section
+3. Selects pet and service
+4. Chooses available date/time
+5. Adds notes if needed
+6. Confirms booking
+7. Receives confirmation notification
+8. Staff receives new appointment notification
+
+#### Medical Visit Workflow
+1. Client arrives for appointment
+2. Staff updates appointment status to "in-progress"
+3. Veterinary examination conducted
+4. Diagnosis and treatment provided
+5. Medical history record created
+6. Appointment marked as "completed"
+7. Follow-up instructions provided
+8. Client receives medical update notification
+
+#### Product Purchase Workflow
+1. Client browses product catalog
+2. Adds items to shopping cart
+3. Reviews cart contents
+4. Proceeds to checkout
+5. Selects payment method
+6. Completes purchase
+7. Order confirmation sent
+8. Staff receives new order notification
+
+---
+
+### NOTIFICATION TYPES
+
+#### System Notifications
+- `appointment_new` - New appointment booked
+- `appointment_status_change` - Appointment status updated
+- `appointment_reminder` - Upcoming appointment reminder
+- `appointment_cancellation_request` - Cancellation requested
+- `appointment_cancellation_denied` - Cancellation denied
+- `pet_registration` - New pet registered
+- `medical_history_update` - Medical record updated
+- `order_new` - New order placed
+- `order_status_change` - Order status updated
+- `product_stock_alert` - Low inventory alert
+- `system_announcement` - System-wide announcements
+- `security_lockout` - Security-related notifications
+
+---
+
+### BUSINESS HOURS
+- **Monday - Saturday**: 9:00 AM to 6:00 PM
+- **Sunday**: Closed
+- **Emergency Services**: Available during business hours
+
+---
+
+### CONTACT INFORMATION
+- **Email**: tattaoveterinaryclinic@gmail.com
+- **Phone**: 0917-519-4639 | 0975-339-7908
+- **Facebook**: Tattao Veterinary Clinic
+- **Address**: Zone 2 National Highway, Alimanac, Penablanca, Cagayan
+
+---
+
+### SYSTEM REQUIREMENTS
+- **Web Server**: Apache/Nginx with PHP 8.x support
+- **Database**: SQLite 3.x
+- **Browser Compatibility**: Modern browsers (Chrome, Firefox, Safari, Edge)
+- **Mobile Support**: Responsive design for mobile devices
+- **Internet Connection**: Required for real-time features
+
+---
+
+### SECURITY FEATURES
+- **Password Security**: PHP password_hash() with bcrypt
+- **Session Security**: Secure session management with timeout
+- **Login Protection**: Account lockout after failed attempts
+- **Input Sanitization**: Comprehensive input validation
+- **CSRF Protection**: Token-based request validation
+- **Access Control**: Role-based permissions system
+
+---
+
+### PERFORMANCE FEATURES
+- **Database Optimization**: Efficient SQLite queries
+- **Caching**: Static asset caching
+- **Real-time Updates**: Server-sent events for live data
+- **Responsive Design**: Mobile-optimized interface
+- **Progressive Enhancement**: Graceful degradation
+
+---
+
+### DEVELOPMENT INFORMATION
+- **Code Organization**: Modular architecture
+- **Error Handling**: Comprehensive error management
+- **Logging**: PHP error logging system
+- **Version Control**: Git repository
+- **Documentation**: Inline code documentation
+
+---
+
+### API RESPONSE FORMAT
+All API endpoints return JSON responses in the format:
+```json
+{
+  "success": boolean,
+  "message": "Response message",
+  "data": { ... response data ... }
+}
+```
+
+---
+
+### FILE STRUCTURE OVERVIEW
+```
+vetfinal/
+├── index.html (Public homepage)
+├── api/
+│   ├── vet_api.php (Main API)
+│   └── notification_service.php (Real-time notifications)
+├── db/
+│   └── database.php (Database configuration)
+├── assets/
+│   ├── css/ (Stylesheets)
+│   ├── js/ (JavaScript files)
+│   └── images/ (Static assets)
+├── public/
+│   ├── client.html (Client dashboard)
+│   ├── staff.html (Staff dashboard)
+│   └── store.html (E-commerce store)
+└── systemfullinfo.txt (This documentation)
+```
+
+---
+
+### SYSTEM CAPABILITIES SUMMARY
+
+✅ **Complete Clinic Management**
+- Client and pet registration
+- Appointment scheduling and management
+- Medical record keeping
+- Inventory management
+- Financial tracking
+
+✅ **E-commerce Integration**
+- Product catalog management
+- Shopping cart functionality
+- Order processing
+- Payment method support
+- Inventory tracking
+
+✅ **Communication System**
+- Real-time notifications
+- Email integration
+- SMS notifications (configurable)
+- Appointment reminders
+
+✅ **Security & Access Control**
+- Role-based access
+- Secure authentication
+- Session management
+- Login attempt monitoring
+
+✅ **User Experience**
+- Responsive design
+- Modern UI/UX
+- Real-time updates
+- Mobile compatibility
+
+✅ **Business Operations**
+- Dashboard analytics
+- Report generation
+- Customer management
+- Service management
+
+---
+
+This system provides a complete solution for veterinary clinic management with modern web technologies, comprehensive security features, and an intuitive user interface for both clients and staff members.

@@ -151,9 +151,121 @@ body {
 
 /* Add a subtle animation to the profile picture */
 @keyframes profilePicturePulse {
-    0% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(74, 144, 226, 0.2); }
-    50% { box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2), 0 3px 10px rgba(74, 144, 226, 0.3); }
-    100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(74, 144, 226, 0.2); }
+  0% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(74, 144, 226, 0.2); }
+  50% { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25), 0 4px 15px rgba(74, 144, 226, 0.4); }
+  100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(74, 144, 226, 0.2); }
+}
+
+/* Enhanced Hover Effects */
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px) rotateY(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0deg);
+  }
+}
+
+@keyframes bounceUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced Card Styles */
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+  animation: bounceUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.7s ease;
+}
+
+.dashboard-card:hover::before {
+  left: 100%;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow:
+    0 20px 40px rgba(74, 144, 226, 0.15),
+    0 10px 20px rgba(74, 144, 226, 0.1);
+}
+
+/* Enhanced Navigation Animations */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.nav-item:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Button Styles */
+.header-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.header-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: width 0.6s, height 0.6s;
+  transform: translate(-50%, -50%);
+}
+
+.header-btn:active::before {
+  width: 300px;
+  height: 300px;
 }
 
 .sidebar-header img {

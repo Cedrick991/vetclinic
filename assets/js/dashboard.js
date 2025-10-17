@@ -529,7 +529,7 @@ class Dashboard {
             if (result.success) {
                 this.showToast('Logged out successfully!', 'success');
                 setTimeout(() => {
-                    window.location.href = '../homepage.html';
+                    window.location.href = '../index.html';
                 }, 1500);
             } else {
                 this.showToast('Logout failed. Please try again.', 'error');
@@ -2075,6 +2075,14 @@ class Dashboard {
 
     async loadOrdersSection() {
         try {
+            const ordersSection = document.getElementById('ordersSection');
+
+            // Check if ordersSection element exists
+            if (!ordersSection) {
+                console.warn('Orders section element not found in DOM - skipping orders loading');
+                return;
+            }
+
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2082,7 +2090,6 @@ class Dashboard {
             });
 
             const result = await response.json();
-            const ordersSection = document.getElementById('ordersSection');
 
             if (result.success && result.data && result.data.length > 0) {
                 ordersSection.innerHTML = `
@@ -2136,12 +2143,18 @@ class Dashboard {
         } catch (error) {
             console.error('Failed to load orders:', error);
             const ordersSection = document.getElementById('ordersSection');
-            ordersSection.innerHTML = `
-                <div class="error-state full-width">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Failed to load orders</p>
-                </div>
-            `;
+
+            // Check if ordersSection element exists before trying to set innerHTML
+            if (ordersSection) {
+                ordersSection.innerHTML = `
+                    <div class="error-state full-width">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load orders</p>
+                    </div>
+                `;
+            } else {
+                console.warn('Orders section element not found - cannot display error message');
+            }
         }
     }
 
@@ -2310,7 +2323,7 @@ class Dashboard {
     redirectToLogin() {
         this.showToast('Please log in to access the dashboard', 'warning');
         setTimeout(() => {
-            window.location.href = '../homepage.html';
+            window.location.href = '../index.html';
         }, 2000);
     }
 

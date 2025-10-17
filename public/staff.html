@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -209,6 +209,477 @@
      .btn-warning:hover {
        background: linear-gradient(135deg, #e0a800 0%, #d7690a 100%) !important;
      }
+
+     /* Floating Order Management Window */
+     .floating-order-window {
+       position: fixed;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -50%);
+       width: 90%;
+       max-width: 1000px;
+       height: 80vh;
+       max-height: 700px;
+       background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+       border-radius: 20px;
+       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+       z-index: 2000;
+       display: none;
+       flex-direction: column;
+       animation: floatIn 0.3s ease-out;
+     }
+
+     .floating-order-window.show {
+       display: flex;
+     }
+
+     @keyframes floatIn {
+       from {
+         opacity: 0;
+         transform: translate(-50%, -50%) scale(0.9);
+       }
+       to {
+         opacity: 1;
+         transform: translate(-50%, -50%) scale(1);
+       }
+     }
+
+     .floating-order-header {
+       background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+       color: white;
+       padding: 25px 30px;
+       border-radius: 20px 20px 0 0;
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+     }
+
+     .floating-order-header h3 {
+       margin: 0;
+       font-size: 20px;
+       display: flex;
+       align-items: center;
+       gap: 12px;
+     }
+
+     .floating-order-header .order-count {
+       background: rgba(255, 255, 255, 0.2);
+       padding: 4px 12px;
+       border-radius: 20px;
+       font-size: 14px;
+       font-weight: bold;
+     }
+
+     .close-floating-order {
+       background: rgba(255, 255, 255, 0.2);
+       border: none;
+       color: white;
+       width: 35px;
+       height: 35px;
+       border-radius: 50%;
+       cursor: pointer;
+       font-size: 20px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       transition: background 0.3s;
+     }
+
+     .close-floating-order:hover {
+       background: rgba(255, 255, 255, 0.3);
+     }
+
+     .floating-order-body {
+       flex: 1;
+       overflow-y: auto;
+       padding: 25px;
+     }
+
+     .floating-orders-container {
+       display: grid;
+       gap: 20px;
+     }
+
+     .floating-order-card {
+       background: #ffffff;
+       border: 1px solid #e2e8f0;
+       border-radius: 15px;
+       padding: 25px;
+       transition: all 0.3s ease;
+       position: relative;
+       overflow: hidden;
+     }
+
+     .floating-order-card:hover {
+       box-shadow: 0 10px 25px rgba(30, 64, 175, 0.1);
+       transform: translateY(-2px);
+     }
+
+     .floating-order-card::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 4px;
+       background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+     }
+
+     .floating-order-header-info {
+       display: flex;
+       justify-content: space-between;
+       align-items: flex-start;
+       margin-bottom: 20px;
+       padding-bottom: 20px;
+       border-bottom: 1px solid #e2e8f0;
+     }
+
+     .floating-order-info h4 {
+       margin: 0 0 8px 0;
+       color: #1e40af;
+       font-size: 18px;
+     }
+
+     .floating-order-info p {
+       margin: 0;
+       color: #64748b;
+       font-size: 14px;
+     }
+
+     .floating-order-status {
+       padding: 8px 16px;
+       border-radius: 25px;
+       font-size: 12px;
+       font-weight: bold;
+       text-transform: uppercase;
+       letter-spacing: 0.5px;
+     }
+
+     .status-pending { background: #fef3c7; color: #d97706; }
+     .status-processing { background: #dbeafe; color: #1d4ed8; }
+     .status-shipped { background: #d1fae5; color: #059669; }
+     .status-delivered { background: #dcfce7; color: #166534; }
+     .status-cancelled { background: #fee2e2; color: #dc2626; }
+
+     .floating-order-items {
+       margin-bottom: 20px;
+     }
+
+     .floating-order-item {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       padding: 12px 0;
+       border-bottom: 1px solid #f1f5f9;
+     }
+
+     .floating-order-item:last-child {
+       border-bottom: none;
+     }
+
+     .item-details h5 {
+       margin: 0 0 4px 0;
+       color: #1e293b;
+       font-size: 15px;
+     }
+
+     .item-details p {
+       margin: 0;
+       color: #64748b;
+       font-size: 13px;
+     }
+
+     .item-subtotal {
+       font-weight: bold;
+       color: #1e40af;
+       font-size: 14px;
+     }
+
+     .floating-order-summary {
+       background: #f8fafc;
+       padding: 20px;
+       border-radius: 12px;
+       margin-bottom: 20px;
+       border: 1px solid #e2e8f0;
+     }
+
+     .floating-order-total {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       font-size: 18px;
+       font-weight: bold;
+       color: #1e40af;
+     }
+
+     .floating-order-actions {
+       display: flex;
+       gap: 12px;
+       justify-content: flex-end;
+       padding-top: 20px;
+       border-top: 1px solid #e2e8f0;
+     }
+
+     .floating-status-select {
+       padding: 10px 15px;
+       border: 2px solid #e2e8f0;
+       border-radius: 10px;
+       background: white;
+       color: #1e40af;
+       font-size: 14px;
+       font-weight: bold;
+       cursor: pointer;
+       transition: all 0.3s ease;
+     }
+
+     .floating-status-select:hover {
+       border-color: #3b82f6;
+       background: #f0f4ff;
+     }
+
+     .floating-status-select:focus {
+       outline: none;
+       border-color: #3b82f6;
+       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+     }
+
+     .no-floating-orders {
+       text-align: center;
+       padding: 60px 20px;
+       color: #64748b;
+     }
+
+     .no-floating-orders i {
+       font-size: 64px;
+       margin-bottom: 20px;
+       display: block;
+       color: #cbd5e1;
+     }
+
+     .no-floating-orders p {
+       margin: 0 0 8px 0;
+       font-size: 18px;
+       color: #94a3b8;
+     }
+
+     .no-floating-orders small {
+       color: #94a3b8;
+       font-size: 14px;
+     }
+
+     /* Floating window backdrop */
+     .floating-backdrop {
+       position: fixed;
+       top: 0;
+       left: 0;
+       width: 100%;
+       height: 100%;
+       background: rgba(0, 0, 0, 0.5);
+       z-index: 1999;
+       display: none;
+     }
+
+     .floating-backdrop.show {
+       display: block;
+     }
+
+     /* Notification Badge for Mobile Menu Toggle */
+     .mobile-menu-toggle {
+       position: relative;
+     }
+
+     .mobile-menu-toggle .notification-badge {
+       position: absolute;
+       top: -8px;
+       right: -8px;
+       background: #ef4444;
+       color: white;
+       border-radius: 50%;
+       width: 20px;
+       height: 20px;
+       font-size: 10px;
+       font-weight: bold;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+       animation: pulse 2s infinite;
+       z-index: 10;
+     }
+
+     @keyframes pulse {
+       0% {
+         transform: scale(1);
+         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+       }
+       50% {
+         transform: scale(1.1);
+         box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+       }
+       100% {
+         transform: scale(1);
+         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+       }
+     }
+
+     /* Medical Report Styles */
+     .medical-report-container {
+       max-width: 100%;
+     }
+
+     .report-section {
+       background: #ffffff;
+       border-radius: 12px;
+       padding: 24px;
+       margin-bottom: 20px;
+       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+       border-left: 4px solid #08355f;
+     }
+
+     .report-section h3 {
+       color: #333;
+       margin: 0 0 20px 0;
+       font-size: 18px;
+       font-weight: 600;
+       display: flex;
+       align-items: center;
+       gap: 8px;
+     }
+
+     .report-section h3 i {
+       color: #08355f;
+     }
+
+     .info-grid {
+       display: grid;
+       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+       gap: 16px;
+     }
+
+     .info-item {
+       display: flex;
+       gap: 8px;
+       padding: 8px 0;
+     }
+
+     .info-item .label {
+       font-weight: 600;
+       color: #555;
+       min-width: 80px;
+     }
+
+     .info-item .value {
+       color: #333;
+     }
+
+     .medical-record {
+       background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+       border: 2px solid #08355f;
+       border-radius: 12px;
+       padding: 20px;
+       margin: 16px 0;
+       box-shadow: 0 2px 8px rgba(8, 53, 95, 0.1);
+     }
+
+     .record-header {
+       margin-bottom: 16px;
+       padding-bottom: 12px;
+       border-bottom: 1px solid rgba(8, 53, 95, 0.2);
+     }
+
+     .record-header h4 {
+       margin: 0 0 8px 0;
+       color: #08355f;
+       font-size: 16px;
+     }
+
+     .record-meta {
+       display: flex;
+       gap: 16px;
+       font-size: 12px;
+       color: #666;
+     }
+
+     .record-meta span {
+       display: flex;
+       align-items: center;
+       gap: 4px;
+     }
+
+     .record-details {
+       display: grid;
+       gap: 12px;
+     }
+
+     .detail-item {
+       background: #ffffff;
+       padding: 12px;
+       border-radius: 8px;
+       border-left: 4px solid #28a745;
+     }
+
+     .detail-label {
+       font-weight: 600;
+       color: #333;
+       margin-bottom: 4px;
+       font-size: 14px;
+     }
+
+     .detail-content {
+       color: #555;
+       line-height: 1.4;
+     }
+
+     .records-count {
+       text-align: center;
+       margin-bottom: 20px;
+     }
+
+     .badge {
+       background: linear-gradient(135deg, #08355f 0%, #2E5BAA 100%);
+       color: white;
+       padding: 8px 16px;
+       border-radius: 20px;
+       font-size: 14px;
+       font-weight: 600;
+       display: inline-flex;
+       align-items: center;
+       gap: 6px;
+     }
+
+     .empty-state {
+       text-align: center;
+       padding: 40px 20px;
+       background: rgba(8, 53, 95, 0.05);
+       border-radius: 12px;
+       border: 2px dashed rgba(8, 53, 95, 0.3);
+     }
+
+     .empty-state i {
+       font-size: 48px;
+       color: rgba(8, 53, 95, 0.3);
+       margin-bottom: 16px;
+     }
+
+     .empty-state h4 {
+       margin: 0 0 8px 0;
+       color: #08355f;
+       font-size: 18px;
+     }
+
+     .empty-state p {
+       margin: 0;
+       color: #666;
+       font-size: 14px;
+     }
+
+     .no-history {
+       border-left-color: #ffc107;
+     }
+
+     .no-history h3 i {
+       color: #ffc107;
+     }
   </style>
 </head>
 <body>
@@ -318,7 +789,7 @@
              <div class="card-title" style="color: white;">
                <i class="fas fa-calendar-alt" style="color: white;"></i> Today's Appointments
              </div>
-             <div class="card-value" style="color: #ffffff;">0</div>
+             <div class="card-value" id="todayAppointmentsCount" style="color: #ffffff;">0</div>
              <div class="card-subtitle" style="color: rgba(255, 255, 255, 0.8);">Scheduled for today</div>
            </div>
 
@@ -326,7 +797,7 @@
              <div class="card-title" style="color: white;">
                <i class="fas fa-users" style="color: white;"></i> Total Clients
              </div>
-             <div class="card-value" style="color: #ffffff;">0</div>
+             <div class="card-value" id="totalClientsCount" style="color: #ffffff;">0</div>
              <div class="card-subtitle" style="color: rgba(255, 255, 255, 0.8);">Registered clients</div>
            </div>
 
@@ -334,7 +805,7 @@
              <div class="card-title" style="color: white;">
                <i class="fas fa-paw" style="color: white;"></i> Total Pets
              </div>
-             <div class="card-value" style="color: #ffffff;">0</div>
+             <div class="card-value" id="totalPetsCount" style="color: #ffffff;">0</div>
              <div class="card-subtitle" style="color: rgba(255, 255, 255, 0.8);">Registered pets</div>
            </div>
 
@@ -342,7 +813,7 @@
              <div class="card-title" style="color: white;">
                <i class="fas fa-dollar-sign" style="color: white;"></i> Monthly Revenue
              </div>
-             <div class="card-value" style="color: #ffffff;">-</div>
+             <div class="card-value" id="monthlyRevenueCount" style="color: #ffffff;">-</div>
              <div class="card-subtitle" style="color: rgba(255, 255, 255, 0.8);">Current month</div>
            </div>
 
@@ -402,6 +873,14 @@
            <h2 class="section-title">
              <i class="fas fa-paw"></i> Pets Management
            </h2>
+           <div style="display: flex; gap: 10px;">
+             <button class="header-btn" onclick="showPetPrintModal()" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+               <i class="fas fa-print"></i> Print Pet Report
+             </button>
+             <button class="header-btn" onclick="showPetMedicalHistoryModal()" style="background: linear-gradient(135deg, #28a745, #20c997);">
+               <i class="fas fa-file-medical"></i> View Medical History
+             </button>
+           </div>
          </div>
 
          <!-- Pets Grid -->
@@ -427,22 +906,27 @@
            <h2 class="section-title">
              <i class="fas fa-stethoscope"></i> Services Management
            </h2>
-           <button class="header-btn" onclick="staffDashboard.showAddServiceModal()">
-             <i class="fas fa-plus"></i> Add Service
-           </button>
+           <div style="display: flex; gap: 10px;">
+             <button class="header-btn" onclick="showAddServiceModal()" style="background: linear-gradient(135deg, #28a745, #20c997);">
+               <i class="fas fa-plus"></i> Add Service
+             </button>
+             <button class="header-btn" onclick="testAddServiceFunctionality()" style="background: linear-gradient(135deg, #6f42c1, #6610f2);">
+               <i class="fas fa-vial"></i> Test Add Service
+             </button>
+           </div>
          </div>
-         <div class="table-container">
-           <table class="data-table">
-             <thead>
+         <div class="table-container" style="max-height: 600px; overflow-y: auto;">
+           <table class="data-table" style="width: 100%; border-collapse: collapse;">
+             <thead style="position: sticky; top: 0; background: rgba(8, 53, 95, 0.95); backdrop-filter: blur(10px);">
                <tr>
-                 <th style="text-align: left; padding: 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">Service Name</th>
-                 <th style="text-align: center; padding: 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">Status</th>
-                 <th style="text-align: center; padding: 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">Actions</th>
+                 <th style="text-align: left; padding: 16px 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1); font-size: 14px;">Service Name</th>
+                 <th style="text-align: center; padding: 16px 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1); font-size: 14px; width: 120px;">Status</th>
+                 <th style="text-align: center; padding: 16px 12px; font-weight: 600; color: #ffffff; border-bottom: 2px solid rgba(255, 255, 255, 0.1); font-size: 14px; width: 180px;">Actions</th>
                </tr>
              </thead>
              <tbody id="servicesTableBody">
                <tr>
-                 <td colspan="3" class="loading" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.7);">
+                 <td colspan="3" class="loading" style="text-align: center; padding: 60px; color: rgba(255, 255, 255, 0.7);">
                    <div class="spinner" style="display: inline-block; margin-right: 10px;"></div>
                    Loading services...
                  </td>
@@ -452,47 +936,105 @@
          </div>
        </section>
 
+       <!-- Orders Management Section -->
+       <section id="ordersSection" class="content-section" style="display: none;">
+         <div class="section-header">
+           <h2 class="section-title">
+             <i class="fas fa-shopping-bag"></i> Orders Management
+             <span id="pendingOrdersBadge" class="notification-badge" style="display: none;">0</span>
+           </h2>
+           <button onclick="showFloatingOrderWindow()" class="header-btn" style="background: linear-gradient(135deg, #10b981, #059669);">
+             <i class="fas fa-window-maximize"></i> Manage Orders
+           </button>
+         </div>
+         <div id="ordersContainer" class="orders-container">
+           <div class="loading">
+             <div class="spinner"></div>
+             Loading orders...
+           </div>
+         </div>
+       </section>
+
        <!-- Reports Section -->
        <section id="reportsSection" class="content-section" style="display: none;">
            <div class="section-header">
              <h2 class="section-title">
-               <i class="fas fa-file-pdf"></i> Pet Reports
+               <i class="fas fa-file-pdf"></i> Pet Medical Reports
              </h2>
            </div>
 
            <!-- Pet Reports Interface -->
-           <div class="pet-reports-container" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+           <div class="pet-reports-container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
              <!-- Select Pet Section -->
-             <div class="pet-select-section" style="background: #08355f; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-               <div class="section-title" style="color: #ffffff; font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                 <i class="fas fa-paw" style="color: #ffffff;"></i>
-                 Select Pet for Report
+             <div class="pet-select-section" style="background: linear-gradient(135deg, #08355f 0%, #2E5BAA 100%); border-radius: 20px; padding: 40px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(8, 53, 95, 0.3); position: relative; overflow: hidden;">
+               <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
+               <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transform: translate(-50px, 50px);"></div>
+
+               <div class="section-title" style="color: #ffffff; font-size: 24px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2;">
+                 <i class="fas fa-stethoscope" style="color: #ffffff; font-size: 28px;"></i>
+                 Select Pet for Medical Report
                </div>
 
-               <div class="form-group" style="margin-bottom: 20px;">
-                 <label for="petSelect" style="color: #ffffff; font-size: 14px; margin-bottom: 8px; display: block;">Choose a Pet:</label>
-                 <select id="petSelect" style="width: 100%; padding: 12px 16px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 14px; cursor: pointer;">
-                   <option value="">Select a pet...</option>
+               <div class="form-group" style="margin-bottom: 25px; position: relative; z-index: 2;">
+                 <label for="petSelect" style="color: #ffffff; font-size: 16px; margin-bottom: 10px; display: block; font-weight: 600;">Choose a Pet:</label>
+                 <select id="petSelect" style="width: 100%; padding: 15px 20px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.95); color: #333; font-size: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                   <option value="">Loading pets...</option>
                  </select>
                </div>
 
-               <div class="form-actions" style="text-align: right;">
-                 <button class="header-btn" onclick="generatePetReport()" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
-                   <i class="fas fa-file-pdf"></i> Generate Report
+               <div class="form-actions" style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 2;">
+                 <button id="loadPetsBtn" class="header-btn" onclick="loadPetsDropdown()" style="background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.4); padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
+                   <i class="fas fa-sync-alt"></i> Load Pets
+                 </button>
+                 <button id="generateReportBtn" class="header-btn" onclick="generatePetReport()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);">
+                   <i class="fas fa-file-medical"></i> Generate Medical Report
+                 </button>
+                 <button onclick="testMedicalReportDisplay()" style="background: #6f42c1; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-left: 10px;">
+                   <i class="fas fa-vial"></i> Test Medical Report
                  </button>
                </div>
              </div>
 
              <!-- Report Preview Section -->
-             <div class="report-preview-section" style="background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-               <div class="section-title" style="color: #333; font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                 <i class="fas fa-eye" style="color: #667eea;"></i>
-                 Report Preview
+             <div class="report-preview-section" style="background: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border: 2px solid rgba(8, 53, 95, 0.1); position: relative; overflow: hidden;">
+               <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #08355f, #2E5BAA, #08355f);"></div>
+
+               <div class="section-title" style="color: #333; font-size: 22px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+                 <i class="fas fa-eye" style="color: #08355f; font-size: 24px;"></i>
+                 Medical Report Preview
                </div>
 
-               <div id="reportPreview" class="report-preview-content" style="min-height: 200px; padding: 40px; text-align: center; color: #999; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
-                 <i class="fas fa-file-alt" style="font-size: 48px; color: #dee2e6; margin-bottom: 16px;"></i>
-                 <p style="margin: 0; font-size: 16px;">Select a pet and click "Generate Report" to preview the pet report here.</p>
+               <div id="reportPreview" class="report-preview-content" style="min-height: 300px; padding: 40px; text-align: center; color: #999; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px dashed #dee2e6; transition: all 0.3s ease;">
+                 <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                   <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(8, 53, 95, 0.3);"></i>
+                   <div>
+                     <h3 style="margin: 0 0 10px 0; color: #08355f; font-size: 20px;">No Report Selected</h3>
+                     <p style="margin: 0; font-size: 16px; color: #666;">Select a pet and click "Generate Medical Report" to view their complete medical history here.</p>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             <!-- Quick Stats Section (shown after report generation) -->
+             <div id="reportStats" class="report-stats-section" style="display: none; margin-top: 30px;">
+               <div style="background: linear-gradient(135deg, #08355f 0%, #2E5BAA 100%); border-radius: 20px; padding: 30px; color: white;">
+                 <h3 style="margin: 0 0 20px 0; display: flex; align-items: center; gap: 10px;">
+                   <i class="fas fa-chart-bar"></i> Medical Summary
+                 </h3>
+                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                   <div style="text-align: center;">
+                     <div id="totalVisits" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">0</div>
+                     <div style="font-size: 14px; opacity: 0.9;">Total Visits</div>
+                   </div>
+                   <div style="text-align: center;">
+                     <div id="totalVaccinations" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">0</div>
+                     <div style="font-size: 14px; opacity: 0.9;">Vaccinations</div>
+                   </div>
+                   <div style="text-align: center;">
+                     <div id="lastVisit" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">-</div>
+                     <div style="font-size: 14px; opacity: 0.9;">Last Visit</div>
+                   </div>
+                 </div>
                </div>
              </div>
            </div>
@@ -877,6 +1419,173 @@
     </div>
   </div>
 
+  <!-- Pet Print Modal -->
+  <div id="petPrintModal" class="modal" style="display: none;">
+    <div class="modal-content pet-report-modal" style="width: 90%; max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+      <h2><i class="fas fa-print"></i> Pet Report Preview & Print</h2>
+      <span class="close" onclick="closePetPrintModal()">&times;</span>
+
+      <div class="pet-report-content">
+        <!-- Pet Selection Section -->
+        <div class="pet-select-section" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
+          <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transform: translate(-50px, 50px);"></div>
+
+          <div class="section-title" style="color: #ffffff; font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2;">
+            <i class="fas fa-paw" style="color: #ffffff; font-size: 24px;"></i>
+            Select Pet for Report
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px; position: relative; z-index: 2;">
+            <label for="petPrintSelect" style="color: #ffffff; font-size: 16px; margin-bottom: 10px; display: block; font-weight: 600;">Choose a Pet:</label>
+            <select id="petPrintSelect" style="width: 100%; padding: 12px 20px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.95); color: #333; font-size: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+              <option value="">Loading pets...</option>
+            </select>
+          </div>
+
+          <div class="form-actions" style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 2;">
+            <button id="loadPetsForPrintBtn" class="header-btn" onclick="loadPetsForPrint()" style="background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.4); padding: 12px 25px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);">
+              <i class="fas fa-sync-alt"></i> Load Pets
+            </button>
+            <button id="generatePrintReportBtn" class="header-btn" onclick="generatePrintReport()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);">
+              <i class="fas fa-file-medical"></i> Generate Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Print Preview Section -->
+        <div class="print-preview-section" id="printPreviewSection" style="display: none; background: #ffffff; border-radius: 20px; padding: 30px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border: 2px solid rgba(23, 162, 184, 0.1); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #17a2b8, #138496, #17a2b8);"></div>
+
+          <div class="section-title" style="color: #333; font-size: 20px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-eye" style="color: #17a2b8; font-size: 22px;"></i>
+            Report Preview
+          </div>
+
+          <div id="printReportContent" class="print-report-content" style="min-height: 300px; padding: 30px; text-align: center; color: #999; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px dashed #dee2e6; transition: all 0.3s ease;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+              <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(23, 162, 184, 0.3);"></i>
+              <div>
+                <h3 style="margin: 0 0 10px 0; color: #17a2b8; font-size: 18px;">No Report Selected</h3>
+                <p style="margin: 0; font-size: 14px; color: #666;">Select a pet and click "Generate Report" to view their complete information here.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Print Actions -->
+          <div class="print-actions" id="printActions" style="display: none; margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 15px; border: 2px solid #e9ecef;">
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+              <button onclick="printReport()" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
+                <i class="fas fa-print"></i> Print Report
+              </button>
+              <button onclick="downloadPDFReport()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                <i class="fas fa-download"></i> Download PDF
+              </button>
+              <button onclick="closePetPrintModal()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-times"></i> Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pet Medical History Modal -->
+  <div id="petMedicalHistoryModal" class="modal" style="display: none;">
+    <div class="modal-content pet-report-modal" style="width: 90%; max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+      <h2><i class="fas fa-file-medical"></i> Pet Medical History Preview</h2>
+      <span class="close" onclick="closePetMedicalHistoryModal()">&times;</span>
+
+      <div class="pet-report-content">
+        <!-- Pet Selection Section -->
+        <div class="pet-select-section" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
+          <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transform: translate(-50px, 50px);"></div>
+
+          <div class="section-title" style="color: #ffffff; font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2;">
+            <i class="fas fa-stethoscope" style="color: #ffffff; font-size: 24px;"></i>
+            Select Pet for Medical History
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px; position: relative; z-index: 2;">
+            <label for="petMedicalHistorySelect" style="color: #ffffff; font-size: 16px; margin-bottom: 10px; display: block; font-weight: 600;">Choose a Pet:</label>
+            <select id="petMedicalHistorySelect" style="width: 100%; padding: 12px 20px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.95); color: #333; font-size: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+              <option value="">Loading pets...</option>
+            </select>
+          </div>
+
+          <div class="form-actions" style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 2;">
+            <button id="loadPetsForMedicalHistoryBtn" class="header-btn" onclick="loadPetsForMedicalHistory()" style="background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.4); padding: 12px 25px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);">
+              <i class="fas fa-sync-alt"></i> Load Pets
+            </button>
+            <button id="generateMedicalHistoryBtn" class="header-btn" onclick="generateMedicalHistoryReport()" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);">
+              <i class="fas fa-file-medical"></i> Generate Medical History
+            </button>
+          </div>
+        </div>
+
+        <!-- Medical History Preview Section -->
+        <div class="medical-history-preview-section" id="medicalHistoryPreviewSection" style="display: none; background: #ffffff; border-radius: 20px; padding: 30px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border: 2px solid rgba(40, 167, 69, 0.1); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #28a745, #20c997, #28a745);"></div>
+
+          <div class="section-title" style="color: #333; font-size: 20px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-eye" style="color: #28a745; font-size: 22px;"></i>
+            Medical History Preview
+          </div>
+
+          <div id="medicalHistoryContent" class="medical-history-content" style="min-height: 300px; padding: 30px; text-align: center; color: #999; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px dashed #dee2e6; transition: all 0.3s ease;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+              <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(40, 167, 69, 0.3);"></i>
+              <div>
+                <h3 style="margin: 0 0 10px 0; color: #28a745; font-size: 18px;">No Medical History Selected</h3>
+                <p style="margin: 0; font-size: 14px; color: #666;">Select a pet and click "Generate Medical History" to view their complete medical records here.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical History Actions -->
+          <div class="medical-history-actions" id="medicalHistoryActions" style="display: none; margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 15px; border: 2px solid #e9ecef;">
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+              <button onclick="printMedicalHistoryReport()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                <i class="fas fa-print"></i> Print Medical History
+              </button>
+              <button onclick="downloadMedicalHistoryPDF()" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
+                <i class="fas fa-download"></i> Download PDF
+              </button>
+              <button onclick="closePetMedicalHistoryModal()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-times"></i> Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Order Management Window -->
+  <div id="floatingOrderWindow" class="floating-order-window">
+    <div class="floating-order-header">
+      <h3><i class="fas fa-shopping-bag"></i> Order Management</h3>
+      <div class="floating-order-header-info">
+        <span class="order-count" id="floatingOrderCount">0 Orders</span>
+        <button onclick="closeFloatingOrderWindow()" class="close-floating-order">×</button>
+      </div>
+    </div>
+    <div class="floating-order-body">
+      <div id="floatingOrdersContainer" class="floating-orders-container">
+        <div class="no-floating-orders">
+          <i class="fas fa-shopping-bag"></i>
+          <p>No orders found</p>
+          <small>All orders will appear here for easy management.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating window backdrop -->
+  <div id="floatingBackdrop" class="floating-backdrop" onclick="closeFloatingOrderWindow()"></div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast"></div>
 
@@ -900,6 +1609,7 @@
         console.log('Checking for staffDashboard instance...');
         if (typeof window.staffDashboard !== 'undefined') {
           console.log('✅ StaffDashboard instance found');
+          console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.staffDashboard)).filter(name => typeof window.staffDashboard[name] === 'function'));
         } else {
           console.log('❌ StaffDashboard instance NOT found');
         }
@@ -1026,8 +1736,8 @@
       `;
     }
 
-    // Download simple PDF report
-    async function downloadSimplePDFReport() {
+    // Download staff PDF report (adapted for staff theme)
+    async function downloadStaffPDFReport() {
       if (!currentReportData) {
         toast('No report data available', 'error');
         return;
@@ -1045,28 +1755,46 @@
         const pet = currentReportData.pet;
         const owner = currentReportData.owner;
 
-        // Header
+        // Header with staff theme colors
         pdf.setFontSize(20);
+        pdf.setTextColor(8, 53, 95); // Staff blue theme color
         pdf.text('Tattoo Veterinary Clinic', 105, 20, { align: 'center' });
+
         pdf.setFontSize(16);
+        pdf.setTextColor(46, 91, 170); // Lighter staff blue
         pdf.text('Pet Medical Report', 105, 30, { align: 'center' });
 
-        let yPosition = 50;
+        // Clinic info
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Clinic Address: Your Clinic Address', 105, 40, { align: 'center' });
+        pdf.text('Phone: 0917-519-4639 | Email: info@tattoovet.com', 105, 45, { align: 'center' });
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, 105, 50, { align: 'center' });
+
+        let yPosition = 65;
 
         // Pet Information
         pdf.setFontSize(14);
+        pdf.setTextColor(8, 53, 95);
         pdf.text('Pet Information', 20, yPosition);
         yPosition += 10;
 
         pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
         const petInfo = [
           ['Name:', pet.name],
           ['Species:', pet.species],
           ['Breed:', pet.breed || 'Not specified'],
+          ['Birthdate:', pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not specified'],
           ['Gender:', pet.gender || 'Not specified'],
-          ['Weight:', pet.weight ? `${pet.weight} kg` : 'Not recorded'],
+          ['Weight:', pet.weight ? `${pet.weight} kg` : 'Weight not recorded'],
           ['Color:', pet.color || 'Not specified']
         ];
+
+        if (pet.notes) {
+          petInfo.push(['Notes:', pet.notes]);
+        }
 
         petInfo.forEach(([label, value]) => {
           pdf.text(`${label} ${value}`, 20, yPosition);
@@ -1076,10 +1804,13 @@
         // Owner Information
         yPosition += 5;
         pdf.setFontSize(14);
+        pdf.setTextColor(8, 53, 95);
         pdf.text('Owner Information', 20, yPosition);
         yPosition += 10;
 
         pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
         const ownerInfo = [
           ['Name:', owner.name],
           ['Email:', owner.email],
@@ -1095,10 +1826,13 @@
         // Statistics
         yPosition += 5;
         pdf.setFontSize(14);
+        pdf.setTextColor(8, 53, 95);
         pdf.text('Statistics', 20, yPosition);
         yPosition += 10;
 
         pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
         const stats = [
           ['Total Appointments:', currentReportData.statistics.total_appointments.toString()],
           ['Total Vaccinations:', currentReportData.statistics.total_vaccinations.toString()],
@@ -1110,10 +1844,113 @@
           yPosition += 6;
         });
 
+        // Medical History Section
+        if (currentReportData.medical_history && currentReportData.medical_history.length > 0) {
+          // Check if we need a new page for medical history
+          if (yPosition > 200) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+
+          pdf.setFontSize(16);
+          pdf.setTextColor(8, 53, 95);
+          pdf.text('Medical History', 20, yPosition);
+          pdf.setTextColor(0, 0, 0);
+          yPosition += 15;
+
+          pdf.setFontSize(10);
+          let recordCount = 0;
+          const maxRecordsPerPage = 3;
+
+          for (const record of currentReportData.medical_history) {
+            recordCount++;
+
+            // Check if we need a new page
+            if (yPosition > 220 || recordCount > maxRecordsPerPage) {
+              pdf.addPage();
+              yPosition = 20;
+              recordCount = 1;
+            }
+
+            // Record header
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`${recordCount}. ${new Date(record.created_at).toLocaleDateString()}`, 20, yPosition);
+            yPosition += 10;
+
+            // Staff info
+            pdf.setFontSize(8);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text(`   Staff: ${record.staff_name || 'Not recorded'}`, 20, yPosition);
+            pdf.setTextColor(0, 0, 0);
+            yPosition += 8;
+
+            // Diagnosis
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, 'normal');
+            const diagnosisText = record.diagnosis || 'No diagnosis recorded';
+            const diagnosisLines = pdf.splitTextToSize(`   Diagnosis: ${diagnosisText}`, 165);
+            pdf.text(diagnosisLines, 20, yPosition);
+            yPosition += (diagnosisLines.length * 5) + 5;
+
+            // Treatment
+            if (record.treatment) {
+              const treatmentText = record.treatment;
+              const treatmentLines = pdf.splitTextToSize(`   Treatment: ${treatmentText}`, 165);
+              pdf.text(treatmentLines, 20, yPosition);
+              yPosition += (treatmentLines.length * 5) + 5;
+            }
+
+            // Medications
+            if (record.medications) {
+              const medicationText = record.medications;
+              const medicationLines = pdf.splitTextToSize(`   Medications: ${medicationText}`, 165);
+              pdf.text(medicationLines, 20, yPosition);
+              yPosition += (medicationLines.length * 5) + 5;
+            }
+
+            // Notes
+            if (record.notes) {
+              const notesText = record.notes;
+              const notesLines = pdf.splitTextToSize(`   Notes: ${notesText}`, 165);
+              pdf.text(notesLines, 20, yPosition);
+              yPosition += (notesLines.length * 5) + 5;
+            }
+
+            // Instructions
+            if (record.instructions) {
+              const instructionsText = record.instructions;
+              const instructionsLines = pdf.splitTextToSize(`   Instructions: ${instructionsText}`, 165);
+              pdf.text(instructionsLines, 20, yPosition);
+              yPosition += (instructionsLines.length * 5) + 5;
+            }
+
+            // Follow-up date
+            if (record.follow_up_date) {
+              pdf.text(`   Follow-up: ${new Date(record.follow_up_date).toLocaleDateString()}`, 20, yPosition);
+              yPosition += 8;
+            }
+
+            // Add space between records
+            yPosition += 10;
+
+            // Safety check
+            if (yPosition > 240) {
+              pdf.addPage();
+              yPosition = 20;
+            }
+          }
+        }
+
         // Footer
-        pdf.setFontSize(8);
-        pdf.text(`Report generated: ${new Date().toLocaleString()}`, 20, 280);
-        pdf.text('This report contains confidential medical information.', 20, 285);
+        const pageCount = pdf.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(8);
+          pdf.setTextColor(150, 150, 150);
+          pdf.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+          pdf.text('This report contains confidential medical information.', 105, 290, { align: 'center' });
+        }
 
         // Download
         const filename = `pet_report_${pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -1125,6 +1962,145 @@
         toast('Error generating PDF. Please try again.', 'error');
       }
     }
+
+    // Load jsPDF library
+    async function loadJSPDFLibrary() {
+      return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+          setTimeout(() => {
+            if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+              resolve();
+            } else {
+              reject(new Error('jsPDF library failed to load properly'));
+            }
+          }, 100);
+        };
+        script.onerror = () => reject(new Error('Failed to load jsPDF library'));
+        document.head.appendChild(script);
+      });
+    }
+
+    // Test Medical Report Display function (for debugging)
+    window.testMedicalReportDisplay = function() {
+      console.log('=== TESTING MEDICAL REPORT DISPLAY ===');
+
+      // Test data
+      const testData = {
+        pet: {
+          name: 'Bogart',
+          species: 'Dog',
+          breed: 'Puspin',
+          gender: 'Male',
+          weight: '25',
+          color: 'Blue'
+        },
+        owner: {
+          name: 'John Cedrick Unida',
+          email: 'unida99@gmail.com',
+          phone: '09286077247',
+          address: 'Not provided'
+        },
+        medical_history: [
+          {
+            created_at: '2025-10-15 09:00:00',
+            staff_name: 'Dr. Smith',
+            service_name: 'Vaccination',
+            diagnosis: 'Routine health check',
+            treatment: 'Annual vaccination administered',
+            medications: 'DHPP vaccine, Rabies vaccine',
+            notes: 'Patient was healthy and cooperative'
+          }
+        ],
+        statistics: {
+          total_appointments: 1,
+          total_vaccinations: 1,
+          total_medical_records: 1,
+          last_visit: '2025-10-15'
+        }
+      };
+
+      // Find the report preview element
+      const reportPreview = document.getElementById('reportPreview');
+      if (reportPreview) {
+        console.log('✅ Found report preview element');
+
+        // Generate HTML content
+        let html = `
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-paw" style="color: #08355f;"></i> Pet Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${testData.pet.name}</div>
+              <div><strong>Species:</strong> ${testData.pet.species}</div>
+              <div><strong>Breed:</strong> ${testData.pet.breed}</div>
+              <div><strong>Gender:</strong> ${testData.pet.gender}</div>
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-stethoscope" style="color: #08355f;"></i> Medical Records
+            </h3>
+            <div style="margin-bottom: 15px; text-align: center;">
+              <span style="background: linear-gradient(135deg, #08355f 0%, #2E5BAA 100%); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;">
+                Total Records: ${testData.medical_history.length}
+              </span>
+            </div>
+        `;
+
+        testData.medical_history.forEach((record, index) => {
+          html += `
+            <div style="margin: 15px 0; padding: 15px; border: 2px solid #08355f; border-radius: 10px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);">
+              <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e1e5e9;">
+                <h5 style="margin: 0 0 5px 0; color: #08355f; font-size: 14px;">
+                  Visit #${index + 1} - ${new Date(record.created_at).toLocaleDateString()}
+                </h5>
+                <div style="font-size: 12px; color: #666;">
+                  <strong>Staff:</strong> ${record.staff_name} | <strong>Service:</strong> ${record.service_name}
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #08355f;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Diagnosis</div>
+                  <div style="color: #555; font-size: 12px;">${record.diagnosis}</div>
+                </div>
+
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #28a745;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Treatment</div>
+                  <div style="color: #555; font-size: 12px;">${record.treatment}</div>
+                </div>
+
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #ffc107;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Medications</div>
+                  <div style="color: #555; font-size: 12px;">${record.medications}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+
+        // Display the HTML
+        reportPreview.innerHTML = html;
+        console.log('✅ Medical report displayed with test data');
+
+        return '✅ Medical report test completed successfully';
+      } else {
+        console.error('❌ Report preview element not found');
+        return '❌ Report preview element not found';
+      }
+    };
 
     // Global function for downloading PDF reports
     async function downloadPDFReport() {
@@ -1308,6 +2284,7 @@
         'pets': '<i class="fas fa-paw"></i> Pets Management',
         'store': '<i class="fas fa-store"></i> Store',
         'services': '<i class="fas fa-stethoscope"></i> Services Management',
+        'orders': '<i class="fas fa-shopping-bag"></i> Orders Management',
         'reports': '<i class="fas fa-chart-bar"></i> Reports & Analytics',
         'settings': '<i class="fas fa-cog"></i> Settings'
       };
@@ -1340,10 +2317,22 @@
           }
         }
 
+        // Load clients when clients section is shown
+        if (sectionName === 'clients') {
+          console.log('👥 Loading clients section...');
+          loadClientsSection();
+        }
+
         // Load pets dropdown when reports section is shown
         if (sectionName === 'reports') {
           console.log('📋 Loading reports section...');
           loadPetsDropdown();
+        }
+
+        // Load orders when orders section is shown
+        if (sectionName === 'orders') {
+          console.log('🛒 Loading orders section...');
+          loadOrdersManagement();
         }
  
      // Load pets when pets section is shown
@@ -1398,6 +2387,81 @@
 
     // Make toast function globally available
     window.toast = toast;
+
+    // Test function to debug client loading
+    window.testClientAPI = async function() {
+      console.log('🔍 Testing client API...');
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_clients' })
+        });
+
+        const result = await response.json();
+        console.log('🔍 Client API response:', result);
+
+        if (result.success) {
+          console.log('✅ Clients found:', result.data.length);
+          result.data.forEach((client, index) => {
+            console.log(`👤 Client ${index + 1}:`, client);
+            console.log(`🐾 Client pets:`, client.pets);
+          });
+        } else {
+          console.log('❌ API error:', result.message);
+        }
+
+        return result;
+      } catch (error) {
+        console.error('🔍 Test client API error:', error);
+        return null;
+      }
+    };
+
+    // Test function to manually trigger notifications for existing orders
+    window.testOrderNotifications = async function() {
+      console.log('🔔 Testing order notifications...');
+      try {
+        // Get all orders
+        const ordersResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_all_orders' })
+        });
+
+        const ordersResult = await ordersResponse.json();
+        console.log('📋 Orders result:', ordersResult);
+
+        if (ordersResult.success && ordersResult.data && ordersResult.data.length > 0) {
+          // Create notifications for each order
+          for (const order of ordersResult.data) {
+            const notificationResponse = await fetch('../api/vet_api.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'send_notification',
+                user_id: 1, // Staff user ID
+                type: 'order_new',
+                title: 'New Order Placed',
+                message: `New order #${order.id} placed for ₱${parseFloat(order.total_amount).toFixed(2)}.`,
+                priority: 'normal'
+              })
+            });
+
+            const notificationResult = await notificationResponse.json();
+            console.log(`📢 Notification for order ${order.id}:`, notificationResult);
+          }
+
+          toast('Test notifications sent for all orders!', 'success');
+          updateNotificationBadge(); // Update the badge
+        } else {
+          toast('No orders found to create notifications for', 'warning');
+        }
+      } catch (error) {
+        console.error('❌ Error testing notifications:', error);
+        toast('Error testing notifications', 'error');
+      }
+    };
 
     // Profile Picture Upload Functionality
     let selectedProfilePicture = null;
@@ -1583,8 +2647,8 @@
           }
 
           if (result.data?.user_type !== 'staff') {
-            window.location.href = '../public/homepage.html';
-            return;
+          window.location.href = '../index.html';
+          return;
           }
 
           // Update UI with staff info
@@ -1613,7 +2677,7 @@
           } else {
             // All retries failed
             console.error('Session check failed after all retries:', error);
-            window.location.href = '../public/homepage.html';
+            window.location.href = '../index.html';
           }
         }
       }
@@ -1674,6 +2738,147 @@
         toast('Add pet feature coming soon!', 'info');
       }
     }
+
+    function showAddServiceModal() {
+      console.log('🔧 Show add service modal called');
+
+      // Check if StaffDashboard instance exists
+      if (typeof window.staffDashboard !== 'undefined' && window.staffDashboard !== null) {
+        console.log('✅ StaffDashboard instance found, calling showAddServiceModal method');
+
+        // Check if the method exists
+        if (typeof window.staffDashboard.showAddServiceModal === 'function') {
+          console.log('✅ showAddServiceModal method found, executing...');
+          window.staffDashboard.showAddServiceModal();
+        } else {
+          console.error('❌ showAddServiceModal method not found on StaffDashboard instance');
+          console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.staffDashboard)).filter(name => typeof window.staffDashboard[name] === 'function'));
+
+          if (typeof toast === 'function') {
+            toast('Add service method not available. Please refresh the page.', 'error');
+          } else {
+            alert('Add service method not available. Please refresh the page.');
+          }
+        }
+      } else {
+        console.error('❌ StaffDashboard instance not found');
+        console.log('window.staffDashboard:', window.staffDashboard);
+
+        // Try to initialize StaffDashboard if it's not available
+        console.log('🔄 Attempting to initialize StaffDashboard...');
+
+        // Check if the StaffDashboard class is available
+        if (typeof StaffDashboard !== 'undefined') {
+          console.log('✅ StaffDashboard class found, creating instance...');
+          window.staffDashboard = new StaffDashboard();
+
+          // Wait a bit for initialization and try again
+          setTimeout(() => {
+            if (window.staffDashboard && window.staffDashboard.showAddServiceModal) {
+              console.log('✅ StaffDashboard initialized, calling showAddServiceModal...');
+              window.staffDashboard.showAddServiceModal();
+            } else {
+              console.error('❌ Failed to initialize StaffDashboard');
+              if (typeof toast === 'function') {
+                toast('Failed to initialize dashboard. Please refresh the page.', 'error');
+              } else {
+                alert('Failed to initialize dashboard. Please refresh the page.');
+              }
+            }
+          }, 1000);
+        } else {
+          console.error('❌ StaffDashboard class not found');
+          if (typeof toast === 'function') {
+            toast('Dashboard not loaded. Please refresh the page.', 'error');
+          } else {
+            alert('Dashboard not loaded. Please refresh the page.');
+          }
+        }
+      }
+    }
+
+    // Test function to verify add service functionality
+    window.testAddServiceFunctionality = function() {
+      console.log('🧪 Testing add service functionality...');
+
+      // Test 1: Check if StaffDashboard class exists
+      if (typeof StaffDashboard === 'undefined') {
+        console.error('❌ StaffDashboard class not found');
+        toast('StaffDashboard class not loaded', 'error');
+        return false;
+      }
+      console.log('✅ StaffDashboard class found');
+
+      // Test 2: Check if StaffDashboard instance exists
+      if (typeof window.staffDashboard === 'undefined' || window.staffDashboard === null) {
+        console.error('❌ StaffDashboard instance not found');
+        toast('StaffDashboard instance not created', 'error');
+        return false;
+      }
+      console.log('✅ StaffDashboard instance found');
+
+      // Test 3: Check if showAddServiceModal method exists
+      if (typeof window.staffDashboard.showAddServiceModal !== 'function') {
+        console.error('❌ showAddServiceModal method not found');
+        toast('showAddServiceModal method not available', 'error');
+        return false;
+      }
+      console.log('✅ showAddServiceModal method found');
+
+      // Test 4: Check if createAddServiceModal method exists
+      if (typeof window.staffDashboard.createAddServiceModal !== 'function') {
+        console.error('❌ createAddServiceModal method not found');
+        toast('createAddServiceModal method not available', 'error');
+        return false;
+      }
+      console.log('✅ createAddServiceModal method found');
+
+      // Test 5: Check if handleAddService method exists
+      if (typeof window.staffDashboard.handleAddService !== 'function') {
+        console.error('❌ handleAddService method not found');
+        toast('handleAddService method not available', 'error');
+        return false;
+      }
+      console.log('✅ handleAddService method found');
+
+      // Test 6: Try to create the modal
+      try {
+        console.log('🧪 Testing modal creation...');
+        const modal = window.staffDashboard.createAddServiceModal();
+        if (modal && modal.id === 'addServiceModal') {
+          console.log('✅ Modal created successfully');
+        } else {
+          console.error('❌ Modal creation failed');
+          toast('Modal creation failed', 'error');
+          return false;
+        }
+      } catch (error) {
+        console.error('❌ Modal creation threw error:', error);
+        toast('Modal creation error: ' + error.message, 'error');
+        return false;
+      }
+
+      // Test 7: Check if API endpoint exists
+      console.log('🧪 Testing API endpoint availability...');
+      fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_service', name: 'test', duration: 30 })
+      }).then(response => {
+        console.log('✅ API endpoint is reachable, status:', response.status);
+        if (response.status === 200) {
+          console.log('✅ API endpoint responding correctly');
+        } else {
+          console.warn('⚠️ API endpoint returned status:', response.status);
+        }
+      }).catch(error => {
+        console.error('❌ API endpoint not reachable:', error);
+      });
+
+      console.log('✅ All tests passed! Add service functionality should work.');
+      toast('Add service functionality test completed successfully!', 'success');
+      return true;
+    };
 
 
     // Pet list functions are handled by staff-dashboard.js
@@ -2213,6 +3418,399 @@
       });
     }
 
+    // Notification Badge Management
+    function updateNotificationBadge() {
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      if (!mobileToggle) return;
+
+      // Remove existing badge
+      const existingBadge = mobileToggle.querySelector('.notification-badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
+
+      // Check for unread notifications
+      const unreadCount = getUnreadNotificationCount();
+
+      if (unreadCount > 0) {
+        const badge = document.createElement('div');
+        badge.className = 'notification-badge';
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        mobileToggle.appendChild(badge);
+        console.log(`🔔 Notification badge added: ${unreadCount} unread notifications`);
+      }
+    }
+
+    async function getUnreadNotificationCount() {
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_unread_count' })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          return parseInt(result.data.unread_count) || 0;
+        }
+        return 0;
+      } catch (error) {
+        console.error('Error checking notifications:', error);
+        return 0;
+      }
+    }
+
+    // Orders Management Functions
+    async function loadOrdersManagement() {
+      const container = document.getElementById('ordersContainer');
+      if (!container) return;
+
+      try {
+        container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading orders...</div>';
+
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_all_orders' })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          displayOrdersManagement(result.data);
+        } else {
+          container.innerHTML = '<div class="loading">No orders found</div>';
+        }
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        container.innerHTML = '<div class="loading">Error loading orders. Please try again.</div>';
+      }
+    }
+
+    // Floating Order Window Functions
+    function showFloatingOrderWindow() {
+      const window = document.getElementById('floatingOrderWindow');
+      const backdrop = document.getElementById('floatingBackdrop');
+
+      if (window && backdrop) {
+        window.classList.add('show');
+        backdrop.classList.add('show');
+        loadFloatingOrders(); // Refresh orders when opening the window
+      }
+    }
+
+    function closeFloatingOrderWindow() {
+      const window = document.getElementById('floatingOrderWindow');
+      const backdrop = document.getElementById('floatingBackdrop');
+
+      if (window && backdrop) {
+        window.classList.remove('show');
+        backdrop.classList.remove('show');
+      }
+    }
+
+    async function loadFloatingOrders() {
+      try {
+        const container = document.getElementById('floatingOrdersContainer');
+        if (!container) return;
+
+        // Show loading state
+        container.innerHTML = `
+          <div class="no-floating-orders">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading orders...</p>
+            <small>Please wait while we fetch the latest orders.</small>
+          </div>
+        `;
+
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_all_orders' })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          displayFloatingOrders(result.data);
+          updateFloatingOrderCount(result.data.length);
+        } else {
+          container.innerHTML = `
+            <div class="no-floating-orders">
+              <i class="fas fa-shopping-bag"></i>
+              <p>No orders found</p>
+              <small>No orders have been placed yet.</small>
+            </div>
+          `;
+          updateFloatingOrderCount(0);
+        }
+      } catch (error) {
+        console.error('Error loading floating orders:', error);
+        const container = document.getElementById('floatingOrdersContainer');
+        if (container) {
+          container.innerHTML = `
+            <div class="no-floating-orders">
+              <i class="fas fa-exclamation-triangle"></i>
+              <p>Error loading orders</p>
+              <small>Please try again or contact support.</small>
+            </div>
+          `;
+        }
+        updateFloatingOrderCount(0);
+      }
+    }
+
+    function displayFloatingOrders(orders) {
+      const container = document.getElementById('floatingOrdersContainer');
+      if (!container) return;
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="no-floating-orders">
+            <i class="fas fa-shopping-bag"></i>
+            <p>No orders found</p>
+            <small>No orders have been placed yet.</small>
+          </div>
+        `;
+        updateFloatingOrderCount(0);
+        return;
+      }
+
+      container.innerHTML = orders.map(order => createFloatingOrderCard(order)).join('');
+      updateFloatingOrderCount(orders.length);
+    }
+
+    function createFloatingOrderCard(order) {
+      const orderDate = new Date(order.order_date).toLocaleDateString();
+      const orderTime = new Date(order.order_date).toLocaleTimeString();
+
+      // Format payment method display
+      const paymentMethodDisplay = {
+        'gcash': 'GCash',
+        'bank': 'Bank Transfer',
+        'cash_on_visit': 'Cash on Visit'
+      };
+
+      const paymentMethod = paymentMethodDisplay[order.payment_method] || order.payment_method || 'Not specified';
+
+      return `
+        <div class="floating-order-card">
+          <div class="floating-order-header-info">
+            <div class="floating-order-info">
+              <h4>Order #${order.id}</h4>
+              <p>Customer: ${order.customer_name}</p>
+              <p>Placed on ${orderDate} at ${orderTime}</p>
+              <p>Payment: ${paymentMethod}</p>
+            </div>
+            <div class="floating-order-status status-${order.status.toLowerCase()}">
+              ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+            </div>
+          </div>
+
+          <div class="floating-order-items">
+            ${order.items.map(item => `
+              <div class="floating-order-item">
+                <div class="item-details">
+                  <h5>${item.name}</h5>
+                  <p>₱${parseFloat(item.price).toFixed(2)} × ${item.quantity}</p>
+                </div>
+                <div class="item-subtotal">
+                  ₱${(item.price * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="floating-order-summary">
+            <div class="floating-order-total">
+              <span>Total Amount:</span>
+              <span>₱${parseFloat(order.total_amount).toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div class="floating-order-actions">
+            <select onchange="updateFloatingOrderStatus(${order.id}, this.value)" class="floating-status-select">
+              <option value="">Update Status</option>
+              <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+              <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateFloatingOrderCount(count) {
+      const countElement = document.getElementById('floatingOrderCount');
+      if (countElement) {
+        countElement.textContent = `${count} Order${count !== 1 ? 's' : ''}`;
+      }
+    }
+
+    // Add keyboard support for floating window
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeFloatingOrderWindow();
+      }
+    });
+
+    async function updateFloatingOrderStatus(orderId, newStatus) {
+      if (!newStatus) return;
+
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_order_status',
+            order_id: orderId,
+            status: newStatus
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          toast('Order status updated successfully!', 'success');
+          loadFloatingOrders(); // Reload orders in floating window
+          loadOrdersManagement(); // Reload orders in main section
+          updateNotificationBadge(); // Update notification badge
+        } else {
+          toast('Error: ' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        toast('Failed to update order status', 'error');
+      }
+    }
+
+    function displayOrdersManagement(orders) {
+      const container = document.getElementById('ordersContainer');
+      if (!container) return;
+
+      if (orders.length === 0) {
+        container.innerHTML = '<div class="loading">No orders found.</div>';
+        updatePendingOrdersBadge(0);
+        return;
+      }
+
+      // Count pending orders
+      const pendingCount = orders.filter(order => order.status === 'pending').length;
+      updatePendingOrdersBadge(pendingCount);
+
+      container.innerHTML = `
+        <div class="orders-management">
+          <div class="orders-grid">
+            ${orders.map(order => createOrderManagementCard(order)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function updatePendingOrdersBadge(count) {
+      const badge = document.getElementById('pendingOrdersBadge');
+      if (badge) {
+        if (count > 0) {
+          badge.textContent = count;
+          badge.style.display = 'inline-flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    function createOrderManagementCard(order) {
+      const orderDate = new Date(order.order_date).toLocaleDateString();
+      const orderTime = new Date(order.order_date).toLocaleTimeString();
+
+      // Format payment method display
+      const paymentMethodDisplay = {
+        'gcash': 'GCash',
+        'bank': 'Bank Transfer',
+        'cash_on_visit': 'Cash on Visit'
+      };
+
+      const paymentMethod = paymentMethodDisplay[order.payment_method] || order.payment_method || 'Not specified';
+
+      return `
+        <div class="order-card" style="background: #08355f; border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+          <div class="order-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+            <div class="order-info">
+              <h3 style="color: #ffffff; margin: 0 0 5px 0; font-size: 18px;">Order #${order.id}</h3>
+              <p style="color: rgba(255, 255, 255, 0.8); margin: 0; font-size: 14px;">${orderDate} at ${orderTime}</p>
+              <p style="color: rgba(255, 255, 255, 0.8); margin: 0; font-size: 14px;">Customer: ${order.customer_name}</p>
+            </div>
+            <div class="order-status status-${order.status.toLowerCase()}" style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+              ${order.status}
+            </div>
+          </div>
+
+          <div class="order-items" style="margin-bottom: 15px;">
+            ${order.items.map(item => `
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <div>
+                  <span style="color: #ffffff;">${item.name}</span>
+                  <span style="color: rgba(255, 255, 255, 0.7); font-size: 12px;"> × ${item.quantity}</span>
+                </div>
+                <span style="color: #ffffff;">₱${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px;">
+              <i class="fas fa-credit-card"></i> ${paymentMethod}
+            </div>
+            <div style="font-size: 18px; font-weight: bold; color: #ffffff;">
+              Total: ₱${parseFloat(order.total_amount).toFixed(2)}
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <select onchange="updateOrderStatus(${order.id}, this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.1); color: white; font-size: 14px;">
+              <option value="">Update Status</option>
+              <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+              <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+      if (!newStatus) return;
+
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_order_status',
+            order_id: orderId,
+            status: newStatus
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          toast('Order status updated successfully!', 'success');
+          loadOrdersManagement(); // Reload orders
+        } else {
+          toast('Error: ' + result.message, 'error');
+        }
+      } catch (error) {
+        console.error('Error updating order status:', error);
+        toast('Failed to update order status', 'error');
+      }
+    }
+
     function generateHTMLReport(data) {
       const filename = `pet_report_${data.pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
 
@@ -2684,7 +4282,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load staff dashboard data
 async function loadStaffDashboardData() {
   try {
-    console.log('Loading staff dashboard data...');
+    console.log('📊 Loading staff dashboard data...');
 
     // Load appointments data for today's count
     const appointmentsResponse = await fetch('../api/vet_api.php', {
@@ -2693,6 +4291,7 @@ async function loadStaffDashboardData() {
       body: JSON.stringify({ action: 'get_appointments' })
     });
     const appointmentsResult = await appointmentsResponse.json();
+    console.log('📅 Appointments API response:', appointmentsResult);
 
     if (appointmentsResult.success && appointmentsResult.data) {
       const appointments = appointmentsResult.data;
@@ -2707,8 +4306,12 @@ async function loadStaffDashboardData() {
       const todayElement = document.getElementById('todayAppointmentsCount');
       if (todayElement) {
         todayElement.textContent = todayCount;
+        console.log('✅ Today appointments count updated:', todayCount);
+      } else {
+        console.error('❌ Today appointments element not found');
       }
-      console.log('Today appointments count loaded:', todayCount);
+    } else {
+      console.error('❌ Failed to load appointments:', appointmentsResult.message);
     }
 
     // Load clients data
@@ -2718,6 +4321,7 @@ async function loadStaffDashboardData() {
       body: JSON.stringify({ action: 'get_clients' })
     });
     const clientsResult = await clientsResponse.json();
+    console.log('👥 Clients API response:', clientsResult);
 
     if (clientsResult.success && clientsResult.data) {
       const clientsCount = clientsResult.data.length;
@@ -2726,8 +4330,12 @@ async function loadStaffDashboardData() {
       const clientsElement = document.getElementById('totalClientsCount');
       if (clientsElement) {
         clientsElement.textContent = clientsCount;
+        console.log('✅ Total clients count updated:', clientsCount);
+      } else {
+        console.error('❌ Total clients element not found');
       }
-      console.log('Total clients count loaded:', clientsCount);
+    } else {
+      console.error('❌ Failed to load clients:', clientsResult.message);
     }
 
     // Load pets data
@@ -2737,6 +4345,7 @@ async function loadStaffDashboardData() {
       body: JSON.stringify({ action: 'get_pets' })
     });
     const petsResult = await petsResponse.json();
+    console.log('🐾 Pets API response:', petsResult);
 
     if (petsResult.success && petsResult.data) {
       const petsCount = petsResult.data.length;
@@ -2745,8 +4354,12 @@ async function loadStaffDashboardData() {
       const petsElement = document.getElementById('totalPetsCount');
       if (petsElement) {
         petsElement.textContent = petsCount;
+        console.log('✅ Total pets count updated:', petsCount);
+      } else {
+        console.error('❌ Total pets element not found');
       }
-      console.log('Total pets count loaded:', petsCount);
+    } else {
+      console.error('❌ Failed to load pets:', petsResult.message);
     }
 
     // Load dashboard data for revenue
@@ -2756,6 +4369,7 @@ async function loadStaffDashboardData() {
       body: JSON.stringify({ action: 'get_dashboard_data' })
     });
     const dashboardResult = await dashboardResponse.json();
+    console.log('💰 Dashboard API response:', dashboardResult);
 
     if (dashboardResult.success && dashboardResult.data) {
       const revenue = dashboardResult.data.monthly_revenue || 0;
@@ -2764,12 +4378,568 @@ async function loadStaffDashboardData() {
       const revenueElement = document.getElementById('monthlyRevenueCount');
       if (revenueElement) {
         revenueElement.textContent = '₱' + parseFloat(revenue).toFixed(2);
+        console.log('✅ Monthly revenue updated:', revenue);
+      } else {
+        console.error('❌ Monthly revenue element not found');
       }
-      console.log('Monthly revenue loaded:', revenue);
+    } else {
+      console.error('❌ Failed to load dashboard data:', dashboardResult.message);
     }
 
+    console.log('✅ Dashboard data loading completed');
+
   } catch (error) {
-    console.error('Error loading staff dashboard data:', error);
+    console.error('❌ Error loading staff dashboard data:', error);
+    toast('Error loading dashboard data: ' + error.message, 'error');
+  }
+}
+
+// Test function to manually load dashboard data
+window.testDashboardData = async function() {
+  console.log('🧪 Testing dashboard data loading...');
+  await loadStaffDashboardData();
+  toast('Dashboard data refreshed!', 'success');
+};
+
+// Pet Print Modal Functions
+let currentPrintReportData = null;
+let selectedPetForPrintId = null;
+
+function showPetPrintModal() {
+  const modal = document.getElementById('petPrintModal');
+  if (modal) {
+    modal.style.display = 'block';
+    loadPetsForPrint();
+  }
+}
+
+function closePetPrintModal() {
+  const modal = document.getElementById('petPrintModal');
+  if (modal) {
+    modal.style.display = 'none';
+    // Clear the preview
+    document.getElementById('printPreviewSection').style.display = 'none';
+    document.getElementById('printReportContent').innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(23, 162, 184, 0.3);"></i>
+        <div>
+          <h3 style="margin: 0 0 10px 0; color: #17a2b8; font-size: 18px;">No Report Selected</h3>
+          <p style="margin: 0; font-size: 14px; color: #666;">Select a pet and click "Generate Report" to view their complete information here.</p>
+        </div>
+      </div>
+    `;
+    currentPrintReportData = null;
+    selectedPetForPrintId = null;
+  }
+}
+
+async function loadPetsForPrint() {
+  try {
+    const response = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=200');
+    const result = await response.json();
+
+    if (result.success) {
+      const petSelect = document.getElementById('petPrintSelect');
+      petSelect.innerHTML = '<option value="">Select a pet...</option>';
+
+      result.data.forEach(pet => {
+        const option = document.createElement('option');
+        option.value = pet.id;
+        option.textContent = `${pet.name} (${pet.species}) - Owner: ${pet.first_name} ${pet.last_name}`;
+        petSelect.appendChild(option);
+      });
+    } else {
+      console.error('Failed to load pets for print:', result.message);
+      toast('Error loading pets: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error loading pets for print:', error);
+    toast('Error loading pets. Please try again.', 'error');
+  }
+}
+
+async function generatePrintReport() {
+  const petSelect = document.getElementById('petPrintSelect');
+  const selectedPetId = petSelect.value;
+
+  if (!selectedPetId) {
+    toast('Please select a pet first', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${selectedPetId}`);
+    const result = await response.json();
+
+    if (result.success) {
+      currentPrintReportData = result.data;
+      selectedPetForPrintId = selectedPetId;
+      displayPrintPreview(result.data);
+      toast('Report generated successfully!', 'success');
+    } else {
+      toast('Error generating report: ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Error generating print report:', error);
+    toast('Error generating report. Please try again.', 'error');
+  }
+}
+
+function displayPrintPreview(data) {
+  const previewSection = document.getElementById('printPreviewSection');
+  const reportContent = document.getElementById('printReportContent');
+  const printActions = document.getElementById('printActions');
+
+  if (!previewSection || !reportContent) return;
+
+  const pet = data.pet;
+  const owner = data.owner;
+
+  reportContent.innerHTML = `
+    <div style="text-align: left; max-width: none; margin: 0; padding: 0;">
+      <!-- Header -->
+      <div style="text-align: center; border-bottom: 3px solid #17a2b8; padding-bottom: 20px; margin-bottom: 30px; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0;">
+        <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+          <i class="fas fa-clinic-medical" style="margin-right: 15px;"></i>Tattoo Veterinary Clinic
+        </h1>
+        <h2 style="margin: 0 0 15px 0; font-size: 22px; font-weight: 600;">Pet Medical Report</h2>
+        <div style="font-size: 14px; opacity: 0.9;">
+          <p style="margin: 5px 0;"><strong>Clinic Address:</strong> Your Clinic Address</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> 0917-519-4639 | <strong>Email:</strong> info@tattoovet.com</p>
+          <p style="margin: 5px 0;"><strong>Report Generated:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+      </div>
+
+      <!-- Pet Information -->
+      <div style="background: #ffffff; border: 2px solid #17a2b8; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(23, 162, 184, 0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #17a2b8; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+          <i class="fas fa-paw" style="color: #17a2b8; font-size: 24px;"></i>Pet Information
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #17a2b8;">
+            <div style="font-weight: 600; color: #495057; margin-bottom: 8px; font-size: 16px;">Basic Information</div>
+            <div style="display: grid; gap: 8px;">
+              <div><strong>Name:</strong> <span style="color: #17a2b8; font-weight: 600;">${pet.name}</span></div>
+              <div><strong>Species:</strong> ${pet.species}</div>
+              <div><strong>Breed:</strong> ${pet.breed || 'Not specified'}</div>
+              <div><strong>Gender:</strong> ${pet.gender || 'Not specified'}</div>
+            </div>
+          </div>
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
+            <div style="font-weight: 600; color: #495057; margin-bottom: 8px; font-size: 16px;">Physical Details</div>
+            <div style="display: grid; gap: 8px;">
+              <div><strong>Weight:</strong> ${pet.weight ? pet.weight + ' kg' : 'Not recorded'}</div>
+              <div><strong>Color:</strong> ${pet.color || 'Not specified'}</div>
+              <div><strong>Birthdate:</strong> ${pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not specified'}</div>
+            </div>
+          </div>
+        </div>
+        ${pet.notes ? `
+        <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border-left: 4px solid #ffc107; margin-top: 15px;">
+          <div style="font-weight: 600; color: #856404; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-sticky-note"></i>Additional Notes
+          </div>
+          <div style="color: #856404; line-height: 1.5;">${pet.notes}</div>
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Owner Information -->
+      <div style="background: #ffffff; border: 2px solid #17a2b8; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(23, 162, 184, 0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #17a2b8; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+          <i class="fas fa-user" style="color: #17a2b8; font-size: 24px;"></i>Owner Information
+        </h3>
+        <div style="display: grid; gap: 8px;">
+          <div><strong>Name:</strong> ${owner.name}</div>
+          <div><strong>Email:</strong> ${owner.email}</div>
+          ${owner.phone ? `<div><strong>Phone:</strong> ${owner.phone}</div>` : ''}
+          ${owner.address ? `<div><strong>Address:</strong> ${owner.address}</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div style="background: #ffffff; border: 2px solid #17a2b8; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(23, 162, 184, 0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #17a2b8; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+          <i class="fas fa-chart-bar" style="color: #17a2b8; font-size: 24px;"></i>Medical Statistics
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+          <div style="text-align: center; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; border-radius: 12px;">
+            <div style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${data.statistics.total_appointments}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Total Appointments</div>
+          </div>
+          <div style="text-align: center; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px;">
+            <div style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${data.statistics.total_vaccinations}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Vaccinations</div>
+          </div>
+          <div style="text-align: center; background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%); color: white; padding: 20px; border-radius: 12px;">
+            <div style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">${data.statistics.last_visit ? new Date(data.statistics.last_visit).toLocaleDateString() : 'Never'}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Last Visit</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical History -->
+      ${data.medical_history && data.medical_history.length > 0 ? `
+      <div style="background: #ffffff; border: 2px solid #17a2b8; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(23, 162, 184, 0.1);">
+        <h3 style="margin: 0 0 20px 0; color: #17a2b8; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+          <i class="fas fa-stethoscope" style="color: #17a2b8; font-size: 24px;"></i>Medical History
+          <span style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; margin-left: auto;">
+            ${data.medical_history.length} Record${data.medical_history.length !== 1 ? 's' : ''}
+          </span>
+        </h3>
+
+        ${data.medical_history.map((record, index) => `
+          <div style="margin: 20px 0; padding: 20px; border: 2px solid #17a2b8; border-radius: 12px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 8px 15px; border-radius: 0 12px 0 15px; font-size: 12px; font-weight: 600;">
+              Record #${index + 1}
+            </div>
+
+            <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid rgba(23, 162, 184, 0.2);">
+              <h4 style="margin: 0 0 8px 0; color: #17a2b8; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-calendar-alt"></i>${new Date(record.created_at).toLocaleDateString()}
+              </h4>
+              <div style="font-size: 12px; color: #666; display: flex; align-items: center; gap: 15px;">
+                <span><i class="fas fa-user-md"></i> Staff: ${record.staff_name || 'Not recorded'}</span>
+                ${record.service_name ? `<span><i class="fas fa-stethoscope"></i> Service: ${record.service_name}</span>` : ''}
+              </div>
+            </div>
+
+            <div style="display: grid; gap: 12px;">
+              ${record.diagnosis ? `
+              <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-stethoscope"></i>Diagnosis
+                </div>
+                <div style="color: #555; line-height: 1.4;">${record.diagnosis}</div>
+              </div>
+              ` : ''}
+
+              ${record.treatment ? `
+              <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745;">
+                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-thermometer-three-quarters"></i>Treatment
+                </div>
+                <div style="color: #555; line-height: 1.4;">${record.treatment}</div>
+              </div>
+              ` : ''}
+
+              ${record.medications ? `
+              <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-pills"></i>Medications
+                </div>
+                <div style="color: #555; line-height: 1.4;">${record.medications}</div>
+              </div>
+              ` : ''}
+
+              ${record.notes ? `
+              <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <div style="font-weight: 600; color: #856404; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-sticky-note"></i>Clinical Notes
+                </div>
+                <div style="color: #856404; line-height: 1.4;">${record.notes}</div>
+              </div>
+              ` : ''}
+
+              ${record.instructions ? `
+              <div style="background: #d1ecf1; padding: 12px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                <div style="font-weight: 600; color: #0c5460; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-clipboard-list"></i>Instructions
+                </div>
+                <div style="color: #0c5460; line-height: 1.4;">${record.instructions}</div>
+              </div>
+              ` : ''}
+
+              ${record.follow_up_date ? `
+              <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                  <i class="fas fa-calendar-check"></i>Follow-up Date
+                </div>
+                <div style="color: #555; line-height: 1.4;">${new Date(record.follow_up_date).toLocaleDateString()}</div>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      <!-- Footer -->
+      <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; border-radius: 0 0 15px 15px; margin-top: 30px;">
+        <p style="margin: 0; font-size: 12px; opacity: 0.8;">This report contains confidential medical information and should only be shared with authorized personnel.</p>
+        <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">For questions about this report, please contact Tattoo Veterinary Clinic.</p>
+      </div>
+    </div>
+  `;
+
+  previewSection.style.display = 'block';
+  printActions.style.display = 'block';
+}
+
+function printReport() {
+  if (!currentPrintReportData) {
+    toast('No report data available for printing', 'error');
+    return;
+  }
+
+  // Create a new window for printing
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    toast('Please allow popups for this site to print reports', 'error');
+    return;
+  }
+
+  // Get the HTML content from the preview
+  const reportContent = document.getElementById('printReportContent');
+  if (!reportContent) {
+    toast('Report content not found', 'error');
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Pet Medical Report - ${currentPrintReportData.pet.name}</title>
+      <style>
+        @media print {
+          body { margin: 0; padding: 20px; }
+          .no-print { display: none; }
+          .print-header { margin-bottom: 20px; }
+        }
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #17a2b8; padding-bottom: 20px; margin-bottom: 30px; }
+        .section { margin-bottom: 30px; }
+        .section h3 { color: #17a2b8; margin: 0 0 15px 0; border-left: 4px solid #17a2b8; padding-left: 10px; }
+        .info-grid { display: table; width: 100%; }
+        .info-row { display: table-row; }
+        .info-cell { display: table-cell; padding: 8px; border-bottom: 1px solid #ddd; }
+        .info-label { font-weight: bold; width: 30%; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+      </style>
+    </head>
+    <body>
+      <div class="print-header no-print" style="text-align: center; margin-bottom: 20px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+        <p><strong>Print Preview:</strong> Use your browser's print function (Ctrl+P / Cmd+P) to print this report.</p>
+      </div>
+      ${reportContent.innerHTML}
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  // Wait for content to load then print
+  printWindow.onload = function() {
+    printWindow.print();
+    // Close the print window after printing (optional)
+    printWindow.onafterprint = function() {
+      printWindow.close();
+    };
+  };
+
+  toast('Opening print dialog...', 'success');
+}
+
+async function downloadPDFReport() {
+  if (!currentPrintReportData) {
+    toast('No report data available for download', 'error');
+    return;
+  }
+
+  try {
+    // Load jsPDF library if not already loaded
+    if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+      await loadJSPDFLibrary();
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    const pet = currentPrintReportData.pet;
+    const owner = currentPrintReportData.owner;
+
+    // Header
+    pdf.setFontSize(20);
+    pdf.setTextColor(23, 162, 184);
+    pdf.text('Tattoo Veterinary Clinic', 105, 20, { align: 'center' });
+
+    pdf.setFontSize(16);
+    pdf.text('Pet Medical Report', 105, 30, { align: 'center' });
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Clinic Address: Your Clinic Address', 105, 40, { align: 'center' });
+    pdf.text('Phone: 0917-519-4639 | Email: info@tattoovet.com', 105, 45, { align: 'center' });
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 105, 50, { align: 'center' });
+
+    let yPosition = 65;
+
+    // Pet Information
+    pdf.setFontSize(14);
+    pdf.setTextColor(23, 162, 184);
+    pdf.text('Pet Information', 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(60, 60, 60);
+
+    const petInfo = [
+      ['Name:', pet.name],
+      ['Species:', pet.species],
+      ['Breed:', pet.breed || 'Not specified'],
+      ['Gender:', pet.gender || 'Not specified'],
+      ['Weight:', pet.weight ? `${pet.weight} kg` : 'Weight not recorded'],
+      ['Color:', pet.color || 'Not specified']
+    ];
+
+    if (pet.notes) {
+      petInfo.push(['Notes:', pet.notes]);
+    }
+
+    petInfo.forEach(([label, value]) => {
+      pdf.text(`${label} ${value}`, 20, yPosition);
+      yPosition += 6;
+    });
+
+    // Owner Information
+    yPosition += 5;
+    pdf.setFontSize(14);
+    pdf.setTextColor(23, 162, 184);
+    pdf.text('Owner Information', 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(60, 60, 60);
+
+    const ownerInfo = [
+      ['Name:', owner.name],
+      ['Email:', owner.email],
+      ['Phone:', owner.phone || 'Not provided'],
+      ['Address:', owner.address || 'Not provided']
+    ];
+
+    ownerInfo.forEach(([label, value]) => {
+      pdf.text(`${label} ${value}`, 20, yPosition);
+      yPosition += 6;
+    });
+
+    // Statistics
+    yPosition += 5;
+    pdf.setFontSize(14);
+    pdf.setTextColor(23, 162, 184);
+    pdf.text('Statistics', 20, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(60, 60, 60);
+
+    const stats = [
+      ['Total Appointments:', currentPrintReportData.statistics.total_appointments.toString()],
+      ['Total Vaccinations:', currentPrintReportData.statistics.total_vaccinations.toString()],
+      ['Last Visit:', currentPrintReportData.statistics.last_visit ? new Date(currentPrintReportData.statistics.last_visit).toLocaleDateString() : 'Never']
+    ];
+
+    stats.forEach(([label, value]) => {
+      pdf.text(`${label} ${value}`, 20, yPosition);
+      yPosition += 6;
+    });
+
+    // Medical History
+    if (currentPrintReportData.medical_history && currentPrintReportData.medical_history.length > 0) {
+      if (yPosition > 200) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+
+      pdf.setFontSize(16);
+      pdf.setTextColor(23, 162, 184);
+      pdf.text('Medical History', 20, yPosition);
+      pdf.setTextColor(0, 0, 0);
+      yPosition += 15;
+
+      pdf.setFontSize(10);
+      let recordCount = 0;
+      const maxRecordsPerPage = 3;
+
+      for (const record of currentPrintReportData.medical_history) {
+        recordCount++;
+
+        if (yPosition > 220 || recordCount > maxRecordsPerPage) {
+          pdf.addPage();
+          yPosition = 20;
+          recordCount = 1;
+        }
+
+        pdf.setFontSize(11);
+        pdf.setFont(undefined, 'bold');
+        pdf.text(`${recordCount}. ${new Date(record.created_at).toLocaleDateString()}`, 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`   Staff: ${record.staff_name || 'Not recorded'}`, 20, yPosition);
+        pdf.setTextColor(0, 0, 0);
+        yPosition += 8;
+
+        if (record.diagnosis) {
+          pdf.setFontSize(9);
+          pdf.setFont(undefined, 'normal');
+          const diagnosisLines = pdf.splitTextToSize(`   Diagnosis: ${record.diagnosis}`, 165);
+          pdf.text(diagnosisLines, 20, yPosition);
+          yPosition += (diagnosisLines.length * 5) + 5;
+        }
+
+        if (record.treatment) {
+          const treatmentLines = pdf.splitTextToSize(`   Treatment: ${record.treatment}`, 165);
+          pdf.text(treatmentLines, 20, yPosition);
+          yPosition += (treatmentLines.length * 5) + 5;
+        }
+
+        if (record.medications) {
+          const medicationLines = pdf.splitTextToSize(`   Medications: ${record.medications}`, 165);
+          pdf.text(medicationLines, 20, yPosition);
+          yPosition += (medicationLines.length * 5) + 5;
+        }
+
+        if (record.notes) {
+          const notesLines = pdf.splitTextToSize(`   Notes: ${record.notes}`, 165);
+          pdf.text(notesLines, 20, yPosition);
+          yPosition += (notesLines.length * 5) + 5;
+        }
+
+        if (record.follow_up_date) {
+          pdf.text(`   Follow-up: ${new Date(record.follow_up_date).toLocaleDateString()}`, 20, yPosition);
+          yPosition += 8;
+        }
+
+        yPosition += 10;
+
+        if (yPosition > 240) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      }
+    }
+
+    // Footer
+    const pageCount = pdf.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+      pdf.text('This report contains confidential medical information.', 105, 290, { align: 'center' });
+    }
+
+    const filename = `pet_report_${pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(filename);
+
+    toast('PDF downloaded successfully!', 'success');
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    toast('Error generating PDF. Please try again.', 'error');
   }
 }
 
@@ -2859,115 +5029,141 @@ async function loadStaffDashboardData() {
     }
 
     // Client Management Functions
-    async function loadClientsSection() {
-      const clientsGrid = document.getElementById('clientsGrid');
-      if (!clientsGrid) return;
+     async function loadClientsSection() {
+       console.log('👥 Loading clients section...');
+       const clientsGrid = document.getElementById('clientsGrid');
+       if (!clientsGrid) {
+         console.error('❌ Clients grid not found');
+         return;
+       }
 
-      try {
-        clientsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading clients...</div>';
+       try {
+         console.log('📡 Making API call to get_clients...');
+         clientsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading clients...</div>';
 
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'get_clients' })
-        });
+         const response = await fetch('../api/vet_api.php', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ action: 'get_clients' })
+         });
 
-        const result = await response.json();
+         console.log('📡 Response status:', response.status);
+         const result = await response.json();
+         console.log('📡 API response:', result);
 
-        if (result.success) {
-          displayClients(result.data);
-        } else {
-          clientsGrid.innerHTML = '<div class="loading">Error loading clients: ' + result.message + '</div>';
-        }
-      } catch (error) {
-        console.error('Error loading clients:', error);
-        clientsGrid.innerHTML = '<div class="loading">Error loading clients. Please try again.</div>';
-      }
-    }
+         if (result.success) {
+           console.log('✅ Clients loaded successfully:', result.data.length, 'clients');
+           displayClients(result.data);
+         } else {
+           console.error('❌ Failed to load clients:', result.message);
+           clientsGrid.innerHTML = '<div class="loading">Error loading clients: ' + result.message + '</div>';
+         }
+       } catch (error) {
+         console.error('❌ Error loading clients:', error);
+         clientsGrid.innerHTML = '<div class="loading">Error loading clients. Please try again.</div>';
+       }
+     }
 
     function displayClients(clients) {
-      const clientsGrid = document.getElementById('clientsGrid');
-      if (!clientsGrid) return;
+       console.log('🎨 Displaying clients:', clients);
+       const clientsGrid = document.getElementById('clientsGrid');
+       if (!clientsGrid) {
+         console.error('❌ Clients grid not found');
+         return;
+       }
 
-      if (clients.length === 0) {
-        clientsGrid.innerHTML = '<div class="loading">No clients found.</div>';
-        return;
-      }
+       if (clients.length === 0) {
+         console.log('⚠️ No clients to display');
+         clientsGrid.innerHTML = '<div class="loading">No clients found.</div>';
+         return;
+       }
 
-      clientsGrid.innerHTML = '';
+       console.log('📊 Processing', clients.length, 'clients');
+       clientsGrid.innerHTML = '';
 
-      clients.forEach(client => {
-        const clientCard = createClientCard(client);
-        clientsGrid.appendChild(clientCard);
-      });
-    }
+       clients.forEach((client, index) => {
+         console.log(`👤 Processing client ${index + 1}:`, client);
+         console.log(`👤 Client pets:`, client.pets);
+         const clientCard = createClientCard(client);
+         clientsGrid.appendChild(clientCard);
+       });
+     }
 
     function createClientCard(client) {
-      const card = document.createElement('div');
-      card.className = 'client-card';
+       console.log('🔧 Creating client card for:', client);
+       const card = document.createElement('div');
+       card.className = 'client-card';
 
-      const profileImage = client.profile_picture ?
-        `<img src="../${client.profile_picture}" alt="${client.first_name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` :
-        '';
+       const profileImage = client.profile_picture ?
+         `<img src="../${client.profile_picture}" alt="${client.first_name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` :
+         '';
 
-      const placeholderIcon = client.first_name.charAt(0).toUpperCase();
+       const placeholderIcon = client.first_name.charAt(0).toUpperCase();
 
-      const petsList = client.pets && client.pets.length > 0 ?
-        client.pets.map(pet => `<span class="pet-badge"><i class="fas fa-paw"></i>${pet.name}</span>`).join('') :
-        '<span style="color: #999; font-style: italic;">No pets registered</span>';
+       console.log('🐾 Client pets data:', client.pets);
+       console.log('🐾 Client pets length:', client.pets ? client.pets.length : 'undefined');
 
-      card.innerHTML = `
-        <div class="client-avatar">
-          ${profileImage}
-          <div class="client-avatar-placeholder" style="display: ${client.profile_picture ? 'none' : 'flex'}">
-            <i class="fas fa-user"></i>
-          </div>
-        </div>
-        <div class="client-info">
-          <h3 class="client-name">
-            <i class="fas fa-user-circle"></i>
-            ${client.first_name} ${client.last_name || ''}
-          </h3>
-          <div class="client-email">
-            <i class="fas fa-envelope"></i>
-            ${client.email}
-          </div>
-          <div class="client-details">
-            <p>
-              <i class="fas fa-phone"></i>
-              <strong>Phone:</strong>
-              ${client.phone || 'Not provided'}
-            </p>
-            <p>
-              <i class="fas fa-map-marker-alt"></i>
-              <strong>Address:</strong>
-              ${client.address || 'Not provided'}
-            </p>
-            <p>
-              <i class="fas fa-calendar"></i>
-              <strong>Member since:</strong>
-              ${client.created_at ? new Date(client.created_at).toLocaleDateString() : 'Unknown'}
-            </p>
-          </div>
-          <div class="client-pets">
-            <h4><i class="fas fa-paw"></i> Registered Pets</h4>
-            <div class="client-pets-list">
-              ${petsList}
-            </div>
-          </div>
-          <div class="client-actions">
-            <button class="action-btn view" onclick="viewClientDetails('${client.id}')">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-            <button class="action-btn edit" onclick="editClient('${client.id}')">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-          </div>
-        </div>
-      `;
+       const petsList = client.pets && client.pets.length > 0 ?
+         client.pets.map(pet => {
+           console.log('🐾 Processing pet:', pet);
+           return `<span class="pet-badge"><i class="fas fa-paw"></i>${pet.name}</span>`;
+         }).join('') :
+         '<span style="color: #999; font-style: italic;">No pets registered</span>';
 
-      return card;
-    }
+       console.log('🐾 Final pets list for client:', petsList);
+
+       card.innerHTML = `
+         <div class="client-avatar">
+           ${profileImage}
+           <div class="client-avatar-placeholder" style="display: ${client.profile_picture ? 'none' : 'flex'}">
+             <i class="fas fa-user"></i>
+           </div>
+         </div>
+         <div class="client-info">
+           <h3 class="client-name">
+             <i class="fas fa-user-circle"></i>
+             ${client.first_name} ${client.last_name || ''}
+           </h3>
+           <div class="client-email">
+             <i class="fas fa-envelope"></i>
+             ${client.email}
+           </div>
+           <div class="client-details">
+             <p>
+               <i class="fas fa-phone"></i>
+               <strong>Phone:</strong>
+               ${client.phone || 'Not provided'}
+             </p>
+             <p>
+               <i class="fas fa-map-marker-alt"></i>
+               <strong>Address:</strong>
+               ${client.address || 'Not provided'}
+             </p>
+             <p>
+               <i class="fas fa-calendar"></i>
+               <strong>Member since:</strong>
+               ${client.created_at ? new Date(client.created_at).toLocaleDateString() : 'Unknown'}
+             </p>
+           </div>
+           <div class="client-pets">
+             <h4><i class="fas fa-paw"></i> Registered Pets</h4>
+             <div class="client-pets-list">
+               ${petsList}
+             </div>
+           </div>
+           <div class="client-actions">
+             <button class="action-btn view" onclick="viewClientDetails('${client.id}')">
+               <i class="fas fa-eye"></i> View Details
+             </button>
+             <button class="action-btn edit" onclick="editClient('${client.id}')">
+               <i class="fas fa-edit"></i> Edit
+             </button>
+           </div>
+         </div>
+       `;
+
+       return card;
+     }
 
     function viewClientDetails(clientId) {
       // This will be implemented to show client details modal
@@ -4556,9 +6752,17 @@ async function loadStaffDashboardData() {
       const staffRole = document.getElementById('staffRole');
       console.log('👤 Staff elements found:', { staffName: !!staffName, staffRole: !!staffRole });
 
-      // Dashboard data will be loaded by staff-dashboard.js
-      // Remove hardcoded test values to show real data from API
+      // Load dashboard data immediately since dashboard is shown by default
+      setTimeout(() => {
+        console.log('📊 Loading dashboard data on page load...');
+        loadStaffDashboardData();
+      }, 500);
 
+      // Initialize notification badge
+      updateNotificationBadge();
+
+      // Set up periodic notification badge updates
+      setInterval(updateNotificationBadge, 30000); // Update every 30 seconds
 
       // Set up navigation event listeners
       console.log('🧭 Setting up navigation event listeners...');

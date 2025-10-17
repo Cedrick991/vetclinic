@@ -36,7 +36,7 @@ function initializeModalHandlers() {
     // Booking Modal
     window.showBookingModal = async function() {
         const loggedIn = await checkUserLogin();
-        
+
         if (loggedIn) {
             // Get user info to determine if staff or client
             const response = await fetch('api/vet_api.php', {
@@ -44,25 +44,41 @@ function initializeModalHandlers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_user_info' })
             });
-            
+
             const result = await response.json();
             if (result.success && result.data && result.data.user_type) {
                 if (result.data.user_type === 'staff') {
                     // Redirect staff to their dashboard
-                    window.location.href = 'staff.html';
+                    window.location.href = 'public/staff.html';
+                    return;
+                } else if (result.data.user_type === 'client') {
+                    // Redirect client to their dashboard appointments section
+                    window.location.href = 'public/client.html#appointments';
                     return;
                 }
             }
+
+            // Fallback: redirect to client dashboard if user type is unclear
+            window.location.href = 'public/client.html#appointments';
+            return;
         }
-        
-        document.getElementById('bookingModal').style.display = 'flex';
-        document.getElementById('loginRequiredMessage').style.display = loggedIn ? 'none' : 'block';
-        document.getElementById('bookingForm').style.display = loggedIn ? 'block' : 'none';
-        
-        if (loggedIn) {
-            // Load the user's pets and available services
-            loadUserPets();
-            loadServices();
+
+        // User is not logged in, show the booking modal with login prompt
+        const modal = document.getElementById('bookingModal');
+        if (modal) {
+            modal.style.display = 'flex';
+
+            // Show/hide appropriate content based on login status
+            const loginRequiredMsg = document.getElementById('loginRequiredMessage');
+            const bookingForm = document.getElementById('bookingForm');
+
+            if (loginRequiredMsg) loginRequiredMsg.style.display = 'block';
+            if (bookingForm) bookingForm.style.display = 'none';
+
+            // Add animation
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
         }
     };
 

@@ -1,16 +1,13 @@
 <?php
 /**
  * Password Reset Page
- * Handles password reset requests and form submission
+ * Handles password reset requests and form submission using API
  */
 
-require_once '../src/config.php';
-require_once '../src/auth/auth.php';
-
-$auth = new Auth();
 $message = '';
 $messageType = 'info';
 $showForm = true;
+$token = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = trim($_POST['token'] ?? '');
@@ -27,15 +24,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Passwords do not match.';
         $messageType = 'error';
     } else {
-        $result = $auth->resetPassword($token, $newPassword);
+        // Use API to reset password
+        $apiUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/api/vet_api.php';
 
-        if ($result['success']) {
-            $message = $result['message'];
-            $messageType = 'success';
-            $showForm = false;
-        } else {
-            $message = $result['message'];
+        $postData = json_encode([
+            'action' => 'reset_password',
+            'token' => $token,
+            'new_password' => $newPassword
+        ]);
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-Type: application/json',
+                'content' => $postData
+            ]
+        ]);
+
+        $response = file_get_contents($apiUrl, false, $context);
+
+        if ($response === false) {
+            $message = 'Failed to connect to server. Please try again.';
             $messageType = 'error';
+        } else {
+            $result = json_decode($response, true);
+
+            if ($result['success']) {
+                $message = $result['message'];
+                $messageType = 'success';
+                $showForm = false;
+            } else {
+                $message = $result['message'];
+                $messageType = 'error';
+            }
         }
     }
 } elseif (isset($_GET['token'])) {
@@ -204,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <div class="reset-actions">
-            <a href="index.html" class="btn btn-secondary">Back to Homepage</a>
+            <a href="../index.html" class="btn btn-secondary">Back to Homepage</a>
         </div>
     </div>
 

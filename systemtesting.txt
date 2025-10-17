@@ -1,0 +1,177 @@
+# TATTAO VETERINARY CLINIC MANAGEMENT SYSTEM
+## System Testing Document
+
+| TEST STAGES | EXPECTED RESULTS | ACTUAL RESULT | REMARKS PASS/FAIL | CORRECTIVE ACTIONS (IF TESTING FAILS) |
+|-------------|------------------|---------------|-------------------|--------------------------------------|
+
+### I. FUNCTIONAL TESTING (Duration: October 16 - November 15, 2024)
+
+#### A. User Authentication System
+**Test Case 1.1: Client Registration**  
+• Verify that new clients can successfully register with valid email, password, and personal information  
+• Verify that the system validates email format and password strength  
+• Verify that duplicate email addresses are rejected | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 1.2: Staff Login**  
+• Verify that staff members can login with correct credentials  
+• Verify that invalid login attempts are rejected  
+• Verify that account lockout occurs after 5 failed attempts | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 1.3: Password Reset**  
+• Verify that users can request password reset  
+• Verify that password reset emails are sent (if email system configured)  
+• Verify that users can reset password with valid token | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### B. Pet Management System
+**Test Case 2.1: Pet Registration**  
+• Verify that clients can add new pets with complete information (name, species, breed, age, weight)  
+• Verify that pet profiles display correctly in client dashboard  
+• Verify that multiple pets per client are supported | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 2.2: Pet Information Update**  
+• Verify that clients can update pet information  
+• Verify that staff can update pet information with admin privileges  
+• Verify that changes are reflected immediately | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### C. Appointment Management System
+**Test Case 3.1: Appointment Booking**  
+• Verify that clients can book appointments for their pets  
+• Verify that service selection works correctly  
+• Verify that date/time slot validation works  
+• Verify that appointment confirmation is displayed | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 3.2: Appointment Status Management**  
+• Verify that staff can update appointment status (pending, confirmed, in-progress, completed, cancelled)  
+• Verify that clients receive notifications for status changes  
+• Verify that appointment history is maintained | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 3.3: Appointment Cancellation**  
+• Verify that clients can request appointment cancellation  
+• Verify that staff can approve/deny cancellation requests  
+• Verify that notifications are sent for cancellation actions | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### D. Medical Records System
+**Test Case 4.1: Medical History Creation**  
+• Verify that staff can create medical records during appointments  
+• Verify that diagnosis, treatment, and medication fields are properly saved  
+• Verify that follow-up instructions are recorded | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 4.2: Medical History Viewing**  
+• Verify that clients can view their pets' medical history  
+• Verify that staff can view all medical records  
+• Verify that medical records are properly linked to appointments | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### E. E-commerce System
+**Test Case 5.1: Product Catalog**  
+• Verify that product catalog displays correctly with images, descriptions, and prices  
+• Verify that products are properly categorized (Food, Toys, Grooming, Accessories)  
+• Verify that stock levels are displayed | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 5.2: Shopping Cart**  
+• Verify that users can add products to cart  
+• Verify that cart quantity can be modified  
+• Verify that items can be removed from cart  
+• Verify that cart total is calculated correctly | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 5.3: Checkout Process**  
+• Verify that checkout process works with different payment methods (gcash, bank, cash_on_visit)  
+• Verify that order confirmation is generated  
+• Verify that inventory is updated after purchase | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### F. Notification System
+**Test Case 6.1: Real-time Notifications**  
+• Verify that users receive real-time notifications for appointments, orders, and system updates  
+• Verify that notification preferences can be configured  
+• Verify that notifications can be marked as read | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+### II. INTEGRATION TESTING (Duration: November 16 - December 15, 2024)
+
+#### A. Database Integration
+**Test Case 7.1: Data Consistency**  
+• Verify that all database relationships work correctly (users-pets, appointments-services, orders-products)  
+• Verify that foreign key constraints are enforced  
+• Verify that data is properly synchronized across all tables | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### B. API Integration
+**Test Case 7.2: API Endpoint Testing**  
+• Verify that all 50+ API endpoints return proper JSON responses  
+• Verify that API handles errors gracefully  
+• Verify that API maintains session security | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+### III. USER INTERFACE TESTING (Duration: December 16-31, 2024)
+
+#### A. Client Interface
+**Test Case 8.1: Client Dashboard Usability**  
+• Verify that client dashboard loads correctly and displays relevant information  
+• Verify that navigation between sections works smoothly  
+• Verify that responsive design works on mobile devices | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### B. Staff Interface
+**Test Case 8.2: Staff Dashboard Functionality**  
+• Verify that staff dashboard provides access to all administrative functions  
+• Verify that staff can manage clients, appointments, and inventory  
+• Verify that role-based access control works properly | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+### IV. PERFORMANCE TESTING (Duration: January 1-15, 2025)
+
+#### A. Load Testing
+**Test Case 9.1: Concurrent Users**  
+• Verify that system handles multiple concurrent users without performance degradation  
+• Verify that database operations remain stable under load  
+• Verify that response times remain acceptable | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### B. Database Performance
+**Test Case 9.2: Query Optimization**  
+• Verify that database queries execute efficiently  
+• Verify that appointment scheduling doesn't cause bottlenecks  
+• Verify that search functionality performs adequately | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+### V. SECURITY TESTING (Duration: January 16-31, 2025)
+
+#### A. Authentication Security
+**Test Case 10.1: Login Security**  
+• Verify that passwords are properly hashed in database  
+• Verify that session management is secure  
+• Verify that CSRF protection works correctly | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### B. Access Control
+**Test Case 10.2: Role-based Access**  
+• Verify that clients cannot access staff-only functions  
+• Verify that staff have appropriate administrative privileges  
+• Verify that unauthorized access is properly blocked | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+---
+
+## Testing Summary
+
+**Total Test Cases**: 20 comprehensive test scenarios covering all major system functionalities
+
+**Testing Environment**: 
+- Web browsers: Chrome, Firefox, Safari, Edge
+- Mobile devices: iOS and Android responsive testing
+- Database: SQLite 3.x
+- Server: Apache with PHP 8.x
+
+**Success Criteria**: All test cases must pass with acceptable performance metrics
+
+**Test Data**: Mix of real and synthetic data for comprehensive coverage
+
+**Reporting**: Weekly progress reports and final testing documentation
+
+---
+
+## Test Results
+
+**Overall Status**: [To be determined after testing completion]
+
+**Critical Issues**: None identified during test planning phase
+
+**Recommendations**: 
+- Conduct testing in staging environment before production deployment
+- Implement automated testing for regression prevention
+- Regular security audits recommended
+- Performance monitoring should be implemented post-deployment
+
+---
+
+*This testing document covers all major functionalities of the Tattao Veterinary Clinic Management System including user management, appointment scheduling, medical records, e-commerce, and notification systems.*

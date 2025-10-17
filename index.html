@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tattoo Veterinary Clinic</title>
+  <title>Tattao Veterinary Clinic</title>
   <link rel="stylesheet" href="assets/css/style.css">
-  <meta name="description" content="Tattoo Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
+  <meta name="description" content="Tattao Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
+  <!-- SMTPJS for email sending -->
+  <script src="https://smtpjs.com/v3/smtp.js"></script>
 </head>
 <body>
   <!-- Sidebar -->
@@ -23,8 +25,8 @@
     <div class="header-left">
       <button class="menu-btn" id="menuBtn">&#9776;</button>
       <div class="logo">
-        <img src="assets/images/logoo.jpg" alt="Tattoo Veterinary Clinic Logo">
-        <span class="clinic-name">TATTOO<br>VETERINARY CLINIC</span>
+        <img src="assets/images/logoo.jpg" alt="Tattao Veterinary Clinic Logo">
+        <span class="clinic-name">TATTAO<br>VETERINARY CLINIC</span>
       </div>
     </div>
     <div class="header-right">
@@ -59,62 +61,62 @@
       </div>
       <div class="service-list">
         <div class="service-item" onclick="showServiceDetails('basic-obedience-training')" data-service-id="basic-obedience-training">
-          <i class="service-icon">🐕</i>
+          <i class="service-icon">🐍</i>
           <span class="service-name">BASIC OBEDIENCE TRAINING</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('deworming')" data-service-id="deworming">
-          <i class="service-icon">🐍</i>
+          <i class="service-icon">📶</i>
           <span class="service-name">DEWORMING</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('microchip')" data-service-id="microchip">
-          <i class="service-icon">📶</i>
+          <i class="service-icon">💉</i>
           <span class="service-name">MICROCHIP IMPLANTING</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('vaccination')" data-service-id="vaccination">
-          <i class="service-icon">💉</i>
+          <i class="service-icon">🏠</i>
           <span class="service-name">VACCINATION</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('pet-boarding')" data-service-id="pet-boarding">
-          <i class="service-icon">🏠</i>
+          <i class="service-icon">🦇</i>
           <span class="service-name">PET BOARDING</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('parasite-prevention')" data-service-id="parasite-prevention">
-          <i class="service-icon">🦇</i>
+          <i class="service-icon">🕊️</i>
           <span class="service-name">EXTERNAL PARASITE PREVENTION</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('euthanasia')" data-service-id="euthanasia">
-          <i class="service-icon">🕊️</i>
+          <i class="service-icon">🚑</i>
           <span class="service-name">EUTHANASIA</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('general-checkup')" data-service-id="general-checkup">
-          <i class="service-icon">🚑</i>
+          <i class="service-icon">✂️</i>
           <span class="service-name">COMPREHENSIVE GENERAL CHECK UP</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('grooming')" data-service-id="grooming">
-          <i class="service-icon">✂️</i>
+          <i class="service-icon">🦷</i>
           <span class="service-name">GROOMING</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('dental-surgery')" data-service-id="dental-surgery">
-          <i class="service-icon">🦷</i>
+          <i class="service-icon">🏥</i>
           <span class="service-name">DENTAL SURGERY</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('surgery')" data-service-id="surgery">
-          <i class="service-icon">🏥</i>
+          <i class="service-icon">🏡</i>
           <span class="service-name">SURGERY</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
         <div class="service-item" onclick="showServiceDetails('home-service')" data-service-id="home-service">
-          <i class="service-icon">🏡</i>
+          <i class="service-icon">🏠</i>
           <span class="service-name">HOME SERVICE BY APPOINTMENT</span>
           <i class="fas fa-chevron-right service-arrow"></i>
         </div>
@@ -190,7 +192,9 @@
 
   <!-- Store Section -->
   <section class="store-section" id="store">
-    <h2>STORE</h2>
+    <h2 style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.color='#ffd700'; this.style.transform='scale(1.05)'" onmouseout="this.style.color='white'; this.style.transform='scale(1)'" onclick="document.querySelectorAll('.category')[0]?.click()">
+      🛒 STORE
+    </h2>
     <p>THE TATTAO VETERINARY CLINIC OFFERS</p>
 
     <div class="categories">
@@ -220,7 +224,7 @@
     <div class="footer-container">
       <div class="footer-logo">
         <img src="assets/images/logoo.jpg" alt="Logo">
-        <span>Tattoo Veterinary Clinic</span>
+        <span>Tattao Veterinary Clinic</span>
       </div>
       <span class="footer-tagline">We offer the best care for your fur babies</span>
       <span class="footer-bottom">2024 © Robinsons Galleria, Ampatuan, Cotabato, Clayton | Accent Log In | OPAC GUI Portal | OAI-PMH Service</span>
@@ -246,6 +250,7 @@
       </form>
       <p>Don't have an account? <a href="#" onclick="showRegisterModal()">Register here</a></p>
       <p><a href="#" onclick="showForgotPasswordModal()" style="color: #3498db; text-decoration: none;">Forgot your password?</a></p>
+      <p><a href="#" onclick="showResendVerificationModal()" style="color: #e74c3c; text-decoration: none;">Resend verification email?</a></p>
     </div>
   </div>
 
@@ -308,6 +313,132 @@
     </div>
   </div>
 
+  <!-- Resend Verification Modal -->
+  <div id="resendVerificationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('resendVerificationModal')">&times;</span>
+      <h2><i class="modal-icon">📧</i> Resend Verification Email</h2>
+      <form id="resendVerificationForm">
+        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+          Enter your email address and we'll send you a new verification email.
+        </p>
+        <label for="resend_email" class="sr-only">Email Address</label>
+        <input type="email" id="resend_email" name="email" placeholder="✉️ Email Address" title="Enter your email address to resend verification" required>
+        <button type="submit"><i class="btn-icon">📧</i> RESEND VERIFICATION EMAIL</button>
+      </form>
+      <p style="text-align: center; margin-top: 20px;">
+        Already verified? <a href="#" onclick="showLoginModal(); closeModal('resendVerificationModal');">Login here</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal" style="display: none;">
+    <div class="modal-content booking-modal">
+      <span class="close" onclick="closeModal('bookingModal')">&times;</span>
+      <h2><i class="modal-icon">🗓️</i> Book an Appointment</h2>
+
+      <!-- Login Required Message (shown when not logged in) -->
+      <div id="loginRequiredMessage" class="login-required-message" style="display: none;">
+        <div class="login-prompt">
+          <div class="login-icon">📅</div>
+          <h3>Ready to Book an Appointment?</h3>
+          <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 20px;">
+            To book an appointment for your pet, you'll need to create an account first. It's quick and easy!
+          </p>
+
+          <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 4px solid #ffd700;">
+            <h4 style="color: #ffd700; margin: 0 0 10px 0; font-size: 16px;">
+              <i class="fas fa-star"></i> Why Create an Account?
+            </h4>
+            <ul style="color: rgba(255, 255, 255, 0.9); margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+              <li>Book and manage appointments online</li>
+              <li>Keep track of your pet's medical history</li>
+              <li>Receive appointment reminders</li>
+              <li>Access your pet's vaccination records</li>
+              <li>Order pet supplies and medications</li>
+            </ul>
+          </div>
+
+          <div class="login-prompt-actions">
+            <button class="btn-primary" onclick="showRegisterModal(); closeModal('bookingModal');" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+              <i class="fas fa-user-plus"></i> Create Account & Book
+            </button>
+            <button class="btn-secondary" onclick="showLoginModal(); closeModal('bookingModal');" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+              <i class="fas fa-sign-in-alt"></i> Already have an account?
+            </button>
+          </div>
+
+          <div style="text-align: center; margin-top: 20px;">
+            <button onclick="closeModal('bookingModal')" style="background: none; color: rgba(255, 255, 255, 0.7); border: none; padding: 8px 16px; font-size: 14px; cursor: pointer; text-decoration: underline;">
+              Maybe later
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Form (shown when logged in) -->
+      <form id="bookingForm" class="booking-form" style="display: none;">
+        <div class="form-section">
+          <h3><i class="fas fa-paw"></i> Pet Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pet_id">Select Your Pet *</label>
+              <select id="pet_id" name="pet_id" required>
+                <option value="">Choose your pet...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><i class="fas fa-stethoscope"></i> Service Selection</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="service_id">Select Service *</label>
+              <select id="service_id" name="service_id" required>
+                <option value="">Choose a service...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><i class="fas fa-calendar-alt"></i> Appointment Details</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="appointment_date">Preferred Date *</label>
+              <input type="date" id="appointment_date" name="appointment_date" required min="">
+            </div>
+            <div class="form-group">
+              <label for="appointment_time">Preferred Time *</label>
+              <select id="appointment_time" name="appointment_time" required>
+                <option value="">Select time...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><i class="fas fa-sticky-note"></i> Additional Information</h3>
+          <div class="form-group">
+            <label for="notes">Special Requests or Notes</label>
+            <textarea id="notes" name="notes" rows="4" placeholder="Please describe your pet's condition, special requirements, or any questions you have..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('bookingModal')">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-calendar-check"></i> Book Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Service Details Modal -->
   <div id="serviceDetailsModal" class="modal" style="display: none;">
     <div class="modal-content service-modal">
@@ -328,7 +459,6 @@
             <li>Loading features...</li>
           </ul>
         </div>
-
 
         <div class="service-process" id="serviceProcess">
           <h4><i class="fas fa-clipboard-list"></i> What to Expect</h4>
@@ -781,17 +911,57 @@
     }
 
     .category {
-      background: #3a588c;
+      background: linear-gradient(135deg, #3a588c 0%, #2c4a73 100%);
       border-radius: 12px;
       padding: 20px;
       width: 250px;
       text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      cursor: pointer;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .category::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .category:hover::before {
+      left: 100%;
     }
 
     .category:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+      border-color: #ffd700;
+      background: linear-gradient(135deg, #4a6ba5 0%, #3c5a83 100%);
+    }
+
+    .category:active {
+      transform: translateY(-8px) scale(0.98);
+    }
+
+    .category h3 {
+      position: relative;
+      z-index: 2;
+    }
+
+    .category img {
+      position: relative;
+      z-index: 2;
+      transition: transform 0.3s ease;
+    }
+
+    .category:hover img {
+      transform: scale(1.1) rotate(2deg);
     }
 
     .category img {
@@ -805,6 +975,24 @@
       font-size: 18px;
       font-weight: bold;
       color: white;
+      position: relative;
+      z-index: 2;
+    }
+
+    .category::after {
+      content: '🛒';
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 20px;
+      opacity: 0.3;
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+
+    .category:hover::after {
+      opacity: 0.8;
+      transform: translateY(-2px);
     }
 
     /* Service Modal Styles */
@@ -917,6 +1105,293 @@
       to {
         opacity: 1;
         transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Booking Modal Styles */
+    .booking-modal {
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+        filter: blur(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .login-required-message {
+      text-align: center;
+      padding: 20px;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-prompt {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .login-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      display: block;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .login-prompt h3 {
+      color: white;
+      font-size: 24px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .login-prompt p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .login-prompt-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .login-benefits {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.8);
+      border-left: 4px solid #ffd700;
+    }
+
+    .login-benefits strong {
+      color: #ffd700;
+    }
+
+    /* Booking Form Styles */
+    .booking-form .form-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: slideInFromLeft 0.6s ease-out;
+    }
+
+    .booking-form .form-section:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    .booking-form .form-section:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .booking-form .form-section:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .form-section h3 {
+      color: white;
+      font-size: 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-section h3 i {
+      color: #ffd700;
+      font-size: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .form-group {
+      flex: 1;
+    }
+
+    .form-group label {
+      display: block;
+      color: white;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1e3a8a;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #ffd700;
+      background: white;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 20px;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #1e3a8a;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Responsive Booking Modal */
+    @media (max-width: 768px) {
+      .booking-modal {
+        max-width: 95vw;
+        max-height: 95vh;
+        margin: 2.5vh 2.5vw;
+      }
+
+      .login-prompt {
+        padding: 30px 20px;
+      }
+
+      .login-prompt-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .booking-form .form-section {
+        padding: 20px 15px;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-icon {
+        font-size: 48px;
+      }
+
+      .login-prompt h3 {
+        font-size: 20px;
+      }
+
+      .login-prompt p {
+        font-size: 14px;
+      }
+
+      .booking-modal {
+        padding: 15px;
+      }
+
+      .form-section h3 {
+        font-size: 16px;
       }
     }
 
@@ -1234,27 +1709,40 @@
       // Check login status on page load and update UI accordingly
       async function checkLoginStatusOnLoad() {
         try {
-          const result = await apiCall({ action: 'get_user_info' });
+          // Add retry mechanism for session verification
+          let retries = 3;
+          let result = null;
 
-          if (result.success && result.data.logged_in) {
-            // User is logged in, update UI
-            const user = result.data.user;
-            const userType = result.data.user_type;
+          while (retries > 0) {
+            result = await apiCall({ action: 'get_user_info' });
 
-            console.log('User logged in:', user);
-            console.log('Profile picture path:', user.profile_picture);
+            if (result.success && result.data.logged_in) {
+              // User is logged in, update UI
+              const user = result.data.user;
+              const userType = result.data.user_type;
 
-            updateUIForLoggedInUser(user, userType);
+              console.log('User logged in:', user);
+              console.log('Profile picture path:', user.profile_picture);
 
-            // Update booking buttons text for staff users
-            if (userType === 'staff') {
-              updateBookingButtonsForStaff();
+              updateUIForLoggedInUser(user, userType);
+
+              // Update booking buttons text for staff users
+              if (userType === 'staff') {
+                updateBookingButtonsForStaff();
+              }
+              return; // Success, exit retry loop
             }
-          } else {
-            console.log('User not logged in or API error:', result);
-            // Ensure proper logged out state
-            resetToLoggedOutState();
+
+            retries--;
+            if (retries > 0) {
+              console.log(`Session check failed, retrying... (${retries} attempts left)`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+            }
           }
+
+          console.log('User not logged in after retries or API error:', result);
+          // Ensure proper logged out state
+          resetToLoggedOutState();
         } catch (error) {
           console.error('Error checking login status on load:', error);
           // Ensure proper logged out state on error
@@ -1306,12 +1794,84 @@
       }
 
       // Global modal functions
-      window.showLoginModal = () => openModal('loginModal');
+      window.showLoginModal = () => {
+        openModal('loginModal');
+        updateLoginModalWithAttempts(); // Show attempt status when modal opens
+      };
       window.showRegisterModal = () => openModal('registerModal');
       window.showForgotPasswordModal = () => openModal('forgotPasswordModal');
-      window.showBookingModal = () => {
-        // Redirect to client dashboard appointments section
-        window.location.href = 'public/client.html#appointments';
+      window.showResendVerificationModal = () => openModal('resendVerificationModal');
+      window.showBookingModal = async function() {
+        console.log('🗓️ Booking modal triggered');
+
+        try {
+          // Check if user is logged in
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_user_info' })
+          });
+
+          const result = await response.json();
+          console.log('📊 Login check result:', result);
+
+          if (result.success && result.data && result.data.logged_in) {
+            // User is logged in
+            const userType = result.data.user_type;
+            console.log('✅ User logged in as:', userType);
+
+            if (userType === 'staff') {
+              // Redirect staff to their dashboard
+              console.log('🔄 Redirecting staff to dashboard');
+              window.location.href = 'public/staff.html';
+              return;
+            } else if (userType === 'client') {
+              // Redirect client to their dashboard appointments section
+              console.log('🔄 Redirecting client to dashboard appointments');
+              window.location.href = 'public/client.html#appointments';
+              return;
+            }
+          }
+
+          // User is not logged in or login check failed
+          console.log('❌ User not logged in, showing signup prompt');
+
+          const modal = document.getElementById('bookingModal');
+          if (modal) {
+            modal.style.display = 'flex';
+
+            // Show login required message and hide booking form
+            const loginRequiredMsg = document.getElementById('loginRequiredMessage');
+            const bookingForm = document.getElementById('bookingForm');
+
+            if (loginRequiredMsg) {
+              loginRequiredMsg.style.display = 'block';
+            }
+            if (bookingForm) {
+              bookingForm.style.display = 'none';
+            }
+
+            // Add animation
+            setTimeout(() => {
+              modal.classList.add('show');
+            }, 10);
+
+            console.log('✅ Booking modal shown with signup prompt');
+          } else {
+            console.error('❌ Booking modal not found');
+          }
+
+        } catch (error) {
+          console.error('❌ Error in booking modal:', error);
+
+          // On error, show signup prompt as fallback
+          const modal = document.getElementById('bookingModal');
+          if (modal) {
+            modal.style.display = 'flex';
+            document.getElementById('loginRequiredMessage').style.display = 'block';
+            document.getElementById('bookingForm').style.display = 'none';
+          }
+        }
       };
       window.closeModal = (id) => {
         const modal = document.getElementById(id);
@@ -1386,7 +1946,165 @@
       // Initialize register form state
       updateRegisterForm();
       
-      // Booking functionality now handled by client dashboard
+      // Helper function to check user login status
+      async function checkUserLogin() {
+        try {
+          // First check sessionStorage
+          const userSession = sessionStorage.getItem('user_session');
+          if (userSession) {
+            const sessionData = JSON.parse(userSession);
+            if (sessionData && sessionData.user_id) {
+              return true;
+            }
+          }
+
+          // If no session, check with server
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'check_session' })
+          });
+
+          const result = await response.json();
+          return result.success && result.logged_in;
+        } catch (error) {
+          console.error('Error checking login status:', error);
+          return false;
+        }
+      }
+
+      // Load user's pets for booking form
+      async function loadUserPets() {
+        try {
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_user_pets' })
+          });
+
+          const result = await response.json();
+          const petSelect = document.getElementById('pet_id');
+
+          if (result.success && result.data && petSelect) {
+            petSelect.innerHTML = '<option value="">Choose your pet...</option>';
+
+            if (result.data.length > 0) {
+              result.data.forEach(pet => {
+                const option = document.createElement('option');
+                option.value = pet.pet_id;
+                option.textContent = `${pet.name} (${pet.species})`;
+                petSelect.appendChild(option);
+              });
+            } else {
+              petSelect.innerHTML = '<option value="">No pets registered. Please add a pet first.</option>';
+            }
+          }
+        } catch (error) {
+          console.error('Error loading pets:', error);
+          toast('Error loading pets. Please try again.', 'error');
+        }
+      }
+
+      // Load available services for booking form
+      async function loadServices() {
+        try {
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_services' })
+          });
+
+          const result = await response.json();
+          const serviceSelect = document.getElementById('service_id');
+          const timeSelect = document.getElementById('appointment_time');
+
+          if (result.success && result.data && serviceSelect) {
+            serviceSelect.innerHTML = '<option value="">Choose a service...</option>';
+
+            if (result.data.length > 0) {
+              result.data.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.service_id;
+                option.textContent = `${service.name} - ₱${service.price}`;
+                serviceSelect.appendChild(option);
+              });
+            }
+          }
+
+          // Set available time slots
+          if (timeSelect) {
+            timeSelect.innerHTML = '<option value="">Select time...</option>';
+            const timeSlots = [
+              '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM',
+              '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM'
+            ];
+
+            timeSlots.forEach(time => {
+              const option = document.createElement('option');
+              option.value = time;
+              option.textContent = time;
+              timeSelect.appendChild(option);
+            });
+          }
+
+          // Set minimum date to today
+          const dateInput = document.getElementById('appointment_date');
+          if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+          }
+        } catch (error) {
+          console.error('Error loading services:', error);
+          toast('Error loading services. Please try again.', 'error');
+        }
+      }
+
+      // Handle booking form submission
+      async function handleBooking(e) {
+        e.preventDefault();
+
+        if (!checkUserLogin()) {
+          toast('Please login to book an appointment', 'warning');
+          showLoginModal();
+          return;
+        }
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        try {
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'create_appointment',
+              service_id: formData.get('service_id'),
+              pet_id: formData.get('pet_id'),
+              appointment_date: formData.get('appointment_date'),
+              appointment_time: formData.get('appointment_time'),
+              notes: formData.get('notes')
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            toast('Appointment booked successfully!', 'success');
+            closeModal('bookingModal');
+            form.reset();
+
+            // Redirect to client dashboard to view appointment
+            setTimeout(() => {
+              window.location.href = 'public/client.html#appointments';
+            }, 1500);
+          } else {
+            toast(result.message || 'Booking failed', 'error');
+          }
+        } catch (error) {
+          console.error('Booking error:', error);
+          toast('An error occurred while booking', 'error');
+        }
+      }
       
       // Booking functionality now handled by client dashboard
 
@@ -1529,33 +2247,155 @@
       const forgotPasswordForm = document.getElementById('forgotPasswordForm');
       if (forgotPasswordForm) forgotPasswordForm.addEventListener('submit', handleForgotPassword);
 
+      const resendVerificationForm = document.getElementById('resendVerificationForm');
+      if (resendVerificationForm) resendVerificationForm.addEventListener('submit', handleResendVerification);
+
+      const bookingForm = document.getElementById('bookingForm');
+      if (bookingForm) bookingForm.addEventListener('submit', handleBooking);
+
       // Booking functionality now handled by client dashboard
       
+      // Login attempt tracking functions
+      function getLoginAttempts() {
+        const attempts = localStorage.getItem('login_attempts');
+        return attempts ? JSON.parse(attempts) : { count: 0, lastAttempt: null, lockoutUntil: null };
+      }
+
+      function setLoginAttempts(attempts) {
+        localStorage.setItem('login_attempts', JSON.stringify(attempts));
+      }
+
+      function resetLoginAttempts() {
+        localStorage.removeItem('login_attempts');
+      }
+
+      function isLockedOut() {
+        const attempts = getLoginAttempts();
+        if (attempts.lockoutUntil) {
+          const now = new Date().getTime();
+          const lockoutTime = new Date(attempts.lockoutUntil).getTime();
+          if (now < lockoutTime) {
+            return {
+              locked: true,
+              remainingTime: Math.ceil((lockoutTime - now) / 1000 / 60) // minutes
+            };
+          } else {
+            // Lockout expired, reset attempts
+            resetLoginAttempts();
+            return { locked: false };
+          }
+        }
+        return { locked: false };
+      }
+
+      function incrementLoginAttempts() {
+        const attempts = getLoginAttempts();
+        attempts.count++;
+        attempts.lastAttempt = new Date().toISOString();
+
+        // Lock out after 5 failed attempts
+        if (attempts.count >= 5) {
+          attempts.lockoutUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+        }
+
+        setLoginAttempts(attempts);
+        return attempts;
+      }
+
+      function updateLoginModalWithAttempts() {
+        const attempts = getLoginAttempts();
+        const lockout = isLockedOut();
+
+        // Remove existing status messages
+        const existingStatus = document.querySelector('.login-attempt-status');
+        if (existingStatus) {
+          existingStatus.remove();
+        }
+
+        // Create status message element
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'login-attempt-status';
+
+        if (lockout.locked) {
+          statusDiv.style.cssText = 'background: #ffebee; border: 1px solid #f44336; color: #c62828; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center;';
+          statusDiv.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 8px;">🔒</div>
+            <div style="font-weight: bold; margin-bottom: 8px;">Account Temporarily Locked</div>
+            <div style="font-size: 14px;">Too many failed login attempts. Please wait ${lockout.remainingTime} minute(s) before trying again.</div>
+            <div style="font-size: 14px; margin-top: 8px; color: #1565c0;"><strong>For immediate assistance, contact admin at 09286077247</strong></div>
+          `;
+        } else if (attempts.count > 0) {
+          const remainingAttempts = 5 - attempts.count;
+          statusDiv.style.cssText = 'background: #fff3e0; border: 1px solid #ff9800; color: #e65100; padding: 12px; border-radius: 8px; margin: 15px 0; text-align: center;';
+          statusDiv.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 8px;">⚠️</div>
+            <div style="font-weight: bold; margin-bottom: 8px;">Login Attempts Warning</div>
+            <div style="font-size: 14px;">${attempts.count} failed attempt(s). ${remainingAttempts} attempt(s) remaining before temporary lockout.</div>
+          `;
+        }
+
+        // Insert status message after the password field
+        const passwordField = document.querySelector('#loginModal .password-container');
+        if (passwordField && statusDiv.innerHTML) {
+          passwordField.parentNode.insertBefore(statusDiv, passwordField.nextSibling);
+        }
+
+        // Add event listeners to clear status when user starts typing
+        const emailInput = document.getElementById('login_email');
+        const passwordInput = document.getElementById('login_password');
+
+        if (emailInput) {
+          emailInput.addEventListener('focus', clearLoginModalStatus);
+        }
+        if (passwordInput) {
+          passwordInput.addEventListener('focus', clearLoginModalStatus);
+        }
+      }
+
+      function clearLoginModalStatus() {
+        const statusDiv = document.querySelector('.login-attempt-status');
+        if (statusDiv) {
+          statusDiv.remove();
+        }
+      }
+
       async function handleLogin(e) {
         e.preventDefault();
-        
+
         const form = e.target;
         const email = form.email.value.trim();
         const password = form.password.value;
-        
+
+        // Check if account is locked out (client-side check)
+        const lockout = isLockedOut();
+        if (lockout.locked) {
+          toast(`Account locked. Please wait ${lockout.remainingTime} minute(s) before trying again. For immediate assistance, contact admin at 09286077247.`, 'error');
+          updateLoginModalWithAttempts();
+          return;
+        }
+
         if (!validateEmail(email)) {
           toast('Please enter a valid email address.', 'error');
           return;
         }
-        
+
         if (!password) {
           toast('Please enter your password.', 'error');
           return;
         }
-        
+
         try {
           const result = await apiCall({
             action: 'login',
             email: email,
             password: password
           });
-          
+
           if (result.success) {
+            // Reset login attempts on successful login
+            resetLoginAttempts();
+            clearLoginModalStatus();
+
             toast('Login successful! Redirecting...', 'success');
 
             // Determine redirect path based on user type
@@ -1581,6 +2421,29 @@
               // Update booking buttons text for staff users
               if (result.user.type === 'staff') {
                 updateBookingButtonsForStaff();
+              }
+
+              // If user logged in from booking modal, redirect to appointments
+              if (document.getElementById('bookingModal').style.display === 'flex') {
+                setTimeout(() => {
+                  window.location.href = 'public/client.html#appointments';
+                }, 500);
+              }
+            }
+          } else {
+            // Increment failed attempts on login failure
+            const attempts = incrementLoginAttempts();
+            updateLoginModalWithAttempts();
+
+            // Show specific error message or attempt warning
+            if (result.message) {
+              toast(result.message, 'error');
+            } else {
+              const remainingAttempts = 5 - attempts.count;
+              if (remainingAttempts > 0) {
+                toast(`Login failed. ${remainingAttempts} attempt(s) remaining before lockout.`, 'error');
+              } else {
+                toast('Account locked due to multiple failed attempts. Please wait 15 minutes. For immediate assistance, contact admin at 09286077247.', 'error');
               }
             }
           }
@@ -1648,23 +2511,60 @@
           const result = await apiCall(payload);
           
           if (result.success) {
-            const welcomeMsg = `Registration successful! Welcome ${firstName}! You can now log in with your account.`;
+            let welcomeMsg = `Registration successful! Welcome ${firstName}! You can now log in with your account.`;
 
-            toast(welcomeMsg, 'success');
-            closeModal('registerModal');
-            form.reset();
+            // Send verification email using SMTPJS (optional)
+            if (typeof emailService !== 'undefined' && result.verification_token) {
+              emailService.sendVerificationEmail(email, firstName, result.verification_token)
+                .then(emailResult => {
+                  if (emailResult.success) {
+                    toast(welcomeMsg + ' (Optional: Check your email for account verification link for enhanced security)', 'success');
+                  } else {
+                    toast(welcomeMsg + ' (Optional: Email verification available for enhanced security)', 'success');
+                  }
 
-            // Reset form state
-            updateRegisterForm();
+                  closeModal('registerModal');
+                  form.reset();
+                  updateRegisterForm();
 
-            // Handle auto-login and redirect to client dashboard
-            if (result.client) {
-              // Redirect to client dashboard
-              setTimeout(() => {
-                window.location.href = 'public/client.html';
-              }, 1500);
+                  // Auto-redirect for new users
+                  if (result.user && result.user.type === 'client') {
+                    toast('Redirecting to your dashboard...', 'success');
+                    setTimeout(() => {
+                      window.location.href = 'public/client.html';
+                    }, 1500);
+                    updateUIForLoggedInUser(result.user, 'client');
+                  }
+                })
+                .catch(emailError => {
+                  console.error('Email sending error:', emailError);
+                  toast(welcomeMsg, 'success');
+                  closeModal('registerModal');
+                  form.reset();
+                  updateRegisterForm();
 
-              updateUIForLoggedInUser(result.client, 'client');
+                  // Auto-redirect even if email fails
+                  if (result.user && result.user.type === 'client') {
+                    setTimeout(() => {
+                      window.location.href = 'public/client.html#appointments';
+                    }, 1500);
+                    updateUIForLoggedInUser(result.user, 'client');
+                  }
+                });
+            } else {
+              toast(welcomeMsg, 'success');
+              closeModal('registerModal');
+              form.reset();
+              updateRegisterForm();
+
+              // Auto-redirect for new users
+              if (result.user && result.user.type === 'client') {
+                toast('Redirecting to your dashboard...', 'success');
+                setTimeout(() => {
+                  window.location.href = 'public/client.html#appointments';
+                }, 1500);
+                updateUIForLoggedInUser(result.user, 'client');
+              }
             }
           } else {
             toast(result.message || 'Registration failed. Please try again.', 'error');
@@ -1682,32 +2582,104 @@
       const email = form.email.value.trim();
 
       if (!email) {
-          toast('Please enter your email address.', 'error');
-          return;
+        toast('Please enter your email address.', 'error');
+        return;
       }
 
       try {
-          const response = await fetch('api/vet_api.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  action: 'request_password_reset',
-                  email: email
+        const result = await apiCall({
+          action: 'request_password_reset',
+          email: email
+        });
+
+        if (result.success) {
+          // Send password reset email using SMTPJS
+          if (typeof emailService !== 'undefined') {
+            emailService.sendPasswordResetEmail(email, 'Valued Customer', 'reset_token')
+              .then(emailResult => {
+                if (emailResult.success) {
+                  toast('Password reset email sent successfully! Please check your inbox.', 'success');
+                } else {
+                  toast('Reset request processed. Please check your email for the reset link.', 'success');
+                }
+                closeModal('forgotPasswordModal');
+                form.reset();
               })
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-              toast('Password reset link sent! Please check your email.', 'success');
-              closeModal('forgotPasswordModal');
-              form.reset();
+              .catch(emailError => {
+                console.error('Email sending error:', emailError);
+                toast('Reset request processed. Please check your email for the reset link.', 'success');
+                closeModal('forgotPasswordModal');
+                form.reset();
+              });
           } else {
-              toast(result.message || 'Failed to send reset link.', 'error');
+            toast('Password reset link sent! Please check your email.', 'success');
+            closeModal('forgotPasswordModal');
+            form.reset();
           }
+        } else {
+          toast(result.message || 'Failed to send reset link.', 'error');
+        }
       } catch (error) {
-          console.error('Forgot password error:', error);
-          toast('Connection error. Please try again.', 'error');
+        console.error('Forgot password error:', error);
+        toast('Connection error. Please try again.', 'error');
+      }
+    }
+
+    async function handleResendVerification(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const email = form.email.value.trim();
+
+      if (!email) {
+        toast('Please enter your email address.', 'error');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        toast('Please enter a valid email address.', 'error');
+        return;
+      }
+
+      try {
+        const result = await apiCall({
+          action: 'resend_verification',
+          email: email
+        });
+
+        if (result.success) {
+          // Send the actual email using SMTPJS
+          const email = form.email.value.trim();
+          const firstName = 'Valued Customer'; // We don't have the first name here, use generic
+
+          if (typeof emailService !== 'undefined') {
+            emailService.sendVerificationEmail(email, firstName, 'resend_token')
+              .then(emailResult => {
+                if (emailResult.success) {
+                  toast('Verification email sent successfully! Please check your inbox.', 'success');
+                } else {
+                  toast('Email configuration may need setup, but verification request was processed.', 'warning');
+                }
+                closeModal('resendVerificationModal');
+                form.reset();
+              })
+              .catch(emailError => {
+                console.error('Email sending error:', emailError);
+                toast('Verification request processed. Please check your email.', 'success');
+                closeModal('resendVerificationModal');
+                form.reset();
+              });
+          } else {
+            toast(result.message, 'success');
+            closeModal('resendVerificationModal');
+            form.reset();
+          }
+        } else {
+          toast(result.message || 'Failed to resend verification email.', 'error');
+        }
+      } catch (error) {
+        console.error('Resend verification error:', error);
+        toast('Connection error. Please try again.', 'error');
       }
     }
       
@@ -1830,17 +2802,125 @@
       });
     });
 
-    // Simple store functionality
-  window.filterCategory = function(category) {
-    // Simple toast notification for category selection
-    toast(`You selected: ${category.toUpperCase()} category`, 'info');
-
-    // Here you could add logic to:
-    // - Navigate to a dedicated store page
-    // - Filter products
-    // - Open a modal with category products
-    // - etc.
-  };
+    // Store category click functionality
+    window.filterCategory = function(category) {
+      console.log('🏪 Filtering category:', category);
+ 
+      // Check if user is logged in first
+      fetch('api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_user_info' })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success && result.data && result.data.logged_in) {
+          // User is logged in, redirect to actual store page
+          console.log('✅ User logged in, redirecting to store page');
+          window.location.href = `public/store.html?category=${encodeURIComponent(category)}`;
+        } else {
+          // User not logged in, redirect to public store page
+          console.log('❌ User not logged in, redirecting to public store');
+          window.location.href = `public/store.html?category=${encodeURIComponent(category)}`;
+        }
+      })
+      .catch(error => {
+        console.error('❌ Error checking login status:', error);
+        // Fallback to public store
+        window.location.href = `public/store.html?category=${encodeURIComponent(category)}`;
+      });
+    };
+ 
+    // Add click handlers to store categories when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const categories = document.querySelectorAll('.category');
+      console.log('🏪 Found', categories.length, 'store categories');
+ 
+      categories.forEach((category, index) => {
+        console.log('🏪 Setting up category', index + 1, ':', category.querySelector('h3')?.textContent);
+ 
+        // Make sure it's clickable
+        category.style.cursor = 'pointer';
+        category.style.userSelect = 'none';
+ 
+        // Remove existing click listeners to prevent duplicates
+        category.replaceWith(category.cloneNode(true));
+ 
+        // Get fresh reference after cloning
+        const freshCategory = document.querySelectorAll('.category')[index];
+        if (freshCategory) {
+          freshCategory.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+ 
+            const categoryText = this.querySelector('h3').textContent.trim();
+            console.log('🏪 Category clicked:', categoryText);
+ 
+            let categoryKey = '';
+ 
+            // Map display text to category keys
+            if (categoryText.includes('FOOD FOR')) {
+              categoryKey = 'food';
+            } else if (categoryText.includes('GROOMING')) {
+              categoryKey = 'grooming';
+            } else if (categoryText.includes('ACCESSORIES')) {
+              categoryKey = 'accessories';
+            }
+ 
+            console.log('🏪 Mapped to category key:', categoryKey);
+ 
+            if (categoryKey) {
+              // Show loading toast
+              toast(`Loading ${categoryText.toLowerCase()}...`, 'info');
+              filterCategory(categoryKey);
+            } else {
+              console.warn('🏪 Could not map category:', categoryText);
+              // Default to store page if mapping fails
+              toast('Loading store...', 'info');
+              window.location.href = 'public/store.html';
+            }
+          });
+ 
+          // Add enhanced hover effects for better UX
+          freshCategory.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-12px) scale(1.02)';
+            this.style.boxShadow = '0 12px 25px rgba(0,0,0,0.4)';
+            this.style.transition = 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          });
+ 
+          freshCategory.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-8px) scale(1)';
+            this.style.boxShadow = '0 6px 15px rgba(0,0,0,0.3)';
+          });
+ 
+          // Add keyboard support
+          freshCategory.setAttribute('tabindex', '0');
+          freshCategory.setAttribute('role', 'button');
+          freshCategory.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.click();
+            }
+          });
+ 
+          // Add touch support for mobile devices
+          freshCategory.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            // Add visual feedback for touch
+            this.style.transform = 'translateY(-10px) scale(0.98)';
+          });
+ 
+          freshCategory.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            // Restore normal state and trigger click
+            this.style.transform = 'translateY(-8px) scale(1)';
+            this.click();
+          });
+        }
+      });
+ 
+      console.log('✅ Store categories setup complete');
+    });
 
   // Ensure all modals exist before adding event listeners
   function initializeModalHandlers() {

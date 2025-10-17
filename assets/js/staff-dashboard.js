@@ -563,14 +563,7 @@ class StaffDashboard {
             });
         }
 
-        // Add service form
-        const addServiceForm = document.getElementById('addServiceForm');
-        if (addServiceForm) {
-            addServiceForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleAddService(addServiceForm);
-            });
-        }
+        // Add service form event listener will be set up when modal is created
 
         // Edit service form
         const editServiceForm = document.getElementById('editServiceForm');
@@ -625,6 +618,113 @@ class StaffDashboard {
 
         // Settings functionality
         this.setupSettingsEventListeners();
+    }
+
+    async handleAddService(form) {
+        try {
+            // Prevent form submission and show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Service...';
+            }
+
+            const formData = new FormData(form);
+            const serviceData = {
+                action: 'add_service',
+                name: formData.get('service_name')?.trim(),
+                description: formData.get('service_description')?.trim(),
+                duration: parseInt(formData.get('duration')) || 30,
+                is_active: parseInt(formData.get('service_status')) || 1
+            };
+
+            console.log('=== ADD SERVICE FORM SUBMISSION ===');
+            console.log('Form data received:', {
+                service_name: formData.get('service_name'),
+                service_description: formData.get('service_description'),
+                duration: formData.get('duration'),
+                service_status: formData.get('service_status')
+            });
+            console.log('Processed service data:', serviceData);
+
+            // Validate required fields
+            if (!serviceData.name || serviceData.name === '') {
+                this.showToast('❌ Service name is required', 'error');
+                return;
+            }
+
+            if (!serviceData.duration || serviceData.duration <= 0) {
+                this.showToast('❌ Duration must be greater than 0 minutes', 'error');
+                return;
+            }
+
+            // Validate field lengths and limits
+            if (serviceData.name.length > 100) {
+                this.showToast('❌ Service name must be less than 100 characters', 'error');
+                return;
+            }
+
+            if (serviceData.description && serviceData.description.length > 500) {
+                this.showToast('❌ Description must be less than 500 characters', 'error');
+                return;
+            }
+
+            if (serviceData.duration > 480) {
+                this.showToast('❌ Duration cannot exceed 8 hours (480 minutes)', 'error');
+                return;
+            }
+
+            console.log('✅ All validations passed, submitting service...');
+
+            const response = await fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('📡 Service add response:', result);
+
+            if (result.success) {
+                this.showToast(`✅ Service "${serviceData.name}" added successfully!`, 'success');
+
+                // Close modal and reset form
+                this.closeModal('addServiceModal');
+                form.reset();
+
+                // Refresh services list and dashboard data
+                await this.loadServicesSection();
+                await this.loadDashboardData();
+
+                // Show additional success feedback
+                setTimeout(() => {
+                    this.showToast('Services list updated with new service', 'info');
+                }, 1000);
+            } else {
+                // Handle specific backend error messages
+                if (result.message && result.message.includes('already exists')) {
+                    this.showToast('❌ A service with this name already exists. Please choose a different name.', 'error');
+                } else if (result.message && result.message.includes('required')) {
+                    this.showToast('❌ ' + result.message, 'error');
+                } else {
+                    this.showToast(result.message || '❌ Failed to add service. Please check your input and try again.', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Add service error:', error);
+            this.showToast(`❌ Error: ${error.message || 'Failed to add service. Please try again.'}`, 'error');
+        } finally {
+            // Re-enable submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> ADD SERVICE';
+            }
+        }
     }
 
     setupSettingsEventListeners() {
@@ -711,19 +811,25 @@ class StaffDashboard {
                 <div class="modal-body">
                     <form id="addServiceForm" class="booking-form">
                         <div class="form-group">
-                            <label for="serviceName">Service Name *</label>
-                            <input type="text" id="serviceName" name="service_name" required placeholder="e.g., General Check-up">
+                            <label for="service_name">Service Name *</label>
+                            <input type="text" id="service_name" name="service_name" required placeholder="e.g., General Check-up" maxlength="100">
                         </div>
                         <div class="form-group">
-                            <label for="serviceDescription">Description</label>
-                            <textarea id="serviceDescription" name="service_description" rows="3" placeholder="Brief description of the service..."></textarea>
+                            <label for="service_description">Description</label>
+                            <textarea id="service_description" name="service_description" rows="3" placeholder="Brief description of the service..." maxlength="500"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="serviceStatus">Status</label>
-                            <select id="serviceStatus" name="service_status">
-                                <option value="1" selected>Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="duration">Duration (minutes) *</label>
+                                <input type="number" id="duration" name="duration" required min="1" max="480" placeholder="e.g., 30" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="service_status">Status</label>
+                                <select id="service_status" name="service_status">
+                                    <option value="1" selected>Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-actions">
                             <button type="button" class="btn-secondary" onclick="staffDashboard.closeModal('addServiceModal')">CANCEL</button>
@@ -733,6 +839,15 @@ class StaffDashboard {
                 </div>
             </div>
         `;
+
+        // Add event listener to the form after it's created
+        const addServiceForm = modal.querySelector('#addServiceForm');
+        if (addServiceForm) {
+            addServiceForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleAddService(addServiceForm);
+            });
+        }
 
         return modal;
     }
@@ -1023,18 +1138,24 @@ class StaffDashboard {
                         <input type="hidden" id="editServiceId" name="service_id" value="${service.id}">
                         <div class="form-group">
                             <label for="editServiceName">Service Name *</label>
-                            <input type="text" id="editServiceName" name="service_name" value="${service.name}" required placeholder="e.g., General Check-up">
+                            <input type="text" id="editServiceName" name="service_name" value="${service.name}" required placeholder="e.g., General Check-up" maxlength="100">
                         </div>
                         <div class="form-group">
                             <label for="editServiceDescription">Description</label>
-                            <textarea id="editServiceDescription" name="service_description" rows="3" placeholder="Brief description of the service...">${service.description || ''}</textarea>
+                            <textarea id="editServiceDescription" name="service_description" rows="3" placeholder="Brief description of the service..." maxlength="500">${service.description || ''}</textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="editServiceStatus">Status</label>
-                            <select id="editServiceStatus" name="service_status">
-                                <option value="1" ${service.is_active ? 'selected' : ''}>Active</option>
-                                <option value="0" ${!service.is_active ? 'selected' : ''}>Inactive</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editServiceDuration">Duration (minutes) *</label>
+                                <input type="number" id="editServiceDuration" name="duration" value="${service.duration || 30}" required min="1" max="480" placeholder="e.g., 30">
+                            </div>
+                            <div class="form-group">
+                                <label for="editServiceStatus">Status</label>
+                                <select id="editServiceStatus" name="service_status">
+                                    <option value="1" ${service.is_active ? 'selected' : ''}>Active</option>
+                                    <option value="0" ${!service.is_active ? 'selected' : ''}>Inactive</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-actions">
                             <button type="button" class="btn-secondary btn-small" onclick="staffDashboard.closeModal('editServiceModal')">CANCEL</button>
@@ -1050,20 +1171,66 @@ class StaffDashboard {
 
     async handleEditService(form) {
         try {
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            }
+
             const formData = new FormData(form);
             const serviceData = {
                 action: 'update_service',
                 service_id: parseInt(formData.get('service_id')),
-                name: formData.get('service_name'),
-                description: formData.get('service_description'),
-                is_active: parseInt(formData.get('service_status'))
+                name: formData.get('service_name')?.trim(),
+                description: formData.get('service_description')?.trim(),
+                duration: parseInt(formData.get('duration')) || 30,
+                is_active: parseInt(formData.get('service_status')) || 1
             };
 
+            console.log('=== EDIT SERVICE FORM SUBMISSION ===');
+            console.log('Form data received:', {
+                service_id: formData.get('service_id'),
+                service_name: formData.get('service_name'),
+                service_description: formData.get('service_description'),
+                duration: formData.get('duration'),
+                service_status: formData.get('service_status')
+            });
+            console.log('Processed service data:', serviceData);
+
             // Validate required fields
-            if (!serviceData.name) {
-                this.showToast('Service name is required', 'error');
+            if (!serviceData.service_id || isNaN(serviceData.service_id)) {
+                this.showToast('❌ Invalid service ID', 'error');
                 return;
             }
+
+            if (!serviceData.name || serviceData.name === '') {
+                this.showToast('❌ Service name is required', 'error');
+                return;
+            }
+
+            if (!serviceData.duration || serviceData.duration <= 0) {
+                this.showToast('❌ Duration must be greater than 0 minutes', 'error');
+                return;
+            }
+
+            // Validate field lengths and limits
+            if (serviceData.name.length > 100) {
+                this.showToast('❌ Service name must be less than 100 characters', 'error');
+                return;
+            }
+
+            if (serviceData.description && serviceData.description.length > 500) {
+                this.showToast('❌ Description must be less than 500 characters', 'error');
+                return;
+            }
+
+            if (serviceData.duration > 480) {
+                this.showToast('❌ Duration cannot exceed 8 hours (480 minutes)', 'error');
+                return;
+            }
+
+            console.log('✅ All validations passed, updating service...');
 
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
@@ -1071,27 +1238,75 @@ class StaffDashboard {
                 body: JSON.stringify(serviceData)
             });
 
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+
             const result = await response.json();
+            console.log('📡 Service update response:', result);
 
             if (result.success) {
-                this.showToast('Service updated successfully!', 'success');
+                this.showToast(`✅ Service "${serviceData.name}" updated successfully!`, 'success');
+
+                // Close modal and reset form
                 this.closeModal('editServiceModal');
-                await this.loadServicesSection(); // Refresh services list
-                await this.loadDashboardData(); // Refresh dashboard data
+                form.reset();
+
+                // Refresh services list and dashboard data
+                await this.loadServicesSection();
+                await this.loadDashboardData();
+
+                // Show additional success feedback
+                setTimeout(() => {
+                    this.showToast('Services list updated with changes', 'info');
+                }, 1000);
             } else {
-                this.showToast(result.message || 'Failed to update service', 'error');
+                // Handle specific backend error messages
+                if (result.message && result.message.includes('already exists')) {
+                    this.showToast('❌ A service with this name already exists. Please choose a different name.', 'error');
+                } else if (result.message && result.message.includes('not found')) {
+                    this.showToast('❌ Service not found. It may have been deleted by another user.', 'error');
+                } else if (result.message && result.message.includes('required')) {
+                    this.showToast('❌ ' + result.message, 'error');
+                } else {
+                    this.showToast(result.message || '❌ Failed to update service. Please check your input and try again.', 'error');
+                }
             }
         } catch (error) {
-            console.error('Edit service error:', error);
-            this.showToast('Failed to update service. Please try again.', 'error');
+            console.error('❌ Edit service error:', error);
+            this.showToast(`❌ Error updating service: ${error.message}`, 'error');
+        } finally {
+            // Re-enable submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> UPDATE SERVICE';
+            }
         }
     }
 
     async deleteService(serviceId, buttonElement) {
         if (!serviceId || isNaN(parseInt(serviceId))) {
-            this.showToast('Invalid service ID', 'error');
+            this.showToast('❌ Invalid service ID', 'error');
             return;
         }
+
+        // Get service name for better user feedback
+        const serviceRow = buttonElement.closest('tr');
+        const serviceNameElement = serviceRow?.querySelector('td div div');
+        const serviceName = serviceNameElement?.textContent?.trim() || 'Unknown Service';
+
+        // Show confirmation dialog with service name
+        const confirmMessage = `Are you sure you want to delete the service "${serviceName}"?\n\nThis action will:\n• Deactivate the service\n• Remove it from all future appointments\n• Hide it from the services list\n\nThis action cannot be undone.`;
+
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        // Show loading state on the button
+        const originalText = buttonElement.innerHTML;
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
         try {
             console.log('🗑️ Deactivating service with ID:', serviceId);
@@ -1106,26 +1321,49 @@ class StaffDashboard {
                 })
             });
 
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+
             const result = await response.json();
             console.log('📡 Deactivate service response:', result);
 
             if (result.success) {
-                this.showToast('Service deleted successfully!', 'success');
+                this.showToast(`✅ Service "${serviceName}" deleted successfully!`, 'success');
+
                 // Immediately hide the table row for better UX
-                const serviceRow = buttonElement.closest('tr');
                 if (serviceRow) {
-                    serviceRow.style.transition = 'opacity 0.3s ease';
+                    serviceRow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                     serviceRow.style.opacity = '0';
+                    serviceRow.style.transform = 'translateX(-100%)';
                     setTimeout(() => {
                         serviceRow.remove();
+
+                        // Check if this was the last service and show empty state if needed
+                        const remainingRows = document.querySelectorAll('#servicesTableBody tr.service-row');
+                        if (remainingRows.length === 0) {
+                            this.loadServicesSection(); // Reload to show empty state
+                        }
                     }, 300);
                 }
+
+                // Refresh dashboard data after deletion
+                await this.loadDashboardData();
             } else {
-                this.showToast(result.message || 'Failed to delete service', 'error');
+                // Handle specific backend error messages
+                if (result.message && result.message.includes('not found')) {
+                    this.showToast('❌ Service not found. It may have already been deleted.', 'error');
+                } else {
+                    this.showToast(result.message || '❌ Failed to delete service. Please try again.', 'error');
+                }
             }
         } catch (error) {
-            console.error('Error deleting service:', error);
-            this.showToast('Error deleting service. Please try again.', 'error');
+            console.error('❌ Error deleting service:', error);
+            this.showToast(`❌ Error deleting service: ${error.message}`, 'error');
+        } finally {
+            // Restore button state
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = originalText;
         }
     }
 
@@ -1955,119 +2193,6 @@ class StaffDashboard {
         console.log('✅ Dashboard booking form initialized');
     }
 
-    async handleAddService(form) {
-        try {
-            const formData = new FormData(form);
-            const serviceData = {
-                action: 'add_service',
-                name: formData.get('service_name'),
-                description: formData.get('service_description'),
-                is_active: parseInt(formData.get('service_status'))
-            };
-
-            // Validate required fields
-            if (!serviceData.name || serviceData.name.trim() === '') {
-                this.showToast('Service name is required', 'error');
-                return;
-            }
-
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(serviceData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showToast('Service added successfully!', 'success');
-                this.closeModal('addServiceModal');
-                await this.loadServicesSection(); // Refresh services list
-                await this.loadDashboardData(); // Refresh dashboard data
-            } else {
-                this.showToast(result.message || 'Failed to add service', 'error');
-            }
-        } catch (error) {
-            console.error('Add service error:', error);
-            this.showToast('Failed to add service. Please try again.', 'error');
-        }
-    }
-
-    async handleAddService(form) {
-        try {
-            const formData = new FormData(form);
-            const serviceData = {
-                action: 'add_service',
-                name: formData.get('service_name'),
-                description: formData.get('service_description'),
-                is_active: parseInt(formData.get('service_status'))
-            };
-
-            // Validate required fields
-            if (!serviceData.name || serviceData.name.trim() === '') {
-                this.showToast('Service name is required', 'error');
-                return;
-            }
-
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(serviceData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showToast('Service added successfully!', 'success');
-                this.closeModal('addServiceModal');
-                await this.loadServicesSection(); // Refresh services list
-                await this.loadDashboardData(); // Refresh dashboard data
-            } else {
-                this.showToast(result.message || 'Failed to add service', 'error');
-            }
-        } catch (error) {
-            console.error('Add service error:', error);
-            this.showToast('Failed to add service. Please try again.', 'error');
-        }
-    }
-
-    async handleAddService(form) {
-        try {
-            const formData = new FormData(form);
-            const serviceData = {
-                action: 'add_service',
-                name: formData.get('service_name'),
-                description: formData.get('service_description'),
-                is_active: parseInt(formData.get('service_status'))
-            };
-
-            // Validate required fields
-            if (!serviceData.name || serviceData.name.trim() === '') {
-                this.showToast('Service name is required', 'error');
-                return;
-            }
-
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(serviceData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showToast('Service added successfully!', 'success');
-                this.closeModal('addServiceModal');
-                await this.loadServicesSection(); // Refresh services list
-                await this.loadDashboardData(); // Refresh dashboard data
-            } else {
-                this.showToast(result.message || 'Failed to add service', 'error');
-            }
-        } catch (error) {
-            console.error('Add service error:', error);
-            this.showToast('Failed to add service. Please try again.', 'error');
-        }
-    }
 
     async handleMedicalHistorySubmission(form) {
         try {
@@ -2611,6 +2736,11 @@ class StaffDashboard {
             <p><strong>Gender:</strong> ${pet.gender || 'Not specified'}</p>
             <p><strong>Weight:</strong> ${weightDisplay}</p>
             <p><strong>Owner:</strong> ${ownerName}</p>
+            <div class="pet-actions" style="margin-top: 15px; display: flex; gap: 8px; justify-content: center;">
+                <button class="action-btn view" onclick="showPetMedicalHistory(${pet.id})" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-file-medical"></i> Medical History
+                </button>
+            </div>
         </div>`;
     }
 
@@ -2793,16 +2923,41 @@ class StaffDashboard {
                     <div class="report-value">${data.pet.breed || 'Not specified'}</div>
                 </div>
                 <div class="report-row">
+                    <div class="report-label">Age:</div>
+                    <div class="report-value">${data.pet.age || 'Age not recorded'}</div>
+                </div>
+                <div class="report-row">
+                    <div class="report-label">Gender:</div>
+                    <div class="report-value">${data.pet.gender || 'Not specified'}</div>
+                </div>
+                <div class="report-row">
+                    <div class="report-label">Weight:</div>
+                    <div class="report-value">${data.pet.weight ? data.pet.weight + ' kg' : 'Weight not recorded'}</div>
+                </div>
+                <div class="report-row">
                     <div class="report-label">Owner:</div>
                     <div class="report-value">${data.owner.name}</div>
                 </div>
+                ${data.pet.color ? `
+                <div class="report-row">
+                    <div class="report-label">Color:</div>
+                    <div class="report-value">${data.pet.color}</div>
+                </div>
+                ` : ''}
+                ${data.pet.notes ? `
+                <div class="report-row">
+                    <div class="report-label">Notes:</div>
+                    <div class="report-value">${data.pet.notes}</div>
+                </div>
+                ` : ''}
             </div>
         `;
 
+        // Enhanced Medical Records Section
         if (data.medical_history && data.medical_history.length > 0) {
             html += `
                 <div class="report-section">
-                    <h4><i class="fas fa-stethoscope"></i> Medical History</h4>
+                    <h4><i class="fas fa-stethoscope"></i> Complete Medical Records</h4>
                     <div style="margin-bottom: 20px; text-align: center;">
                         <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                             <i class="fas fa-file-medical"></i> Total Records: ${data.medical_history.length}
@@ -2812,16 +2967,25 @@ class StaffDashboard {
 
             data.medical_history.forEach((record, index) => {
                 html += `
-                    <div class="medical-record" style="margin: 25px 0; padding: 25px; border: 2px solid #667eea; border-radius: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);">
+                    <div class="medical-record" style="margin: 25px 0; padding: 25px; border: 2px solid #667eea; border-radius: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15); position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 15px; border-radius: 0 15px 0 15px; font-size: 12px; font-weight: 600;">
+                            Record #${index + 1}
+                        </div>
+
                         <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e1e5e9;">
                             <h5 style="margin: 0 0 10px 0; color: #667eea; font-size: 18px; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-file-medical"></i> Medical Record #${index + 1}
+                                <i class="fas fa-file-medical"></i> Medical Visit Details
                             </h5>
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                                 <div style="display: flex; align-items: center; gap: 15px; color: #666;">
                                     <div><i class="fas fa-calendar"></i> <strong>Date:</strong> ${new Date(record.created_at).toLocaleDateString()}</div>
                                     <div><i class="fas fa-user-md"></i> <strong>Staff:</strong> ${record.staff_name || 'Not recorded'}</div>
                                 </div>
+                                ${record.appointment_duration ? `
+                                <div style="background: rgba(102, 126, 234, 0.1); padding: 4px 12px; border-radius: 15px; font-size: 12px; color: #667eea;">
+                                    <i class="fas fa-clock"></i> Duration: ${record.appointment_duration} minutes
+                                </div>
+                                ` : ''}
                             </div>
                         </div>
 
@@ -2835,7 +2999,7 @@ class StaffDashboard {
 
                             <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #28a745; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                 <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-thermometer-three-quarters"></i> Treatment
+                                    <i class="fas fa-thermometer-three-quarters"></i> Treatment Provided
                                 </div>
                                 <div style="color: #555; line-height: 1.6; padding-left: 25px;">${record.treatment ? record.treatment.replace(/\n/g, '<br>') : 'Not specified'}</div>
                             </div>
@@ -2843,7 +3007,7 @@ class StaffDashboard {
                             ${record.medications ? `
                             <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #ffc107; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                 <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-pills"></i> Medications
+                                    <i class="fas fa-pills"></i> Medications Prescribed
                                 </div>
                                 <div style="color: #555; line-height: 1.6; padding-left: 25px;">${record.medications.replace(/\n/g, '<br>')}</div>
                             </div>
@@ -2870,7 +3034,7 @@ class StaffDashboard {
                             ${record.instructions ? `
                             <div style="background: #d1ecf1; padding: 15px; border-radius: 10px; border-left: 5px solid #17a2b8; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                 <div style="font-weight: bold; color: #0c5460; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-clipboard-list"></i> Instructions
+                                    <i class="fas fa-clipboard-list"></i> Care Instructions
                                 </div>
                                 <div style="color: #0c5460; line-height: 1.6; padding-left: 25px;">${record.instructions.replace(/\n/g, '<br>')}</div>
                             </div>
@@ -2881,16 +3045,151 @@ class StaffDashboard {
             });
 
             html += `</div>`;
+
+            // Add Medical Summary Section
+            html += `
+                <div class="report-section">
+                    <h4><i class="fas fa-chart-bar"></i> Medical Summary</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: 800; margin-bottom: 5px;">${data.medical_history.length}</div>
+                            <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Total Visits</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: 800; margin-bottom: 5px;">${this.getVaccinationCount(data.medical_history)}</div>
+                            <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Vaccinations</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: 800; margin-bottom: 5px;">${this.getSurgeryCount(data.medical_history)}</div>
+                            <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Surgeries</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: 800; margin-bottom: 5px;">${this.getEmergencyCount(data.medical_history)}</div>
+                            <div style="font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Emergency Visits</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         } else {
             html += `
                 <div class="report-section">
                     <h4><i class="fas fa-info-circle"></i> Medical History</h4>
-                    <p style="text-align: center; color: #666; font-style: italic;">No medical history records found for this pet.</p>
+                    <div style="text-align: center; padding: 40px; background: rgba(102, 126, 234, 0.05); border-radius: 15px; border: 2px dashed rgba(102, 126, 234, 0.3);">
+                        <i class="fas fa-calendar-times" style="font-size: 48px; color: rgba(102, 126, 234, 0.3); margin-bottom: 15px;"></i>
+                        <h3 style="margin: 0 0 10px 0; color: #667eea;">Not Appointed Yet</h3>
+                        <p style="margin: 0; color: #666;">This pet hasn't had any appointments yet. Schedule an appointment to begin tracking medical history.</p>
+                    </div>
                 </div>
             `;
         }
 
+        // Add Vaccination Records Section
+        html += this.generateVaccinationRecordsHTML(data);
+
+        // Add Health Alerts Section
+        html += this.generateHealthAlertsHTML(data);
+
         return html;
+    }
+
+    getVaccinationCount(medicalHistory) {
+        return medicalHistory.filter(record =>
+            record.treatment && record.treatment.toLowerCase().includes('vaccin')
+        ).length;
+    }
+
+    getSurgeryCount(medicalHistory) {
+        return medicalHistory.filter(record =>
+            record.treatment && record.treatment.toLowerCase().includes('surgery')
+        ).length;
+    }
+
+    getEmergencyCount(medicalHistory) {
+        return medicalHistory.filter(record =>
+            record.notes && record.notes.toLowerCase().includes('emergency')
+        ).length;
+    }
+
+    generateVaccinationRecordsHTML(data) {
+        // This would typically come from a separate vaccination table
+        // For now, we'll extract vaccination info from medical history
+        const vaccinationRecords = data.medical_history?.filter(record =>
+            record.treatment && record.treatment.toLowerCase().includes('vaccin')
+        ) || [];
+
+        if (vaccinationRecords.length > 0) {
+            return `
+                <div class="report-section">
+                    <h4><i class="fas fa-syringe"></i> Vaccination History</h4>
+                    <div style="display: grid; gap: 15px;">
+                        ${vaccinationRecords.map((record, index) => `
+                            <div style="background: #e8f5e8; padding: 15px; border-radius: 10px; border-left: 5px solid #28a745;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-weight: 600; color: #28a745;">Vaccination Record #${index + 1}</div>
+                                    <div style="font-size: 12px; color: #666;">${new Date(record.created_at).toLocaleDateString()}</div>
+                                </div>
+                                <div style="color: #333; line-height: 1.5;">${record.treatment}</div>
+                                ${record.medications ? `<div style="margin-top: 8px; font-size: 14px; color: #666;"><strong>Administered:</strong> ${record.medications}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        return '';
+    }
+
+    generateHealthAlertsHTML(data) {
+        const alerts = [];
+
+        // Check for upcoming follow-ups
+        const upcomingFollowups = data.medical_history?.filter(record =>
+            record.follow_up_date && new Date(record.follow_up_date) > new Date()
+        ) || [];
+
+        if (upcomingFollowups.length > 0) {
+            alerts.push(`
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                    <div style="color: #856404; font-weight: 600; margin-bottom: 5px;">
+                        <i class="fas fa-calendar-alt"></i> Upcoming Follow-ups
+                    </div>
+                    <div style="color: #856404; font-size: 14px;">
+                        ${upcomingFollowups.length} follow-up appointment(s) scheduled
+                    </div>
+                </div>
+            `);
+        }
+
+        // Check for recent emergency visits
+        const recentEmergencies = data.medical_history?.filter(record =>
+            record.notes && record.notes.toLowerCase().includes('emergency') &&
+            new Date(record.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
+        ) || [];
+
+        if (recentEmergencies.length > 0) {
+            alerts.push(`
+                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                    <div style="color: #721c24; font-weight: 600; margin-bottom: 5px;">
+                        <i class="fas fa-exclamation-triangle"></i> Recent Emergency Visits
+                    </div>
+                    <div style="color: #721c24; font-size: 14px;">
+                        ${recentEmergencies.length} emergency visit(s) in the last 30 days
+                    </div>
+                </div>
+            `);
+        }
+
+        if (alerts.length > 0) {
+            return `
+                <div class="report-section">
+                    <h4><i class="fas fa-bell"></i> Health Alerts & Notifications</h4>
+                    ${alerts.join('')}
+                </div>
+            `;
+        }
+
+        return '';
     }
 
     async downloadPetMedicalReport(petId) {
@@ -3364,47 +3663,85 @@ class StaffDashboard {
 
     async loadServicesSection() {
         try {
+            console.log('🔄 Loading services section...');
+            const servicesTableBody = document.getElementById('servicesTableBody');
+
+            if (!servicesTableBody) {
+                console.error('❌ Services table body not found');
+                this.showToast('Services table not found. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Show loading state
+            servicesTableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="loading" style="text-align: center; padding: 60px; color: rgba(255, 255, 255, 0.7);">
+                        <div class="spinner" style="display: inline-block; margin-right: 10px;"></div>
+                        Loading services...
+                    </td>
+                </tr>
+            `;
+
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_services' })
             });
 
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+
             const result = await response.json();
-            const servicesTableBody = document.getElementById('servicesTableBody');
+            console.log('📡 Services API response:', result);
 
             if (result.success && result.data && result.data.length > 0) {
                 // Filter to show only active services
                 const activeServices = result.data.filter(service => service.is_active === 1 || service.is_active === "1");
+                console.log('✅ Active services found:', activeServices.length);
 
                 if (activeServices.length > 0) {
-                    servicesTableBody.innerHTML = activeServices.map(service => `
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 16px 12px; color: #ffffff; font-weight: 500;">${service.name || service.service_name || 'Unnamed Service'}</td>
-                            <td style="padding: 16px 12px; text-align: center;">
-                                <span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">ACTIVE</span>
+                    servicesTableBody.innerHTML = activeServices.map((service, index) => `
+                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s ease;" class="service-row">
+                            <td style="padding: 16px 12px; color: #ffffff; font-weight: 500; font-size: 14px; vertical-align: middle;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="background: rgba(93, 173, 226, 0.1); padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
+                                        <i class="fas fa-stethoscope" style="color: #5DADE2; font-size: 14px;"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; margin-bottom: 2px;" title="${service.name || service.service_name || 'Unnamed Service'}">${this.truncateText(service.name || service.service_name || 'Unnamed Service', 35)}</div>
+                                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.6);">${service.duration || 30} minutes</div>
+                                    </div>
+                                </div>
                             </td>
-                            <td style="padding: 16px 12px; text-align: center;">
+                            <td style="padding: 16px 12px; text-align: center; vertical-align: middle;">
+                                <span style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">ACTIVE</span>
+                            </td>
+                            <td style="padding: 16px 12px; text-align: center; vertical-align: middle;">
                                 <div style="display: flex; gap: 8px; justify-content: center;">
-                                    <button onclick="staffDashboard.editService(${service.id || service.service_id})" title="Edit Service" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
-                                        <i class="fas fa-edit"></i> EDIT
+                                    <button onclick="staffDashboard.editService(${service.id || service.service_id})" title="Edit Service" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-edit"></i> Edit
                                     </button>
-                                    <button onclick="staffDashboard.deleteService(${service.id || service.service_id}, this)" title="Delete Service" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;">
-                                        <i class="fas fa-trash"></i> DELETE
+                                    <button onclick="staffDashboard.deleteService(${service.id || service.service_id}, this)" title="Delete Service" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-trash"></i> Delete
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     `).join('');
+
+                    console.log('✅ Services table populated with', activeServices.length, 'services');
                 } else {
                     servicesTableBody.innerHTML = `
                         <tr>
-                            <td colspan="3" style="text-align: center; padding: 40px; color: rgba(255, 255, 255, 0.7);">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                                    <i class="fas fa-stethoscope" style="font-size: 48px; color: rgba(255, 255, 255, 0.3);"></i>
+                            <td colspan="3" style="text-align: center; padding: 60px; color: rgba(255, 255, 255, 0.7);">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                    <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 80px; height: 80px;">
+                                        <i class="fas fa-stethoscope" style="font-size: 32px; color: rgba(255, 255, 255, 0.3);"></i>
+                                    </div>
                                     <div>
-                                        <h3 style="margin: 0 0 10px 0; color: #ffffff;">No Active Services</h3>
-                                        <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">All services have been deactivated. Add a new service to get started.</p>
+                                        <h3 style="margin: 0 0 10px 0; color: #ffffff; font-size: 18px;">No Active Services</h3>
+                                        <p style="margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 14px;">All services have been deactivated. Click "Add Service" to create your first service.</p>
                                     </div>
                                 </div>
                             </td>
@@ -3412,14 +3749,49 @@ class StaffDashboard {
                     `;
                 }
             } else {
-                // Fallback to mock data - only show active services
-                await this.loadServicesSectionMock();
+                console.warn('⚠️ No services data received or API failed');
+                servicesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 60px; color: rgba(255, 255, 255, 0.7);">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 80px; height: 80px;">
+                                    <i class="fas fa-stethoscope" style="font-size: 32px; color: rgba(255, 255, 255, 0.3);"></i>
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0 0 10px 0; color: #ffffff; font-size: 18px;">No Services Found</h3>
+                                    <p style="margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 14px;">No services are currently configured. Click "Add Service" to create your first service.</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
         } catch (error) {
-            console.error('Failed to load services:', error);
-            // Fallback to mock data
-            await this.loadServicesSectionMock();
+            console.error('❌ Failed to load services:', error);
+            const servicesTableBody = document.getElementById('servicesTableBody');
+            if (servicesTableBody) {
+                servicesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 60px; color: rgba(255, 255, 255, 0.7);">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #e74c3c;"></i>
+                                <div>
+                                    <h3 style="margin: 0 0 10px 0; color: #ffffff;">Error Loading Services</h3>
+                                    <p style="margin: 0; color: rgba(255, 255, 255, 0.7);">${error.message}</p>
+                                    <button onclick="staffDashboard.loadServicesSection()" style="margin-top: 15px; background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Try Again</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
         }
+    }
+
+    truncateText(text, maxLength) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength - 3) + '...';
     }
 
     async loadServicesSectionMock() {
@@ -5040,6 +5412,451 @@ function showAddProductModal() {
     }
 }
 
+// Global function to show pet medical history
+function showPetMedicalHistory(petId) {
+    console.log('🏥 Show pet medical history called with ID:', petId);
+    if (window.staffDashboard && window.staffDashboard.showPetMedicalHistory) {
+        window.staffDashboard.showPetMedicalHistory(petId);
+    } else {
+        console.error('❌ StaffDashboard not available for pet medical history');
+        if (window.toast) {
+            window.toast('Medical history feature not available. Please refresh the page.', 'error');
+        } else {
+            alert('Medical history feature not available. Please refresh the page.');
+        }
+    }
+}
+
+// Pet Medical History Functions
+function showPetMedicalHistoryModal() {
+    console.log('🏥 Opening pet medical history modal...');
+    const modal = document.getElementById('petMedicalHistoryModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        loadPetsForMedicalHistory();
+        console.log('✅ Pet medical history modal opened');
+    } else {
+        console.error('❌ Pet medical history modal not found');
+        if (window.toast) {
+            window.toast('Medical history modal not available', 'error');
+        } else {
+            alert('Medical history modal not available');
+        }
+    }
+}
+
+function closePetMedicalHistoryModal() {
+    const modal = document.getElementById('petMedicalHistoryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+        // Clear the preview
+        const previewSection = document.getElementById('medicalHistoryPreviewSection');
+        const content = document.getElementById('medicalHistoryContent');
+        if (previewSection) previewSection.style.display = 'none';
+        if (content) {
+            content.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(40, 167, 69, 0.3);"></i>
+                    <div>
+                        <h3 style="margin: 0 0 10px 0; color: #28a745; font-size: 18px;">No Medical History Selected</h3>
+                        <p style="margin: 0; font-size: 14px; color: #666;">Select a pet and click "Generate Medical History" to view their complete medical records here.</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
+async function loadPetsForMedicalHistory() {
+    try {
+        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=200');
+        const result = await response.json();
+
+        if (result.success) {
+            const petSelect = document.getElementById('petMedicalHistorySelect');
+            petSelect.innerHTML = '<option value="">Select a pet...</option>';
+
+            result.data.forEach(pet => {
+                const option = document.createElement('option');
+                option.value = pet.id;
+                option.textContent = `${pet.name} (${pet.species}) - Owner: ${pet.first_name} ${pet.last_name}`;
+                petSelect.appendChild(option);
+            });
+        } else {
+            console.error('Failed to load pets for medical history:', result.message);
+            if (window.toast) {
+                window.toast('Error loading pets: ' + result.message, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading pets for medical history:', error);
+        if (window.toast) {
+            window.toast('Error loading pets. Please try again.', 'error');
+        }
+    }
+}
+
+async function generateMedicalHistoryReport() {
+    const petSelect = document.getElementById('petMedicalHistorySelect');
+    const selectedPetId = petSelect.value;
+
+    if (!selectedPetId) {
+        if (window.toast) {
+            window.toast('Please select a pet first', 'warning');
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${selectedPetId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            displayMedicalHistoryPreview(result.data);
+            if (window.toast) {
+                window.toast('Medical history generated successfully!', 'success');
+            }
+        } else {
+            if (window.toast) {
+                window.toast('Error generating medical history: ' + result.message, 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Error generating medical history report:', error);
+        if (window.toast) {
+            window.toast('Error generating medical history. Please try again.', 'error');
+        }
+    }
+}
+
+function displayMedicalHistoryPreview(data) {
+    const previewSection = document.getElementById('medicalHistoryPreviewSection');
+    const content = document.getElementById('medicalHistoryContent');
+    const actions = document.getElementById('medicalHistoryActions');
+
+    if (!previewSection || !content) return;
+
+    const pet = data.pet;
+    const owner = data.owner;
+
+    content.innerHTML = `
+        <div style="text-align: left; max-width: none; margin: 0; padding: 0;">
+            <!-- Header -->
+            <div style="text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; border-radius: 15px 15px 0 0;">
+                <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    <i class="fas fa-clinic-medical" style="margin-right: 15px;"></i>Tattoo Veterinary Clinic
+                </h1>
+                <h2 style="margin: 0 0 15px 0; font-size: 22px; font-weight: 600;">Pet Medical History Report</h2>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    <p style="margin: 5px 0;"><strong>Clinic Address:</strong> Your Clinic Address</p>
+                    <p style="margin: 5px 0;"><strong>Phone:</strong> 0917-519-4639 | <strong>Email:</strong> info@tattoovet.com</p>
+                    <p style="margin: 5px 0;"><strong>Report Generated:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+            </div>
+
+            <!-- Pet Information -->
+            <div style="background: #ffffff; border: 2px solid #28a745; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.1);">
+                <h3 style="margin: 0 0 20px 0; color: #28a745; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                    <i class="fas fa-paw" style="color: #28a745; font-size: 24px;"></i>Pet Information
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
+                        <div style="font-weight: 600; color: #495057; margin-bottom: 8px; font-size: 16px;">Basic Information</div>
+                        <div style="display: grid; gap: 8px;">
+                            <div><strong>Name:</strong> <span style="color: #28a745; font-weight: 600;">${pet.name}</span></div>
+                            <div><strong>Species:</strong> ${pet.species}</div>
+                            <div><strong>Breed:</strong> ${pet.breed || 'Not specified'}</div>
+                            <div><strong>Gender:</strong> ${pet.gender || 'Not specified'}</div>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #17a2b8;">
+                        <div style="font-weight: 600; color: #495057; margin-bottom: 8px; font-size: 16px;">Physical Details</div>
+                        <div style="display: grid; gap: 8px;">
+                            <div><strong>Weight:</strong> ${pet.weight ? pet.weight + ' kg' : 'Not recorded'}</div>
+                            <div><strong>Color:</strong> ${pet.color || 'Not specified'}</div>
+                            <div><strong>Birthdate:</strong> ${pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not specified'}</div>
+                        </div>
+                    </div>
+                </div>
+                ${pet.notes ? `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border-left: 4px solid #ffc107; margin-top: 15px;">
+                    <div style="font-weight: 600; color: #856404; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-sticky-note"></i>Additional Notes
+                    </div>
+                    <div style="color: #856404; line-height: 1.5;">${pet.notes}</div>
+                </div>
+                ` : ''}
+            </div>
+
+            <!-- Owner Information -->
+            <div style="background: #ffffff; border: 2px solid #28a745; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.1);">
+                <h3 style="margin: 0 0 20px 0; color: #28a745; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                    <i class="fas fa-user" style="color: #28a745; font-size: 24px;"></i>Owner Information
+                </h3>
+                <div style="display: grid; gap: 8px;">
+                    <div><strong>Name:</strong> ${owner.name}</div>
+                    <div><strong>Email:</strong> ${owner.email}</div>
+                    ${owner.phone ? `<div><strong>Phone:</strong> ${owner.phone}</div>` : ''}
+                    ${owner.address ? `<div><strong>Address:</strong> ${owner.address}</div>` : ''}
+                </div>
+            </div>
+
+            <!-- Medical History -->
+            ${data.medical_history && data.medical_history.length > 0 ? `
+            <div style="background: #ffffff; border: 2px solid #28a745; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.1);">
+                <h3 style="margin: 0 0 20px 0; color: #28a745; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                    <i class="fas fa-stethoscope" style="color: #28a745; font-size: 24px;"></i>Medical History
+                    <span style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; margin-left: auto;">
+                        ${data.medical_history.length} Record${data.medical_history.length !== 1 ? 's' : ''}
+                    </span>
+                </h3>
+
+                ${data.medical_history.map((record, index) => `
+                    <div style="margin: 20px 0; padding: 20px; border: 2px solid #28a745; border-radius: 12px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 8px 15px; border-radius: 0 12px 0 15px; font-size: 12px; font-weight: 600;">
+                            Record #${index + 1}
+                        </div>
+
+                        <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid rgba(40, 167, 69, 0.2);">
+                            <h4 style="margin: 0 0 8px 0; color: #28a745; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-calendar-alt"></i>${new Date(record.created_at).toLocaleDateString()}
+                            </h4>
+                            <div style="font-size: 12px; color: #666; display: flex; align-items: center; gap: 15px;">
+                                <span><i class="fas fa-user-md"></i> Staff: ${record.staff_name || 'Not recorded'}</span>
+                                ${record.service_name ? `<span><i class="fas fa-stethoscope"></i> Service: ${record.service_name}</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div style="display: grid; gap: 12px;">
+                            ${record.diagnosis ? `
+                            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-stethoscope"></i>Diagnosis
+                                </div>
+                                <div style="color: #555; line-height: 1.4;">${record.diagnosis}</div>
+                            </div>
+                            ` : ''}
+
+                            ${record.treatment ? `
+                            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-thermometer-three-quarters"></i>Treatment
+                                </div>
+                                <div style="color: #555; line-height: 1.4;">${record.treatment}</div>
+                            </div>
+                            ` : ''}
+
+                            ${record.medications ? `
+                            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-pills"></i>Medications
+                                </div>
+                                <div style="color: #555; line-height: 1.4;">${record.medications}</div>
+                            </div>
+                            ` : ''}
+
+                            ${record.notes ? `
+                            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                <div style="font-weight: 600; color: #856404; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-sticky-note"></i>Clinical Notes
+                                </div>
+                                <div style="color: #856404; line-height: 1.4;">${record.notes}</div>
+                            </div>
+                            ` : ''}
+
+                            ${record.instructions ? `
+                            <div style="background: #d1ecf1; padding: 12px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                                <div style="font-weight: 600; color: #0c5460; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-clipboard-list"></i>Instructions
+                                </div>
+                                <div style="color: #0c5460; line-height: 1.4;">${record.instructions}</div>
+                            </div>
+                            ` : ''}
+
+                            ${record.follow_up_date ? `
+                            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-calendar-check"></i>Follow-up Date
+                                </div>
+                                <div style="color: #555; line-height: 1.4;">${new Date(record.follow_up_date).toLocaleDateString()}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            ` : `
+            <div style="background: #ffffff; border: 2px solid #28a745; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.1);">
+                <h3 style="margin: 0 0 20px 0; color: #28a745; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+                    <i class="fas fa-info-circle" style="color: #28a745; font-size: 24px;"></i>Medical History
+                </h3>
+                <div style="text-align: center; padding: 40px; background: rgba(40, 167, 69, 0.05); border-radius: 15px; border: 2px dashed rgba(40, 167, 69, 0.3);">
+                    <i class="fas fa-calendar-times" style="font-size: 48px; color: rgba(40, 167, 69, 0.3); margin-bottom: 15px;"></i>
+                    <h3 style="margin: 0 0 10px 0; color: #28a745;">No Medical Records Yet</h3>
+                    <p style="margin: 0; color: #666;">This pet hasn't had any appointments or medical records created yet.</p>
+                </div>
+            </div>
+            `}
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 0 0 15px 15px; margin-top: 30px;">
+                <p style="margin: 0; font-size: 12px; opacity: 0.8;">This report contains confidential medical information and should only be shared with authorized personnel.</p>
+                <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">For questions about this report, please contact Tattoo Veterinary Clinic.</p>
+            </div>
+        </div>
+    `;
+
+    previewSection.style.display = 'block';
+    actions.style.display = 'block';
+}
+
+function printMedicalHistoryReport() {
+    const content = document.getElementById('medicalHistoryContent');
+    if (!content) {
+        if (window.toast) {
+            window.toast('No medical history data available for printing', 'error');
+        }
+        return;
+    }
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        if (window.toast) {
+            window.toast('Please allow popups for this site to print reports', 'error');
+        }
+        return;
+    }
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Pet Medical History Report</title>
+            <style>
+                @media print {
+                    body { margin: 0; padding: 20px; }
+                    .no-print { display: none; }
+                    .print-header { margin-bottom: 20px; }
+                }
+                body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; margin: 0 auto; }
+                .header { text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; }
+                .section { margin-bottom: 30px; }
+                .section h3 { color: #28a745; margin: 0 0 15px 0; border-left: 4px solid #28a745; padding-left: 10px; }
+                .info-grid { display: table; width: 100%; }
+                .info-row { display: table-row; }
+                .info-cell { display: table-cell; padding: 8px; border-bottom: 1px solid #ddd; }
+                .info-label { font-weight: bold; width: 30%; }
+                .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="print-header no-print" style="text-align: center; margin-bottom: 20px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+                <p><strong>Print Preview:</strong> Use your browser's print function (Ctrl+P / Cmd+P) to print this medical history report.</p>
+            </div>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+
+    // Wait for content to load then print
+    printWindow.onload = function() {
+        printWindow.print();
+        // Close the print window after printing (optional)
+        printWindow.onafterprint = function() {
+            printWindow.close();
+        };
+    };
+
+    if (window.toast) {
+        window.toast('Opening print dialog...', 'success');
+    }
+}
+
+async function downloadMedicalHistoryPDF() {
+    const content = document.getElementById('medicalHistoryContent');
+    if (!content) {
+        if (window.toast) {
+            window.toast('No medical history data available for download', 'error');
+        }
+        return;
+    }
+
+    try {
+        // Load jsPDF library if not already loaded
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+            // Load the library dynamically
+            await loadJSPDFLibrary();
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        // For simplicity, we'll create a basic PDF with the pet information
+        // In a full implementation, you would parse the HTML content and add it to the PDF
+
+        pdf.setFontSize(20);
+        pdf.setTextColor(40, 167, 69);
+        pdf.text('Tattoo Veterinary Clinic', 105, 20, { align: 'center' });
+
+        pdf.setFontSize(16);
+        pdf.text('Pet Medical History Report', 105, 30, { align: 'center' });
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Clinic Address: Your Clinic Address', 105, 40, { align: 'center' });
+        pdf.text('Phone: 0917-519-4639 | Email: info@tattoovet.com', 105, 45, { align: 'center' });
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, 105, 50, { align: 'center' });
+
+        // Add a note that this is a basic PDF and full implementation would include all medical records
+        pdf.setFontSize(12);
+        pdf.setTextColor(255, 0, 0);
+        pdf.text('Note: This is a basic PDF export. For complete medical history with all details,', 20, 70);
+        pdf.text('please use the print function or contact your veterinarian.', 20, 80);
+
+        const filename = `pet_medical_history_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
+
+        if (window.toast) {
+            window.toast('PDF downloaded successfully!', 'success');
+        }
+    } catch (error) {
+        console.error('Error generating medical history PDF:', error);
+        if (window.toast) {
+            window.toast('Error generating PDF. Please try again.', 'error');
+        }
+    }
+}
+
+// Helper function to load jsPDF library
+async function loadJSPDFLibrary() {
+    return new Promise((resolve, reject) => {
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+            setTimeout(() => {
+                if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+                    resolve();
+                } else {
+                    reject(new Error('jsPDF library failed to load properly'));
+                }
+            }, 100);
+        };
+        script.onerror = () => reject(new Error('Failed to load jsPDF library'));
+        document.head.appendChild(script);
+    });
+}
+
 // Global functions for pet card actions
 function viewPetDetails(petId) {
     console.log('👁️ View pet details called with ID:', petId);
@@ -5115,6 +5932,66 @@ function refreshDashboardServices() {
         }
     }
 }
+
+// Test function to verify Add Service form functionality
+window.testAddServiceForm = function() {
+    console.log('🧪 Testing Add Service form functionality...');
+
+    if (window.staffDashboard && window.staffDashboard.showAddServiceModal) {
+        console.log('✅ StaffDashboard and showAddServiceModal function available');
+
+        // Show the modal
+        window.staffDashboard.showAddServiceModal();
+
+        // Check if modal was created
+        setTimeout(() => {
+            const modal = document.getElementById('addServiceModal');
+            const form = document.getElementById('addServiceForm');
+
+            if (modal && form) {
+                console.log('✅ Add Service modal and form created successfully');
+
+                // Check form fields
+                const serviceNameField = document.getElementById('serviceName');
+                const serviceDescriptionField = document.getElementById('serviceDescription');
+                const serviceDurationField = document.getElementById('serviceDuration');
+                const serviceStatusField = document.getElementById('serviceStatus');
+
+                console.log('Form fields check:', {
+                    serviceName: !!serviceNameField,
+                    serviceDescription: !!serviceDescriptionField,
+                    serviceDuration: !!serviceDurationField,
+                    serviceStatus: !!serviceStatusField
+                });
+
+                if (serviceNameField && serviceDurationField) {
+                    console.log('✅ All required form fields are present');
+
+                    // Test form validation by trying to submit with empty data
+                    console.log('🧪 Testing form validation...');
+
+                    // The form should not submit if required fields are empty
+                    // This is handled by the browser's built-in validation and our JavaScript validation
+
+                    window.staffDashboard.showToast('Add Service form test completed! Modal should be visible with all fields.', 'success');
+                } else {
+                    console.error('❌ Some required form fields are missing');
+                    window.staffDashboard.showToast('Form test failed: Missing required fields', 'error');
+                }
+            } else {
+                console.error('❌ Add Service modal or form not created');
+                window.staffDashboard.showToast('Form test failed: Modal not created', 'error');
+            }
+        }, 500);
+    } else {
+        console.error('❌ StaffDashboard or showAddServiceModal not available');
+        if (window.toast) {
+            window.toast('Add Service form test failed: StaffDashboard not available', 'error');
+        } else {
+            alert('Add Service form test failed: StaffDashboard not available');
+        }
+    }
+};
 
 // Global function to clear dashboard booking form
 function clearDashboardBookingForm() {

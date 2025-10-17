@@ -323,12 +323,115 @@
   @keyframes cardEntrance {
     from {
       opacity: 0;
-      transform: translateY(30px) scale(0.95);
+      transform: translateY(50px) scale(0.9) rotateX(-10deg);
+      filter: blur(10px);
+    }
+    60% {
+      opacity: 0.8;
+      transform: translateY(-10px) scale(1.02) rotateX(2deg);
+      filter: blur(2px);
     }
     to {
       opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0deg);
+      filter: blur(0);
+    }
+  }
+  
+  /* Enhanced Card Hover Effects */
+  @keyframes cardFloat {
+    0%, 100% {
+      transform: translateY(0px) rotateZ(0deg);
+    }
+    25% {
+      transform: translateY(-8px) rotateZ(1deg);
+    }
+    50% {
+      transform: translateY(-15px) rotateZ(0deg);
+    }
+    75% {
+      transform: translateY(-8px) rotateZ(-1deg);
+    }
+  }
+  
+  @keyframes advancedGlow {
+    0%, 100% {
+      box-shadow:
+        0 0 20px rgba(74, 144, 226, 0.3),
+        0 0 40px rgba(74, 144, 226, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    50% {
+      box-shadow:
+        0 0 30px rgba(74, 144, 226, 0.5),
+        0 0 60px rgba(74, 144, 226, 0.25),
+        0 0 90px rgba(74, 144, 226, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+  }
+  
+  /* Enhanced Dashboard Card Styles */
+  .dashboard-card {
+    animation: cardEntrance 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.8s ease;
+    opacity: 0;
+  }
+  
+  .dashboard-card:hover::before {
+    animation: shimmer 2s ease-in-out;
+    opacity: 1;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow:
+      0 15px 35px rgba(74, 144, 226, 0.2),
+      0 5px 15px rgba(74, 144, 226, 0.1);
+    animation: advancedGlow 2s ease-in-out infinite;
+  }
+  
+  /* Enhanced Loading States */
+  @keyframes pulseLoader {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.7;
+    }
+  }
+  
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(100px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
       transform: translateY(0) scale(1);
     }
+  }
+  
+  .loading-card {
+    animation: pulseLoader 2s ease-in-out infinite;
+  }
+  
+  .content-entrance {
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   /* Enhanced focus states for accessibility */
@@ -2854,13 +2957,15 @@
     box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4) !important;
   }
 
-  /* Medical History Modal Styles */
+  /* Enhanced Medical History Modal Styles */
   .appointment-info-card {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
     border-left: 4px solid #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    animation: slideInFromLeft 0.6s ease-out;
   }
 
   .appointment-info-card h3 {
@@ -2880,17 +2985,147 @@
   .appointment-info-card .info-row {
     display: flex;
     align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  }
+
+  .appointment-info-card .info-row:last-child {
+    border-bottom: none;
   }
 
   .appointment-info-card .info-label {
     font-weight: 600;
-    color: #555;
+    color: #667eea;
     min-width: 100px;
+    font-size: 14px;
   }
 
   .appointment-info-card .info-value {
     color: #333;
     flex: 1;
+    font-weight: 500;
+  }
+
+  /* Enhanced Medical Records Styling */
+  .medical-record {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .medical-record::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .medical-record:hover::before {
+    left: 100%;
+  }
+
+  .medical-record:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+  }
+
+  /* Medical Summary Cards */
+  .medical-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .summary-card:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .summary-number {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .summary-label {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  /* Vaccination Records Styling */
+  .vaccination-record {
+    background: #e8f5e8;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .vaccination-record:hover {
+    background: #d4edda;
+    transform: translateX(5px);
+  }
+
+  .vac-date {
+    font-weight: 600;
+    color: #28a745;
+  }
+
+  .vac-details {
+    text-align: right;
+    font-size: 14px;
+    color: #333;
+  }
+
+  /* Health Alerts Styling */
+  .health-alert {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .alert-critical {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+  }
+
+  .alert-warning {
+    background: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+  }
+
+  .alert-info {
+    background: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
   }
 
   /* Medical History Form Styles */

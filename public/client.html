@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="../assets/css/enhanced-style.css">
   <link rel="stylesheet" href="../assets/css/modern-dashboard.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- SMTPJS for email sending -->
+  <script src="https://smtpjs.com/v3/smtp.js"></script>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -157,6 +159,45 @@
       background: rgba(231, 76, 60, 0.3);
     }
 
+    /* Notification Badge for Mobile Menu Toggle */
+    .mobile-menu-toggle {
+      position: relative;
+    }
+
+    .mobile-menu-toggle .notification-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+      animation: pulse 2s infinite;
+      z-index: 10;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+      }
+    }
+
     /* Pulse animation for Book New button highlight */
     @keyframes highlightPulse {
       0% {
@@ -234,6 +275,165 @@
       font-size: 12px;
       font-style: italic;
     }
+
+    /* Medical Report Styles */
+    .medical-report-container {
+      max-width: 100%;
+    }
+
+    .report-section {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+    }
+
+    .report-section h3 {
+      color: #333;
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .report-section h3 i {
+      color: #667eea;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .info-item {
+      display: flex;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .info-item .label {
+      font-weight: 600;
+      color: #555;
+      min-width: 80px;
+    }
+
+    .info-item .value {
+      color: #333;
+    }
+
+    .medical-record {
+      background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    }
+
+    .record-header {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .record-header h4 {
+      margin: 0 0 8px 0;
+      color: #667eea;
+      font-size: 16px;
+    }
+
+    .record-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .record-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .record-details {
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-item {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .detail-content {
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .records-count {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background: rgba(102, 126, 234, 0.05);
+      border-radius: 12px;
+      border: 2px dashed rgba(102, 126, 234, 0.3);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      color: rgba(102, 126, 234, 0.3);
+      margin-bottom: 16px;
+    }
+
+    .empty-state h4 {
+      margin: 0 0 8px 0;
+      color: #667eea;
+      font-size: 18px;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .no-history {
+      border-left-color: #ffc107;
+    }
+
+    .no-history h3 i {
+      color: #ffc107;
+    }
   </style>
    </head>
 <body>
@@ -263,9 +463,6 @@
         </a>
         <a href="#pets" class="nav-item" data-section="pets">
           <i class="fas fa-paw"></i> <span>My Pets</span>
-        </a>
-        <a href="#orders" class="nav-item" data-section="orders">
-          <i class="fas fa-shopping-bag"></i> <span>My Orders</span>
         </a>
         <a href="#reports" class="nav-item" data-section="reports">
           <i class="fas fa-file-pdf"></i> <span>Pet Reports</span>
@@ -304,11 +501,6 @@
               <input type="text" placeholder="Search for pet products, services..." />
             </div>
 
-            <!-- Cart Icon -->
-            <div class="cart-icon" id="cartIcon" onclick="viewCart()" style="display: none;">
-              <i class="fas fa-shopping-cart"></i>
-              <span class="cart-count">0</span>
-            </div>
 
             <!-- Back to Home Button -->
             <button class="home-btn" onclick="window.location.href='../index.html'" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px;">
@@ -423,6 +615,7 @@
           </div>
         </section>
 
+
         <!-- Add Pet Modal for Client - Simplified -->
         <div id="clientAddPetModal" class="modal" style="display: none;">
           <div class="modal-content" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
@@ -500,75 +693,98 @@
           </div>
         </div>
 
-        <!-- Store Section -->
-        <section id="storeSection" class="content-section" style="display: none;">
-          <div class="section-header">
-            <h2 class="section-title">
-              <i class="fas fa-store"></i> Pet Store
-            </h2>
-          </div>
-          <div id="clientProductsGrid" class="products-grid">
-            <div class="loading">
-              <div class="spinner"></div>
-              Loading products...
-            </div>
-          </div>
-        </section>
 
 
-        <section id="ordersSection" class="content-section" style="display: none;">
-          <div class="section-header">
-            <h2 class="section-title">
-              <i class="fas fa-shopping-bag"></i> My Orders
-            </h2>
-          </div>
-          <div id="ordersContent" class="loading">
-            <div class="spinner"></div>
-            Loading orders...
-          </div>
-        </section>
 
+        <!-- Reports Section -->
         <section id="reportsSection" class="content-section" style="display: none;">
-          <div class="section-header">
-            <h2 class="section-title">
-              <i class="fas fa-file-pdf"></i> Pet Reports
-            </h2>
-          </div>
+            <div class="section-header">
+              <h2 class="section-title">
+                <i class="fas fa-file-pdf"></i> Pet Medical Reports
+              </h2>
+            </div>
 
-          <!-- Pet Selection -->
-          <div class="reports-container">
-            <div class="reports-card">
-              <div class="card-header">
-                <h3><i class="fas fa-paw"></i> Select Pet for Report</h3>
-              </div>
-              <div class="reports-form">
-                <div class="form-group">
-                  <label for="petSelect">Choose a Pet:</label>
-                  <select id="petSelect" class="form-control">
-                    <option value="">Select a pet...</option>
+            <!-- Pet Reports Interface -->
+            <div class="pet-reports-container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+              <!-- Select Pet Section -->
+              <div class="pet-select-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; margin-bottom: 30px; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
+                <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transform: translate(-50px, 50px);"></div>
+
+                <div class="section-title" style="color: #ffffff; font-size: 24px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2;">
+                  <i class="fas fa-stethoscope" style="color: #ffffff; font-size: 28px;"></i>
+                  Select Pet for Medical Report
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px; position: relative; z-index: 2;">
+                  <label for="petSelect" style="color: #ffffff; font-size: 16px; margin-bottom: 10px; display: block; font-weight: 600;">Choose a Pet:</label>
+                  <select id="petSelect" style="width: 100%; padding: 15px 20px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 12px; background: rgba(255, 255, 255, 0.95); color: #333; font-size: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                    <option value="">Loading pets...</option>
                   </select>
                 </div>
-                <div class="form-actions">
-                  <button id="generateReportBtn" class="btn-primary" onclick="generatePetReport()" disabled>
-                    <i class="fas fa-file-pdf"></i> Generate Report
+
+                <div class="form-actions" style="text-align: center; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 2;">
+                  <button id="loadPetsBtn" class="header-btn" onclick="loadPetsDropdown()" style="background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid rgba(255, 255, 255, 0.4); padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
+                    <i class="fas fa-sync-alt"></i> Load Pets
+                  </button>
+                  <button id="generateReportBtn" class="header-btn" onclick="generatePetReport()" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);">
+                    <i class="fas fa-file-medical"></i> Generate Medical Report
+                  </button>
+                  <button onclick="downloadSimplePDFReport()" id="pdfDownloadBtn" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(220, 53, 69, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(220, 53, 69, 0.4)'">
+                    <i class="fas fa-download"></i> Download PDF
                   </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Report Preview -->
-            <div id="reportPreview" class="reports-card hidden">
-              <div class="card-header">
-                <h3><i class="fas fa-eye"></i> Report Preview</h3>
+              <!-- Report Preview Section -->
+              <div class="report-preview-section" style="background: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border: 2px solid rgba(102, 126, 234, 0.1); position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2, #667eea);"></div>
+
+                <div class="section-title" style="color: #333; font-size: 22px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+                  <i class="fas fa-eye" style="color: #667eea; font-size: 24px;"></i>
+                  Medical Report Preview
+                </div>
+
+                <div id="reportPreview" class="report-preview-content" style="min-height: 300px; padding: 40px; text-align: center; color: #999; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px dashed #dee2e6; transition: all 0.3s ease;">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <i class="fas fa-file-medical" style="font-size: 64px; color: rgba(102, 126, 234, 0.3);"></i>
+                    <div>
+                      <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 20px;">No Report Selected</h3>
+                      <p style="margin: 0; font-size: 16px; color: #666;">Select a pet and click "Generate Medical Report" to view their complete medical history here.</p>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(40, 167, 69, 0.1); border-radius: 10px; border: 1px solid rgba(40, 167, 69, 0.2); max-width: 400px;">
+                      <p style="margin: 0; font-size: 14px; color: #28a745; text-align: center;">
+                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                        <strong>PDF Download Available:</strong> After generating a report, you'll see a prominent download button to save your pet's medical report as a PDF file.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div id="reportContent" class="report-preview">
-                <div class="loading">
-                  <div class="spinner"></div>
-                  Loading report preview...
+
+              <!-- Quick Stats Section (shown after report generation) -->
+              <div id="reportStats" class="report-stats-section" style="display: none; margin-top: 30px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 30px; color: white;">
+                  <h3 style="margin: 0 0 20px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-bar"></i> Medical Summary
+                  </h3>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                    <div style="text-align: center;">
+                      <div id="totalVisits" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">0</div>
+                      <div style="font-size: 14px; opacity: 0.9;">Total Visits</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <div id="totalVaccinations" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">0</div>
+                      <div style="font-size: 14px; opacity: 0.9;">Vaccinations</div>
+                    </div>
+                    <div style="text-align: center;">
+                      <div id="lastVisit" style="font-size: 32px; font-weight: 800; margin-bottom: 5px;">-</div>
+                      <div style="font-size: 14px; opacity: 0.9;">Last Visit</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
         </section>
 
         <section id="settingsSection" class="content-section" style="display: none;">
@@ -642,6 +858,37 @@
                   </button>
                 </div>
               </form>
+            </div>
+
+            <!-- Email Verification Settings -->
+            <div class="settings-card" style="background: #08355f; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div class="card-header" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="color: #ffffff; margin: 0; display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-envelope" style="color: #5DADE2;"></i> Email Verification
+                </h3>
+              </div>
+              <div class="email-verification-section" style="margin-bottom: 20px;">
+                <div id="emailVerificationStatus" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background: rgba(255, 255, 255, 0.1);">
+                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-spinner fa-spin" style="color: #ffd700;"></i>
+                    <span style="color: #ffffff; font-weight: 500;">Checking verification status...</span>
+                  </div>
+                </div>
+                <div class="verification-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <button id="verifyEmailBtn" onclick="verifyUserEmail()" class="btn-primary" style="background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-check-circle"></i> Verify Email Address
+                  </button>
+                  <button id="resendVerificationBtn" onclick="resendVerificationEmail()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-paper-plane"></i> Resend Verification
+                  </button>
+                </div>
+                <div class="verification-info" style="margin-top: 15px; padding: 12px; background: rgba(255, 215, 0, 0.1); border-radius: 6px; border-left: 3px solid #ffd700;">
+                  <p style="color: rgba(255, 255, 255, 0.9); font-size: 13px; margin: 0; line-height: 1.4;">
+                    <strong style="color: #ffd700;">Why verify your email?</strong><br>
+                    Email verification enhances your account security and enables password reset functionality. It's optional but recommended for the best experience.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <!-- Profile Picture Settings -->
@@ -912,8 +1159,8 @@
 
   <!-- Dashboard JavaScript -->
   <script src="../assets/js/dashboard.js"></script>
-  <script src="../assets/js/client-dashboard.js"></script>
   <script src="../assets/js/modules/notifications.js"></script>
+  <script src="../assets/js/client-dashboard.js"></script>
 <script>
   // Mobile sidebar toggle functionality
   function toggleClientMobileSidebar() {
@@ -1062,8 +1309,6 @@
           initializeReportsSection();
         } else if (sectionName === 'settings') {
           loadClientSettingsData();
-        } else if (sectionName === 'orders') {
-          loadOrders();
         } else if (sectionName === 'logout') {
           handleLogout();
           return;
@@ -1081,8 +1326,8 @@
         'dashboard': '<i class="fas fa-paw"></i> Welcome to Your Dashboard',
         'appointments': '<i class="fas fa-calendar-alt"></i> My Appointments',
         'pets': '<i class="fas fa-paw"></i> My Pets',
-        'store': '<i class="fas fa-store"></i> Store',
-        'orders': '<i class="fas fa-shopping-bag"></i> My Orders',
+        'reports': '<i class="fas fa-file-pdf"></i> Pet Reports',
+        'store': '<i class="fas fa-store"></i> Pet Store',
         'settings': '<i class="fas fa-cog"></i> Settings'
       };
 
@@ -1690,13 +1935,9 @@
         loadClientDashboardData();
       }
 
-      // Load orders if we're on the orders section
-      if (document.getElementById('ordersSection') && !document.getElementById('ordersSection').classList.contains('hidden')) {
-        loadOrders();
-      }
+      // Initialize notification badge
+      updateNotificationBadge();
 
-      // Add event delegation for order action buttons
-      setupOrderEventDelegation();
     });
 
     // Load client dashboard data
@@ -1765,49 +2006,6 @@
       }
     }
 
-    // Setup event delegation for order action buttons
-    function setupOrderEventDelegation() {
-      document.addEventListener('click', function(event) {
-        // Handle cancel order buttons
-        if (event.target.matches('.cancel-order-btn') || event.target.closest('.cancel-order-btn')) {
-          event.preventDefault();
-          const button = event.target.matches('.cancel-order-btn') ? event.target : event.target.closest('.cancel-order-btn');
-          const orderCard = button.closest('.order-card');
-          if (orderCard) {
-            const orderId = parseInt(orderCard.querySelector('.order-info h3').textContent.replace('Order #', ''));
-            if (orderId) {
-              cancelOrderEnhanced(orderId);
-            }
-          }
-        }
-
-        // Handle buy again buttons
-        if (event.target.matches('.buy-now-order') || event.target.closest('.buy-now-order')) {
-          event.preventDefault();
-          const button = event.target.matches('.buy-now-order') ? event.target : event.target.closest('.buy-now-order');
-          const orderCard = button.closest('.order-card');
-          if (orderCard) {
-            const orderId = parseInt(orderCard.querySelector('.order-info h3').textContent.replace('Order #', ''));
-            if (orderId) {
-              buyAgain(orderId);
-            }
-          }
-        }
-
-        // Handle view details buttons
-        if (event.target.matches('.btn-secondary') && event.target.textContent.includes('View Details')) {
-          event.preventDefault();
-          const button = event.target;
-          const orderCard = button.closest('.order-card');
-          if (orderCard) {
-            const orderId = parseInt(orderCard.querySelector('.order-info h3').textContent.replace('Order #', ''));
-            if (orderId) {
-              viewOrderDetails(orderId);
-            }
-          }
-        }
-      });
-    }
 
     // Profile Form Submission Functionality for Client Dashboard
     function setupProfileForm() {
@@ -1902,9 +2100,176 @@
               };
             }
           }
+
+          // Update email verification status
+          updateEmailVerificationStatus(user);
         }
       } catch (error) {
         console.error('Failed to load client settings data:', error);
+      }
+    }
+
+    // Update email verification status display
+    function updateEmailVerificationStatus(user) {
+      const statusDiv = document.getElementById('emailVerificationStatus');
+      const verifyBtn = document.getElementById('verifyEmailBtn');
+      const resendBtn = document.getElementById('resendVerificationBtn');
+
+      if (!statusDiv) return;
+
+      // Check if user has verification token (not verified)
+      if (user.email_verification_token && !user.email_verified_at) {
+        // User has token but not verified
+        statusDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-clock" style="color: #ffc107;"></i>
+            <span style="color: #ffffff; font-weight: 500;">Email verification pending</span>
+          </div>
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: 13px; margin: 0;">
+            A verification email has been sent to <strong>${user.email}</strong>.
+            Please check your inbox and click the verification link.
+          </p>
+        `;
+
+        if (verifyBtn) verifyBtn.style.display = 'none';
+        if (resendBtn) resendBtn.style.display = 'flex';
+      } else if (user.email_verified_at) {
+        // User is verified
+        const verifiedDate = new Date(user.email_verified_at).toLocaleDateString();
+        statusDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+            <span style="color: #ffffff; font-weight: 500;">Email verified</span>
+          </div>
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: 13px; margin: 0;">
+            Your email address has been verified on <strong>${verifiedDate}</strong>.
+            You now have enhanced account security and password reset capabilities.
+          </p>
+        `;
+
+        if (verifyBtn) verifyBtn.style.display = 'none';
+        if (resendBtn) resendBtn.style.display = 'none';
+      } else {
+        // User not verified and no token
+        statusDiv.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-info-circle" style="color: #17a2b8;"></i>
+            <span style="color: #ffffff; font-weight: 500;">Email not verified</span>
+          </div>
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: 13px; margin: 0;">
+            Verify your email address for enhanced security and password reset functionality.
+            This is optional but recommended.
+          </p>
+        `;
+
+        if (verifyBtn) verifyBtn.style.display = 'flex';
+        if (resendBtn) resendBtn.style.display = 'none';
+      }
+    }
+
+    // Verify user email function
+    async function verifyUserEmail() {
+      const verifyBtn = document.getElementById('verifyEmailBtn');
+      const resendBtn = document.getElementById('resendVerificationBtn');
+
+      if (verifyBtn) {
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        verifyBtn.disabled = true;
+      }
+
+      try {
+        // Get current user info
+        const userResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_user_info' })
+        });
+
+        const userResult = await userResponse.json();
+
+        if (userResult.success && userResult.data && userResult.data.user) {
+          const user = userResult.data.user;
+
+          // Send verification email using SMTPJS
+          if (typeof emailService !== 'undefined') {
+            const emailResult = await emailService.sendVerificationEmail(user.email, user.first_name, 'new_verification');
+
+            if (emailResult.success) {
+              showToast('Verification email sent successfully! Please check your inbox.', 'success');
+
+              // Update status display
+              updateEmailVerificationStatus(user);
+
+              // Update button states
+              if (verifyBtn) verifyBtn.style.display = 'none';
+              if (resendBtn) resendBtn.style.display = 'flex';
+            } else {
+              showToast('Email configuration may need setup. Please contact support if you continue having issues.', 'warning');
+            }
+          } else {
+            showToast('Email service not available. Please contact support for assistance.', 'error');
+          }
+        } else {
+          showToast('Unable to get user information. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error sending verification email:', error);
+        showToast('Error sending verification email. Please try again.', 'error');
+      } finally {
+        // Restore button state
+        if (verifyBtn) {
+          verifyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verify Email Address';
+          verifyBtn.disabled = false;
+        }
+      }
+    }
+
+    // Resend verification email function
+    async function resendVerificationEmail() {
+      const resendBtn = document.getElementById('resendVerificationBtn');
+
+      if (resendBtn) {
+        resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        resendBtn.disabled = true;
+      }
+
+      try {
+        // Get current user info
+        const userResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_user_info' })
+        });
+
+        const userResult = await userResponse.json();
+
+        if (userResult.success && userResult.data && userResult.data.user) {
+          const user = userResult.data.user;
+
+          // Send verification email using SMTPJS
+          if (typeof emailService !== 'undefined') {
+            const emailResult = await emailService.sendVerificationEmail(user.email, user.first_name, 'resend_verification');
+
+            if (emailResult.success) {
+              showToast('Verification email sent successfully! Please check your inbox.', 'success');
+            } else {
+              showToast('Email configuration may need setup. Please contact support if you continue having issues.', 'warning');
+            }
+          } else {
+            showToast('Email service not available. Please contact support for assistance.', 'error');
+          }
+        } else {
+          showToast('Unable to get user information. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error resending verification email:', error);
+        showToast('Error resending verification email. Please try again.', 'error');
+      } finally {
+        // Restore button state
+        if (resendBtn) {
+          resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Resend Verification';
+          resendBtn.disabled = false;
+        }
       }
     }
 
@@ -2123,745 +2488,301 @@
       }
     });
 
-    // Orders functionality
-    async function loadOrders() {
-      const ordersContent = document.getElementById('ordersContent');
-      if (!ordersContent) return;
 
-      try {
-        ordersContent.innerHTML = '<div class="loading"><div class="spinner"></div>Loading orders...</div>';
 
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'get_orders' })
-        });
 
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
 
-        const result = await response.json();
 
-        if (result.success && result.data) {
-          console.log('Orders loaded successfully:', result.data);
-          let orders = result.data;
-          if (!Array.isArray(orders)) {
-            orders = orders ? [orders] : [];
-          }
-          if (orders.length > 0) {
-            // Store orders globally for buyAgain function
-            window.currentOrders = orders;
-            displayOrders(orders);
-          } else {
-            console.log('No orders found');
-            window.currentOrders = [];
-            ordersContent.innerHTML = `
-              <div class="empty-state full-width">
-                <i class="fas fa-shopping-bag"></i>
-                <h3>No Orders Yet</h3>
-                <p>You haven't placed any orders yet. Browse our store to get started!</p>
-                <button class="btn-primary" onclick="showSection('store')">
-                  <i class="fas fa-store"></i> Browse Store
-                </button>
-              </div>
-            `;
-          }
-        } else {
-          console.log('No orders found or API error:', result);
-          window.currentOrders = [];
-          ordersContent.innerHTML = `
-            <div class="empty-state full-width">
-              <i class="fas fa-shopping-bag"></i>
-              <h3>No Orders Yet</h3>
-              <p>You haven't placed any orders yet. Browse our store to get started!</p>
-              <button class="btn-primary" onclick="showSection('store')">
-                <i class="fas fa-store"></i> Browse Store
-              </button>
-            </div>
-          `;
-        }
-      } catch (error) {
-        console.error('Error loading orders:', error);
-        window.currentOrders = [];
-        ordersContent.innerHTML = `
-          <div class="error-state full-width">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>Failed to load orders. Please try again later.</p>
-            <button class="btn-secondary" onclick="loadOrders()">Retry</button>
-          </div>
-        `;
-      }
-    }
 
-    function displayOrders(orders) {
-      const ordersContent = document.getElementById('ordersContent');
-      if (!ordersContent) return;
 
-      // Create orders HTML
-      let ordersHtml = '';
-      if (orders && orders.length > 0) {
-        ordersHtml = `
-          <div class="orders-grid">
-            ${orders.map(order => createOrderCard(order)).join('')}
-          </div>
-        `;
-      } else {
-        ordersHtml = `
-          <div class="empty-state full-width">
-            <i class="fas fa-shopping-bag"></i>
-            <h3>No Orders Yet</h3>
-            <p>You haven't placed any orders yet. Browse our store to get started!</p>
-            <button class="btn-primary" onclick="showSection('store')">
-              <i class="fas fa-store"></i> Browse Store
-            </button>
-          </div>
-        `;
-      }
 
-      // Always include the static button
-      ordersContent.innerHTML = `
-        ${ordersHtml}
-        <!-- Quick Actions Section - Blue Theme -->
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 24px; margin: 24px 0; border-radius: 12px; border: 1px solid #e1e5e9; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <h3 style="color: #667eea; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
-            <i class="fas fa-shopping-cart"></i> Quick Actions
-          </h3>
-          <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <button onclick="handleQuickBuyNow()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <i class="fas fa-credit-card"></i> Buy Now
-            </button>
-            <button onclick="handleQuickCancelOrder()" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <i class="fas fa-times"></i> Cancel Order
-            </button>
-            <button onclick="handleQuickViewDetails()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-          </div>
-        </div>
-      `;
-    }
 
-    function createOrderCard(order) {
-      const orderDate = new Date(order.order_date).toLocaleDateString();
-      const orderTime = new Date(order.order_date).toLocaleTimeString();
-
-      // Format payment method display
-      const paymentMethodDisplay = {
-        'gcash': 'GCash',
-        'bank': 'Bank Transfer',
-        'cash_on_visit': 'Cash on Visit'
-      };
-
-      const paymentMethod = paymentMethodDisplay[order.payment_method] || order.payment_method;
-
-      // Add cancel button for pending orders only
-      const status = (order.status || '').toLowerCase();
-      const canCancel = status === 'pending';
-      const cancelButton = canCancel ? `
-        <button class="cancel-order-btn" onclick="cancelOrder(${order.id})" title="Cancel this order">
-          <i class="fas fa-times"></i> Cancel Order
-        </button>
-      ` : '';
-
-      // Add Buy Again button for completed orders
-      const canBuyAgain = status === 'completed';
-      const buyAgainButton = canBuyAgain ? `
-        <button class="buy-now-order" onclick="buyAgain(${order.id})" title="Buy these items again">
-          <i class="fas fa-shopping-cart"></i> Buy Again
-        </button>
-      ` : '';
-
-      // Add Pay Now button for pending and confirmed orders
-      const canPay = status === 'pending' || status === 'confirmed';
-      const payNowButton = canPay ? `
-        <button class="buy-now-order" onclick="alert('Pay Now for order ${order.id}')" title="Complete payment for this order">
-          <i class="fas fa-credit-card"></i> Pay Now
-        </button>
-      ` : '';
-
-      // Add Reorder button for cancelled orders
-      const canReorder = status === 'cancelled';
-      const reorderButton = canReorder ? `
-        <button class="buy-now-order" onclick="buyAgain(${order.id})" title="Reorder this item">
-          <i class="fas fa-shopping-cart"></i> Reorder
-        </button>
-      ` : '';
-
-      return `
-        <div class="order-card" style="position: relative; z-index: 1;">
-          <div class="order-header">
-            <div class="order-info">
-              <h3>Order #${order.id}</h3>
-              <p class="order-date">${orderDate} at ${orderTime}</p>
-              <p class="payment-method">
-                <i class="fas fa-credit-card"></i>
-                ${paymentMethod}
-              </p>
-            </div>
-            <div class="order-status status-${order.status.toLowerCase()}">
-              ${order.status}
-            </div>
-          </div>
-          <div class="order-items">
-            ${(order.items || []).map(item => `
-              <div class="order-item">
-                <div class="item-info">
-                  <h4>${item.name}</h4>
-                  <p style="color: #333; font-weight: 500;">Quantity: ${item.quantity} × ₱${parseFloat(item.price).toFixed(2)}</p>
-                </div>
-                <div class="item-price">
-                  ₱${(item.price * item.quantity).toFixed(2)}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="order-actions" style="display: flex !important; visibility: visible !important;">
-            <div class="left-actions">
-              ${cancelButton}
-            </div>
-            <div class="right-actions">
-              <button class="btn-secondary" onclick="viewOrderDetails(${order.id})">
-                <i class="fas fa-eye"></i> View Details
-              </button>
-            </div>
-          </div>
-          <div class="order-total" style="display: flex !important; visibility: visible !important;">
-            <div class="total-with-button">
-              <span class="total-amount">Total: ₱${parseFloat(order.total_amount).toFixed(2)}</span>
-            </div>
-            ${buyAgainButton}
-            ${payNowButton}
-            ${reorderButton}
-          </div>
-        </div>
-      `;
-    }
-
-    function buyAgain(orderId) {
-      // Find the order by ID
-      const order = window.currentOrders?.find(o => o.id === orderId);
-      if (!order) {
-        showToast('Order not found', 'error');
-        return;
-      }
-
-      // Convert order items to cart format
-      const cartItems = order.items.map(item => ({
-        id: item.product_id,
-        name: item.name,
-        price: parseFloat(item.price),
-        quantity: item.quantity
-      }));
-
-      // Calculate total
-      const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-      // Create order data for payment processing
-      const orderData = {
-        items: cartItems,
-        total: total
-      };
-
-      // Show payment modal using the dashboard instance
-      if (window.dashboardInstance) {
-        window.dashboardInstance.showPaymentModalForCart(orderData);
-      } else {
-        // Fallback if dashboard instance is not available
-        showToast('Payment system is loading. Please try again in a moment.', 'info');
-      }
-    }
-
-    function viewOrderDetails(orderId) {
-      // Create order details modal
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `
-        <div class="modal-content" style="max-width: 600px;">
-          <div class="modal-header">
-            <h3><i class="fas fa-shopping-bag"></i> Order Details</h3>
-            <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
-          </div>
-          <div class="modal-body">
-            <p>Order details functionality will be implemented here.</p>
-            <p>Order ID: ${orderId}</p>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(modal);
-      modal.style.display = 'block';
-    }
-
-    async function cancelOrder(orderId) {
-      if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
-        return;
-      }
-
-      try {
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'cancel_order',
-            order_id: orderId
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success) {
-          showToast('Order cancelled successfully!', 'success');
-          // Reload orders to reflect the changes
-          loadOrders();
-        } else {
-          showToast(result.message || 'Failed to cancel order', 'error');
-        }
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        showToast('Error cancelling order. Please try again later.', 'error');
-      }
-    }
-
-    // Enhanced cancel order function with better error handling
-    async function cancelOrderEnhanced(orderId) {
-      // Find the order to get more details
-      const order = window.currentOrders?.find(o => o.id === orderId);
-      if (!order) {
-        showToast('Order not found', 'error');
-        return;
-      }
-
-      // Check if order can be cancelled
-      if (order.status.toLowerCase() !== 'pending') {
-        showToast('Only pending orders can be cancelled', 'error');
-        return;
-      }
-
-      if (!confirm(`Are you sure you want to cancel Order #${orderId}? This action cannot be undone.`)) {
-        return;
-      }
-
-      try {
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'cancel_order',
-            order_id: orderId
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success) {
-          showToast('Order cancelled successfully!', 'success');
-          // Reload orders to reflect the changes
-          loadOrders();
-        } else {
-          showToast(result.message || 'Failed to cancel order', 'error');
-        }
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        showToast('Error cancelling order. Please try again later.', 'error');
-      }
-    }
-
-    // Handler functions for quick actions
-    function handleQuickBuyNow() {
-      if (window.dashboardInstance) {
-        // Show store section to allow user to add items to cart
-        showSection('store');
-        showToast('Browse our store and add items to your cart!', 'info');
-      } else {
-        showToast('Store is loading. Please try again in a moment.', 'info');
-      }
-    }
-
-    function handleQuickCancelOrder() {
-      showToast('Please select an order to cancel from the orders list above.', 'info');
-    }
-
-    function handleQuickViewDetails() {
-      showToast('Please select an order to view details from the orders list above.', 'info');
-    }
-
-    // Test function to force load orders
-    function testOrderLoading() {
-      console.log('Testing order loading...');
-
-      // Clear the orders content
-      const ordersContent = document.getElementById('ordersContent');
-      if (!ordersContent) {
-        console.error('Orders content element not found!');
-        return;
-      }
-
-      // Create a test order manually
-      const testOrder = {
-        id: 999,
-        order_date: new Date().toISOString(),
-        payment_method: 'test',
-        status: 'pending',
-        total_amount: 999.99,
-        items: [{
-          name: 'Test Product',
-          quantity: 1,
-          price: 999.99,
-          product_id: 1
-        }]
-      };
-
-      console.log('Creating test order:', testOrder);
-
-      // Use displayOrders function to ensure button is included
-      displayOrders([testOrder]);
-
-      console.log('Test order created successfully!');
-    }
-
-    // Client Reports functionality
+    // Global variables for pet reports
     let currentReportData = null;
+    let selectedPetId = null;
 
-    // Load pets for report selection
-    async function loadPetsForReports() {
-      const petSelect = document.getElementById('petSelect');
-      if (!petSelect) return;
+    // Load pets for the dropdown when reports section is shown
+    async function loadPetsDropdown() {
+      console.log('🔄 loadPetsDropdown called');
 
       try {
-        const response = await fetch('../api/vet_api.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'get_pets' })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
+        console.log('📡 Fetching pets from API...');
+        const response = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=100');
+        console.log('📡 Response status:', response.status);
 
         const result = await response.json();
+        console.log('📊 API result:', result);
 
-        if (result.success && result.data && Array.isArray(result.data)) {
-          // Clear existing options except the first one
-          petSelect.innerHTML = '<option value="">Select a pet...</option>';
+        if (result.success) {
+          console.log('✅ API success, found', result.data.length, 'pets');
+          const petSelect = document.getElementById('petSelect');
 
-          if (result.data.length === 0) {
-            petSelect.innerHTML += '<option value="" disabled>No pets available - Please add a pet first</option>';
-            document.getElementById('generateReportBtn').disabled = true;
-          } else {
-            // Add pet options
-            result.data.forEach(pet => {
-              const option = document.createElement('option');
-              option.value = pet.id;
-              option.textContent = `${pet.name} (${pet.species} - ${pet.breed || 'Mixed'})`;
-              petSelect.appendChild(option);
-            });
-            document.getElementById('generateReportBtn').disabled = false;
+          if (!petSelect) {
+            console.error('❌ Pet select element not found!');
+            showToast('Pet select element not found!', 'error');
+            return;
           }
+
+          console.log('✅ Pet select element found, clearing...');
+          petSelect.innerHTML = '<option value="">Select a pet...</option>';
+          console.log('📝 Cleared select, now adding', result.data.length, 'options');
+
+          result.data.forEach((pet, index) => {
+            console.log(`➕ Adding pet ${index + 1}:`, pet.name, 'ID:', pet.id);
+            const option = document.createElement('option');
+            option.value = pet.id;
+            option.textContent = `${pet.name} (${pet.species}) - Owner: ${pet.first_name} ${pet.last_name}`;
+            console.log('📝 Created option:', option.value, option.textContent);
+
+            const appendResult = petSelect.appendChild(option);
+            console.log('✅ Appended option:', appendResult);
+          });
+
+          console.log('✅ Final select options count:', petSelect.options.length);
+          console.log('✅ Pet dropdown populated successfully');
+
+          // Show success message
+          showToast(`Loaded ${result.data.length} pets successfully!`, 'success');
         } else {
-          const errorMessage = result.message || 'Failed to load pets';
-          console.error('API Error:', errorMessage);
-          petSelect.innerHTML += '<option value="" disabled>Error loading pets</option>';
-          document.getElementById('generateReportBtn').disabled = true;
+          console.error('❌ API failed:', result.message);
+          showToast('Failed to load pets: ' + result.message, 'error');
         }
       } catch (error) {
-        console.error('Error loading pets:', error);
-        petSelect.innerHTML += '<option value="" disabled>Error loading pets</option>';
-        document.getElementById('generateReportBtn').disabled = true;
+        console.error('❌ Error loading pets:', error);
+        showToast('Error loading pets: ' + error.message, 'error');
       }
     }
 
     // Generate pet report
     async function generatePetReport() {
       const petSelect = document.getElementById('petSelect');
-      const reportPreview = document.getElementById('reportPreview');
-      const reportContent = document.getElementById('reportContent');
-      const generateBtn = document.getElementById('generateReportBtn');
+      if (!petSelect) {
+        console.error('Pet select element not found');
+        if (typeof toast === 'function') {
+          toast('Report form not loaded properly. Please refresh the page.', 'error');
+        } else {
+          alert('Report form not loaded properly. Please refresh the page.');
+        }
+        return;
+      }
 
-      const petId = petSelect.value;
-      if (!petId) {
-        showToast('Please select a pet first', 'error');
+      const selectedPetId = petSelect.value;
+
+      if (!selectedPetId) {
+        if (typeof toast === 'function') {
+          toast('Please select a pet first', 'warning');
+        } else if (window.clientDashboard) {
+          window.clientDashboard.showToast('Please select a pet first', 'warning');
+        } else {
+          alert('Please select a pet first');
+        }
         return;
       }
 
       try {
-        // Disable button and show loading
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-        reportPreview.classList.remove('hidden');
-        reportContent.innerHTML = '<div class="loading"><div class="spinner"></div>Loading report...</div>';
-
-        const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${petId}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-
+        const response = await fetch(`../api/pet_reports_api.php?action=get_pet_report&pet_id=${selectedPetId}`);
         const result = await response.json();
 
-        if (result.success && result.data) {
+        if (result.success) {
           currentReportData = result.data;
-          displayReportPreview(result.data);
+          console.log('📋 Report data received:', result.data);
+          console.log('🏥 Medical history records:', result.data.medical_history ? result.data.medical_history.length : 0);
+          displaySimpleReportPreview(result.data);
+          if (typeof toast === 'function') {
+            toast('Report generated successfully!', 'success');
+          } else if (window.clientDashboard) {
+            window.clientDashboard.showToast('Report generated successfully!', 'success');
+          } else {
+            alert('Report generated successfully!');
+          }
         } else {
-          const errorMessage = result.message || 'Failed to generate report';
-          console.error('API Error:', errorMessage);
-          reportContent.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to generate report: ${errorMessage}</p></div>`;
+          if (typeof toast === 'function') {
+            toast('Error generating report: ' + result.message, 'error');
+          } else if (window.clientDashboard) {
+            window.clientDashboard.showToast('Error generating report: ' + result.message, 'error');
+          } else {
+            alert('Error generating report: ' + result.message);
+          }
         }
       } catch (error) {
         console.error('Error generating report:', error);
-        reportContent.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error generating report. Please try again later.</p></div>';
-      } finally {
-        // Re-enable button
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Generate Report';
+        if (typeof toast === 'function') {
+          toast('Error generating report. Please try again.', 'error');
+        } else if (window.clientDashboard) {
+          window.clientDashboard.showToast('Error generating report. Please try again.', 'error');
+        } else {
+          alert('Error generating report. Please try again.');
+        }
       }
     }
 
-    // Display report preview
-    function displayReportPreview(data) {
-      const reportContent = document.getElementById('reportContent');
-      if (!reportContent) return;
+    // Display simple report preview
+    function displaySimpleReportPreview(data) {
+      const reportPreview = document.getElementById('reportPreview');
+
+      if (!reportPreview) return;
 
       const pet = data.pet;
       const owner = data.owner;
-      const statistics = data.statistics;
 
-      const reportHtml = `
-        <h1><i class="fas fa-file-medical"></i> Pet Medical Report</h1>
+      console.log('✅ Report displayed for pet:', pet.name);
 
-        <div class="statistics">
-          <div class="stat-item">
-            <div class="stat-value">${statistics.total_appointments}</div>
-            <div class="stat-label">Total Appointments</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">${statistics.total_vaccinations}</div>
-            <div class="stat-label">Vaccinations</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">${statistics.last_visit ? new Date(statistics.last_visit).toLocaleDateString() : 'None'}</div>
-            <div class="stat-label">Last Visit</div>
-          </div>
-        </div>
-
-        <h2><i class="fas fa-paw"></i> Pet Information</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Name</div>
-            <div class="info-value">${pet.name}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Species</div>
-            <div class="info-value">${pet.species}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Breed</div>
-            <div class="info-value">${pet.breed || 'Not specified'}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Age</div>
-            <div class="info-value">${pet.age}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Gender</div>
-            <div class="info-value">${pet.gender}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Weight</div>
-            <div class="info-value">${pet.weight}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Color</div>
-            <div class="info-value">${pet.color || 'Not specified'}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Registration Date</div>
-            <div class="info-value">${new Date(pet.registration_date).toLocaleDateString()}</div>
-          </div>
-        </div>
-
-        ${pet.notes ? `
-        <div class="info-item" style="grid-column: 1 / -1;">
-          <div class="info-label">Notes</div>
-          <div class="info-value">${pet.notes}</div>
-        </div>
-        ` : ''}
-
-        <h2><i class="fas fa-user"></i> Owner Information</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Name</div>
-            <div class="info-value">${owner.name}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Email</div>
-            <div class="info-value">${owner.email}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Phone</div>
-            <div class="info-value">${owner.phone || 'Not provided'}</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Address</div>
-            <div class="info-value">${owner.address || 'Not provided'}</div>
-          </div>
-        </div>
-
-        <h2><i class="fas fa-stethoscope"></i> Medical History</h2>
-        ${data.medical_history && data.medical_history.length > 0 ? `
-        <div class="section">
-          <div style="margin-bottom: 20px; text-align: center;">
-            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
-              <i class="fas fa-file-medical"></i> Total Records: ${data.medical_history.length}
-            </span>
+      reportPreview.innerHTML = `
+        <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-paw" style="color: #667eea;"></i>
+              Pet Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${pet.name}</div>
+              <div><strong>Species:</strong> ${pet.species}</div>
+              <div><strong>Breed:</strong> ${pet.breed || 'Not specified'}</div>
+              <div><strong>Gender:</strong> ${pet.gender || 'Not specified'}</div>
+              ${pet.weight ? `<div><strong>Weight:</strong> ${pet.weight} kg</div>` : ''}
+              ${pet.color ? `<div><strong>Color:</strong> ${pet.color}</div>` : ''}
+            </div>
           </div>
 
-          <div class="medical-details">
-            ${data.medical_history.map((record, index) => `
-              <div class="medical-record" style="margin: 25px 0; padding: 25px; border: 2px solid #667eea; border-radius: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15); position: relative; overflow: hidden;">
-                <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 15px; border-radius: 0 15px 0 15px; font-size: 12px; font-weight: 600;">
-                  #${index + 1}
-                </div>
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-user" style="color: #667eea;"></i>
+              Owner Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${owner.name}</div>
+              <div><strong>Email:</strong> ${owner.email}</div>
+              ${owner.phone ? `<div><strong>Phone:</strong> ${owner.phone}</div>` : ''}
+              ${owner.address ? `<div><strong>Address:</strong> ${owner.address}</div>` : ''}
+            </div>
+          </div>
 
-                <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e1e5e9;">
-                  <h4 style="margin: 0 0 10px 0; color: #667eea; font-size: 20px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-file-medical"></i> Medical Record
-                  </h4>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div style="display: flex; align-items: center; gap: 15px; color: #666;">
-                      <div><i class="fas fa-calendar"></i> <strong>Date:</strong> ${new Date(record.created_at).toLocaleDateString()}</div>
-                      <div><i class="fas fa-user-md"></i> <strong>Staff:</strong> ${record.staff_name || 'Not recorded'}</div>
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-chart-bar" style="color: #667eea;"></i>
+              Statistics
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Total Appointments:</strong> ${data.statistics.total_appointments}</div>
+              <div><strong>Total Vaccinations:</strong> ${data.statistics.total_vaccinations}</div>
+              <div><strong>Last Visit:</strong> ${data.statistics.last_visit ? new Date(data.statistics.last_visit).toLocaleDateString() : 'Never'}</div>
+              <div><strong>Report Generated:</strong> ${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+
+          ${data.medical_history && data.medical_history.length > 0 ? `
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-stethoscope" style="color: #667eea;"></i>
+              Medical History
+            </h3>
+            <div style="margin-bottom: 20px; text-align: center;">
+              <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                <i class="fas fa-file-medical"></i> Total Records: ${data.medical_history.length}
+              </span>
+            </div>
+
+            <div class="medical-details">
+              ${data.medical_history.slice(0, 3).map((record, index) => `
+                <div style="margin: 15px 0; padding: 15px; border: 2px solid #667eea; border-radius: 10px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);">
+                  <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e1e5e9;">
+                    <h5 style="margin: 0 0 8px 0; color: #667eea; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                      <i class="fas fa-file-medical"></i> Medical Record #${index + 1}
+                    </h5>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 12px; color: #666;">
+                      <div><i class="fas fa-calendar"></i> ${new Date(record.created_at).toLocaleDateString()}</div>
+                      <div><i class="fas fa-user-md"></i> ${record.staff_name || 'Not recorded'}</div>
                     </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                    <div style="background: #ffffff; padding: 10px; border-radius: 8px; border-left: 4px solid #667eea;">
+                      <div style="font-weight: bold; color: #333; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-stethoscope"></i> Diagnosis
+                      </div>
+                      <div style="color: #555; line-height: 1.4;">${record.diagnosis ? record.diagnosis.replace(/\n/g, '<br>') : 'Not specified'}</div>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 10px; border-radius: 8px; border-left: 4px solid #28a745;">
+                      <div style="font-weight: bold; color: #333; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-thermometer-three-quarters"></i> Treatment
+                      </div>
+                      <div style="color: #555; line-height: 1.4;">${record.treatment ? record.treatment.replace(/\n/g, '<br>') : 'Not specified'}</div>
+                    </div>
+
+                    <div style="background: #ffffff; padding: 10px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                      <div style="font-weight: bold; color: #333; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-pills"></i> Medications
+                      </div>
+                      <div style="color: #555; line-height: 1.4;">${record.medications ? record.medications.replace(/\n/g, '<br>') : 'None prescribed'}</div>
+                    </div>
+
+                    ${record.follow_up_date ? `
+                    <div style="background: #ffffff; padding: 10px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                      <div style="font-weight: bold; color: #333; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-calendar-check"></i> Follow-up Date
+                      </div>
+                      <div style="color: #555; line-height: 1.4;">${new Date(record.follow_up_date).toLocaleDateString()}</div>
+                    </div>
+                    ` : ''}
+
+                    ${record.notes ? `
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                      <div style="font-weight: bold; color: #856404; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-sticky-note"></i> Clinical Notes
+                      </div>
+                      <div style="color: #856404; line-height: 1.4;">${record.notes.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    ` : ''}
+
+                    ${record.instructions ? `
+                    <div style="background: #d1ecf1; padding: 10px; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                      <div style="font-weight: bold; color: #0c5460; margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-clipboard-list"></i> Instructions
+                      </div>
+                      <div style="color: #0c5460; line-height: 1.4;">${record.instructions.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    ` : ''}
                   </div>
                 </div>
+              `).join('')}
 
-                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                  <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-stethoscope"></i> Diagnosis
-                    </div>
-                    <div style="color: #555; line-height: 1.6; padding-left: 25px;">${record.diagnosis ? record.diagnosis.replace(/\n/g, '<br>') : 'Not specified'}</div>
-                  </div>
-
-                  <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #28a745; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-thermometer-three-quarters"></i> Treatment
-                    </div>
-                    <div style="color: #555; line-height: 1.6; padding-left: 25px;">${record.treatment ? record.treatment.replace(/\n/g, '<br>') : 'Not specified'}</div>
-                  </div>
-
-                  <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #ffc107; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-pills"></i> Medications
-                    </div>
-                    <div style="color: #555; line-height: 1.6; padding-left: 25px;">${record.medications ? record.medications.replace(/\n/g, '<br>') : 'None prescribed'}</div>
-                  </div>
-
-                  ${record.follow_up_date ? `
-                  <div style="background: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #dc3545; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-calendar-check"></i> Follow-up Date
-                    </div>
-                    <div style="color: #555; line-height: 1.6; padding-left: 25px;">${new Date(record.follow_up_date).toLocaleDateString()}</div>
-                  </div>
-                  ` : ''}
-
-                  ${record.notes ? `
-                  <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border-left: 5px solid #ffc107; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-sticky-note"></i> Clinical Notes
-                    </div>
-                    <div style="color: #856404; line-height: 1.6; padding-left: 25px;">${record.notes.replace(/\n/g, '<br>')}</div>
-                  </div>
-                  ` : ''}
-
-                  ${record.instructions ? `
-                  <div style="background: #d1ecf1; padding: 15px; border-radius: 10px; border-left: 5px solid #17a2b8; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-weight: bold; color: #0c5460; margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                      <i class="fas fa-clipboard-list"></i> Instructions
-                    </div>
-                    <div style="color: #0c5460; line-height: 1.6; padding-left: 25px;">${record.instructions.replace(/\n/g, '<br>')}</div>
-                  </div>
-                  ` : ''}
-                </div>
+              ${data.medical_history.length > 3 ? `
+              <div style="text-align: center; margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #667eea;">
+                <i class="fas fa-ellipsis-h" style="color: #667eea; font-size: 18px; margin-bottom: 8px;"></i>
+                <p style="margin: 0; color: #667eea; font-weight: 600; font-size: 12px;">... and ${data.medical_history.length - 3} more medical records available in full report</p>
               </div>
-            `).join('')}
+              ` : ''}
+            </div>
           </div>
-        </div>
-        ` : '<div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;"><i class="fas fa-file-medical" style="font-size: 48px; color: #667eea; margin-bottom: 15px;"></i><p style="color: #666; font-style: italic; font-size: 16px;">No medical history available for this pet</p></div>'}
+          ` : ''}
 
-        <h2><i class="fas fa-calendar-alt"></i> Appointment History</h2>
-        ${data.appointments && data.appointments.length > 0 ? `
-        <table class="appointment-table">
-          <thead>
-            <tr>
-              <th>Date & Time</th>
-              <th>Service</th>
-              <th>Staff</th>
-              <th>Status</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.appointments.map(appointment => `
-              <tr>
-                <td>${new Date(appointment.appointment_date).toLocaleDateString()}<br><small>${new Date(appointment.appointment_time).toLocaleTimeString()}</small></td>
-                <td>${appointment.service_name}</td>
-                <td>${appointment.staff_first_name && appointment.staff_last_name ? `${appointment.staff_first_name} ${appointment.staff_last_name}` : 'Not assigned'}</td>
-                <td>${appointment.status}</td>
-                <td>${appointment.notes || 'No notes'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <p><strong>Total Appointments:</strong> ${data.appointments.length}</p>
-        ` : '<p>No appointment history available</p>'}
-
-        <div style="margin-top: 40px; padding: 20px; background: #e9ecef; border-radius: 8px; text-align: center;">
-          <button onclick="downloadPetReport()" class="action-btn view" title="Print Report">
-            <i class="fas fa-print"></i> Print Report
-          </button>
-          <p style="margin-top: 10px; font-size: 12px; color: #666;">
-            Generated on ${new Date().toLocaleString()}
-          </p>
         </div>
       `;
-
-      reportContent.innerHTML = reportHtml;
     }
 
-    // Download pet report as PDF
-    async function downloadPetReport() {
+    // Download simple PDF report
+    async function downloadSimplePDFReport() {
       if (!currentReportData) {
-        showToast('No report data available', 'error');
+        showToast('No report data available. Please generate a report first.', 'error');
         return;
       }
 
-      try {
-        showToast('Generating PDF...', 'info');
+      console.log('🔄 Starting PDF generation...');
+      console.log('📋 Current report data:', currentReportData);
+      console.log('🏥 Medical history in report:', currentReportData.medical_history);
 
-        // Load jsPDF library if not already loaded
-        if (typeof window.jspdf === 'undefined') {
-          await loadJSPDFLibrary();
+      try {
+        // Show loading state
+        const downloadBtn = document.getElementById('pdfDownloadBtn');
+        if (downloadBtn) {
+          downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+          downloadBtn.disabled = true;
         }
 
-        // Wait a bit for library to initialize
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Check if jsPDF is available
+        // Load jsPDF library dynamically if not already loaded
         if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-          throw new Error('PDF library not available');
+          await loadJSPDFLibrary();
         }
 
         const { jsPDF } = window.jspdf;
@@ -2870,53 +2791,61 @@
         const pet = currentReportData.pet;
         const owner = currentReportData.owner;
 
-        // Add title
+        // Header
         pdf.setFontSize(20);
-        pdf.text('Pet Medical Report', 105, 20, { align: 'center' });
+        pdf.setTextColor(40, 40, 40);
+        pdf.text('Tattoo Veterinary Clinic', 105, 20, { align: 'center' });
+
+        pdf.setFontSize(16);
+        pdf.text('Pet Medical Report', 105, 30, { align: 'center' });
 
         // Clinic info
-        pdf.setFontSize(12);
-        pdf.text('Tattoo Veterinary Clinic', 105, 35, { align: 'center' });
-        pdf.text('Your Clinic Address | Phone: 0917-519-4639', 105, 42, { align: 'center' });
-        pdf.text(`Generated: ${new Date().toLocaleString()}`, 105, 49, { align: 'center' });
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Clinic Address: Your Clinic Address', 105, 40, { align: 'center' });
+        pdf.text('Phone: 0917-519-4639 | Email: info@tattoovet.com', 105, 45, { align: 'center' });
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, 105, 50, { align: 'center' });
 
         let yPosition = 65;
 
         // Pet Information
-        pdf.setFontSize(16);
+        pdf.setFontSize(14);
+        pdf.setTextColor(40, 40, 40);
         pdf.text('Pet Information', 20, yPosition);
         yPosition += 10;
 
-        pdf.setFontSize(11);
+        pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
         const petInfo = [
           ['Name:', pet.name],
           ['Species:', pet.species],
           ['Breed:', pet.breed || 'Not specified'],
-          ['Age:', pet.age],
-          ['Gender:', pet.gender],
-          ['Weight:', pet.weight],
-          ['Color:', pet.color || 'Not specified'],
-          ['Registration Date:', new Date(pet.registration_date).toLocaleDateString()]
+          ['Birthdate:', pet.birthdate ? new Date(pet.birthdate).toLocaleDateString() : 'Not specified'],
+          ['Gender:', pet.gender || 'Not specified'],
+          ['Weight:', pet.weight ? `${pet.weight} kg` : 'Weight not recorded'],
+          ['Color:', pet.color || 'Not specified']
         ];
+
+        if (pet.notes) {
+          petInfo.push(['Notes:', pet.notes]);
+        }
 
         petInfo.forEach(([label, value]) => {
           pdf.text(`${label} ${value}`, 20, yPosition);
-          yPosition += 7;
+          yPosition += 6;
         });
 
-        if (pet.notes) {
-          yPosition += 5;
-          pdf.text(`Notes: ${pet.notes}`, 20, yPosition);
-          yPosition += 7;
-        }
-
         // Owner Information
-        yPosition += 10;
-        pdf.setFontSize(16);
+        yPosition += 5;
+        pdf.setFontSize(14);
+        pdf.setTextColor(40, 40, 40);
         pdf.text('Owner Information', 20, yPosition);
         yPosition += 10;
 
-        pdf.setFontSize(11);
+        pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
         const ownerInfo = [
           ['Name:', owner.name],
           ['Email:', owner.email],
@@ -2926,257 +2855,134 @@
 
         ownerInfo.forEach(([label, value]) => {
           pdf.text(`${label} ${value}`, 20, yPosition);
-          yPosition += 7;
+          yPosition += 6;
         });
 
-        // Medical History
+        // Statistics
+        yPosition += 5;
+        pdf.setFontSize(14);
+        pdf.setTextColor(40, 40, 40);
+        pdf.text('Statistics', 20, yPosition);
+        yPosition += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+
+        const stats = [
+          ['Total Appointments:', currentReportData.statistics.total_appointments.toString()],
+          ['Total Vaccinations:', currentReportData.statistics.total_vaccinations.toString()],
+          ['Last Visit:', currentReportData.statistics.last_visit ? new Date(currentReportData.statistics.last_visit).toLocaleDateString() : 'Never']
+        ];
+
+        stats.forEach(([label, value]) => {
+          pdf.text(`${label} ${value}`, 20, yPosition);
+          yPosition += 6;
+        });
+
+        // Footer
+        pdf.setFontSize(8);
+        pdf.text(`Report generated: ${new Date().toLocaleString()}`, 20, 280);
+        pdf.text('This report contains confidential medical information.', 20, 285);
+
+        // Add Medical History to PDF
+        let medicalYPosition = 280;
+        console.log('📋 Adding medical history to PDF...');
+        console.log('🏥 Records to add:', currentReportData.medical_history ? currentReportData.medical_history.length : 0);
+
         if (currentReportData.medical_history && currentReportData.medical_history.length > 0) {
-          // Check if we need a new page for medical history
-          if (yPosition > 200) {
-            pdf.addPage();
-            yPosition = 20;
-          }
+          console.log('✅ Medical history found, adding to PDF');
+          pdf.setFontSize(14);
+          pdf.setTextColor(40, 40, 40);
+          pdf.text('Medical History', 20, medicalYPosition);
+          medicalYPosition += 15;
 
-          pdf.setFontSize(16);
-          pdf.setTextColor(102, 126, 234);
-          pdf.text('Medical History', 20, yPosition);
-          pdf.setTextColor(0, 0, 0);
-          yPosition += 15;
-
-          pdf.setFontSize(10);
-          let recordCount = 0;
-          const maxRecordsPerPage = 3; // Limit to 3 records per page to prevent overflow
-
-          for (const record of currentReportData.medical_history) {
-            recordCount++;
-
+          currentReportData.medical_history.forEach((record, index) => {
             // Check if we need a new page
-            if (yPosition > 220 || recordCount > maxRecordsPerPage) {
+            if (medicalYPosition > 250) {
               pdf.addPage();
-              yPosition = 20;
-              recordCount = 1;
+              medicalYPosition = 30;
             }
 
-            // Record header with better spacing
-            pdf.setFontSize(11);
-            pdf.setFont(undefined, 'bold');
-            pdf.text(`${recordCount}. ${new Date(record.created_at).toLocaleDateString()}`, 20, yPosition);
-            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setTextColor(60, 60, 60);
 
-            // Staff info
-            pdf.setFontSize(8);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text(`   Staff: ${record.staff_name || 'Not recorded'}`, 20, yPosition);
-            pdf.setTextColor(0, 0, 0);
-            yPosition += 8;
+            // Record header
+            pdf.setFontSize(12);
+            pdf.setTextColor(40, 40, 40);
+            const recordTitle = `Visit #${index + 1} - ${new Date(record.created_at).toLocaleDateString()}`;
+            pdf.text(recordTitle, 20, medicalYPosition);
+            medicalYPosition += 10;
 
-            // Diagnosis with proper text wrapping
+            // Record details
             pdf.setFontSize(9);
-            pdf.setFont(undefined, 'normal');
-            const diagnosisText = record.diagnosis || 'No diagnosis recorded';
-            const diagnosisLines = pdf.splitTextToSize(`   Diagnosis: ${diagnosisText}`, 165);
-            pdf.text(diagnosisLines, 20, yPosition);
-            yPosition += (diagnosisLines.length * 5) + 5;
+            pdf.setTextColor(80, 80, 80);
 
-            // Treatment with proper text wrapping
+            if (record.diagnosis) {
+              pdf.text(`Diagnosis: ${record.diagnosis}`, 25, medicalYPosition);
+              medicalYPosition += 8;
+            }
+
             if (record.treatment) {
-              const treatmentText = record.treatment;
-              const treatmentLines = pdf.splitTextToSize(`   Treatment: ${treatmentText}`, 165);
-              pdf.text(treatmentLines, 20, yPosition);
-              yPosition += (treatmentLines.length * 5) + 5;
+              pdf.text(`Treatment: ${record.treatment}`, 25, medicalYPosition);
+              medicalYPosition += 8;
             }
 
-            // Medications with proper text wrapping
             if (record.medications) {
-              const medicationText = record.medications;
-              const medicationLines = pdf.splitTextToSize(`   Medications: ${medicationText}`, 165);
-              pdf.text(medicationLines, 20, yPosition);
-              yPosition += (medicationLines.length * 5) + 5;
+              pdf.text(`Medications: ${record.medications}`, 25, medicalYPosition);
+              medicalYPosition += 8;
             }
 
-            // Notes with proper text wrapping
-            if (record.notes) {
-              const notesText = record.notes;
-              const notesLines = pdf.splitTextToSize(`   Notes: ${notesText}`, 165);
-              pdf.text(notesLines, 20, yPosition);
-              yPosition += (notesLines.length * 5) + 5;
+            if (record.staff_name) {
+              pdf.text(`Veterinarian: ${record.staff_name}`, 25, medicalYPosition);
+              medicalYPosition += 8;
             }
 
-            // Instructions with proper text wrapping
-            if (record.instructions) {
-              const instructionsText = record.instructions;
-              const instructionsLines = pdf.splitTextToSize(`   Instructions: ${instructionsText}`, 165);
-              pdf.text(instructionsLines, 20, yPosition);
-              yPosition += (instructionsLines.length * 5) + 5;
-            }
-
-            // Follow-up date
-            if (record.follow_up_date) {
-              pdf.text(`   Follow-up: ${new Date(record.follow_up_date).toLocaleDateString()}`, 20, yPosition);
-              yPosition += 8;
-            }
-
-            // Add space between records
-            yPosition += 10;
-
-            // Safety check - if we're getting close to the bottom, start a new page
-            if (yPosition > 240) {
-              pdf.addPage();
-              yPosition = 20;
-            }
-          }
-
-          // Add note if there are more records than we displayed
-          if (currentReportData.medical_history.length > (maxRecordsPerPage * Math.ceil(currentReportData.medical_history.length / maxRecordsPerPage))) {
-            yPosition += 5;
-            pdf.setFontSize(9);
-            pdf.setTextColor(100, 100, 100);
-            const remainingRecords = currentReportData.medical_history.length - (maxRecordsPerPage * Math.ceil(currentReportData.medical_history.length / maxRecordsPerPage));
-            pdf.text(`... and ${remainingRecords} more medical records (continued on next page)`, 20, yPosition);
-            pdf.setTextColor(0, 0, 0);
-            yPosition += 10;
-          }
-        }
-
-        // Appointment History
-        if (currentReportData.appointments && currentReportData.appointments.length > 0) {
-          yPosition += 10;
-          pdf.setFontSize(16);
-          pdf.text('Appointment History', 20, yPosition);
-          yPosition += 10;
-
-          pdf.setFontSize(10);
-          currentReportData.appointments.slice(0, 10).forEach((appointment, index) => {
-            if (yPosition > 270) { // New page if needed
-              pdf.addPage();
-              yPosition = 20;
-            }
-
-            pdf.text(`${index + 1}. ${new Date(appointment.appointment_date).toLocaleDateString()} - ${appointment.service_name}`, 20, yPosition);
-            yPosition += 7;
+            medicalYPosition += 5; // Space between records
           });
         }
 
-        // Save the PDF
-        const fileName = `${pet.name.replace(/\s+/g, '_')}_Medical_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-        pdf.save(fileName);
+        // Footer
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`Total Medical Records: ${currentReportData.medical_history ? currentReportData.medical_history.length : 0}`, 20, 280);
+        pdf.text(`Report generated: ${new Date().toLocaleString()}`, 20, 285);
 
-        showToast('PDF report downloaded successfully!', 'success');
+        // Download
+        const filename = `pet_report_${pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(filename);
+
+        // Restore button state
+        if (downloadBtn) {
+          downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+          downloadBtn.disabled = false;
+        }
+
+        console.log('✅ PDF generation completed successfully');
+        console.log('📄 PDF saved as:', filename);
+        showToast(`PDF downloaded successfully! Saved as: ${filename}`, 'success');
       } catch (error) {
-        console.error('Error generating PDF:', error);
-        showToast('Error generating PDF. Falling back to HTML...', 'error');
+        console.error('❌ Error generating PDF:', error);
 
-        // Fallback to HTML download
-        downloadReportAsHTML();
+        // Restore button state
+        const downloadBtn = document.getElementById('pdfDownloadBtn');
+        if (downloadBtn) {
+          downloadBtn.innerHTML = '<i class="fas fa-download"></i> <span>Download PDF Report</span>';
+          downloadBtn.disabled = false;
+        }
+
+        showToast('Error generating PDF. Please try again.', 'error');
+
+        // Offer fallback option
+        if (confirm('Would you like to try downloading an HTML version instead?')) {
+          downloadHTMLReport();
+        }
       }
     }
 
-    // Download report as HTML (fallback)
-    function downloadReportAsHTML() {
-      if (!currentReportData) {
-        showToast('No report data available', 'error');
-        return;
-      }
-
-      const pet = currentReportData.pet;
-      const fileName = `${pet.name.replace(/\s+/g, '_')}_Medical_Report_${new Date().toISOString().split('T')[0]}.html`;
-
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Pet Medical Report - ${pet.name}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-            .section { margin-bottom: 30px; }
-            .section h3 { background: #f0f0f0; padding: 10px; margin: 0 0 15px 0; border-left: 4px solid #007bff; }
-            .info-grid { display: table; width: 100%; }
-            .info-row { display: table-row; }
-            .info-cell { display: table-cell; padding: 8px; border-bottom: 1px solid #ddd; }
-            .info-label { font-weight: bold; width: 30%; }
-            .appointment-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            .appointment-table th, .appointment-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            .appointment-table th { background-color: #f8f9fa; font-weight: bold; }
-            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Tattoo Veterinary Clinic</h1>
-            <h2>Pet Medical Report - ${pet.name}</h2>
-          </div>
-
-          <div class="section">
-            <h3>Pet Information</h3>
-            <div class="info-grid">
-              <div class="info-row"><div class="info-cell info-label">Name:</div><div class="info-cell">${pet.name}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Species:</div><div class="info-cell">${pet.species}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Breed:</div><div class="info-cell">${pet.breed || 'Not specified'}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Age:</div><div class="info-cell">${pet.age}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Gender:</div><div class="info-cell">${pet.gender}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Weight:</div><div class="info-cell">${pet.weight}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Color:</div><div class="info-cell">${pet.color || 'Not specified'}</div></div>
-              ${pet.notes ? `<div class="info-row"><div class="info-cell info-label">Notes:</div><div class="info-cell">${pet.notes}</div></div>` : ''}
-            </div>
-          </div>
-
-          <div class="section">
-            <h3>Owner Information</h3>
-            <div class="info-grid">
-              <div class="info-row"><div class="info-cell info-label">Name:</div><div class="info-cell">${currentReportData.owner.name}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Email:</div><div class="info-cell">${currentReportData.owner.email}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Phone:</div><div class="info-cell">${currentReportData.owner.phone || 'Not provided'}</div></div>
-              <div class="info-row"><div class="info-cell info-label">Address:</div><div class="info-cell">${currentReportData.owner.address || 'Not provided'}</div></div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h3>Appointment History</h3>
-            <table class="appointment-table">
-              <thead>
-                <tr><th>Date</th><th>Service</th><th>Staff</th><th>Status</th><th>Notes</th></tr>
-              </thead>
-              <tbody>
-                ${currentReportData.appointments.map(apt => `
-                  <tr>
-                    <td>${new Date(apt.appointment_date).toLocaleDateString()}</td>
-                    <td>${apt.service_name}</td>
-                    <td>${apt.staff_first_name && apt.staff_last_name ? `${apt.staff_first_name} ${apt.staff_last_name}` : 'Not assigned'}</td>
-                    <td>${apt.status}</td>
-                    <td>${apt.notes || 'No notes'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="footer">
-            <p>Generated on ${new Date().toLocaleString()}</p>
-            <p>This report contains confidential medical information.</p>
-          </div>
-        </body>
-        </html>
-      `;
-
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showToast('HTML report downloaded successfully!', 'success');
-    }
-
-    // Load jsPDF library
     async function loadJSPDFLibrary() {
       return new Promise((resolve, reject) => {
-        if (typeof window.jspdf !== 'undefined') {
+        // Check if already loaded
+        if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
           resolve();
           return;
         }
@@ -3184,31 +2990,110 @@
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         script.onload = () => {
-          console.log('jsPDF library loaded successfully');
-          resolve();
+          // Wait a bit for the library to initialize
+          setTimeout(() => {
+            if (typeof window.jspdf !== 'undefined' && typeof window.jspdf.jsPDF !== 'undefined') {
+              resolve();
+            } else {
+              reject(new Error('jsPDF library failed to load properly'));
+            }
+          }, 100);
         };
-        script.onerror = () => {
-          console.error('Failed to load jsPDF library');
-          reject(new Error('Failed to load PDF library'));
-        };
+        script.onerror = () => reject(new Error('Failed to load jsPDF library'));
         document.head.appendChild(script);
       });
     }
 
-    // Initialize reports section when shown
-    function initializeReportsSection() {
-      loadPetsForReports();
-    }
 
-    // Update showSection function to handle reports
-    const originalShowSection = showSection;
-    showSection = function(sectionName) {
-      originalShowSection(sectionName);
-
-      if (sectionName === 'reports') {
-        initializeReportsSection();
+    // Fallback HTML report download
+    function downloadHTMLReport() {
+      if (!currentReportData) {
+        showToast('No report data available', 'error');
+        return;
       }
-    };
+
+      const pet = currentReportData.pet;
+      const owner = currentReportData.owner;
+
+      // Create HTML content for the report
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Pet Medical Report - ${pet.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; }
+            .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+            .section h3 { color: #28a745; margin-top: 0; border-bottom: 2px solid #28a745; padding-bottom: 10px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+            .info-item { margin-bottom: 10px; }
+            .info-label { font-weight: bold; color: #333; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 20px; }
+            @media print { body { margin: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Tattoo Veterinary Clinic</h1>
+            <h2>Pet Medical Report</h2>
+            <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+
+          <div class="section">
+            <h3>Pet Information</h3>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Name:</span> ${pet.name}</div>
+              <div class="info-item"><span class="info-label">Species:</span> ${pet.species}</div>
+              <div class="info-item"><span class="info-label">Breed:</span> ${pet.breed || 'Not specified'}</div>
+              <div class="info-item"><span class="info-label">Gender:</span> ${pet.gender || 'Not specified'}</div>
+              <div class="info-item"><span class="info-label">Weight:</span> ${pet.weight ? pet.weight + ' kg' : 'Not recorded'}</div>
+              <div class="info-item"><span class="info-label">Color:</span> ${pet.color || 'Not specified'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Owner Information</h3>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Name:</span> ${owner.name}</div>
+              <div class="info-item"><span class="info-label">Email:</span> ${owner.email}</div>
+              <div class="info-item"><span class="info-label">Phone:</span> ${owner.phone || 'Not provided'}</div>
+              <div class="info-item"><span class="info-label">Address:</span> ${owner.address || 'Not provided'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Medical Summary</h3>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Total Appointments:</span> ${currentReportData.statistics.total_appointments}</div>
+              <div class="info-item"><span class="info-label">Total Vaccinations:</span> ${currentReportData.statistics.total_vaccinations}</div>
+              <div class="info-item"><span class="info-label">Last Visit:</span> ${currentReportData.statistics.last_visit ? new Date(currentReportData.statistics.last_visit).toLocaleDateString() : 'Never'}</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p><strong>Tattoo Veterinary Clinic</strong></p>
+            <p>Phone: 0917-519-4639 | Email: info@tattoovet.com</p>
+            <p>This report contains confidential medical information.</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create and download HTML file
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pet_report_${pet.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('HTML report downloaded successfully!', 'success');
+    }
 
     // Pet Management Functions for Client Dashboard
     async function loadClientPets() {
@@ -3457,6 +3342,277 @@
     // Add to window for console access
     window.testUpdateAPI = testUpdateAPI;
 
+    // Debug function to test pets API directly
+    async function debugPetReports() {
+      console.log('=== DEBUGGING PET REPORTS ===');
+
+      try {
+        // Check session first
+        console.log('1. Checking session...');
+        const sessionResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'check_session' })
+        });
+        const sessionResult = await sessionResponse.json();
+        console.log('Session check result:', sessionResult);
+
+        if (!sessionResult.success) {
+          console.error('❌ Session check failed:', sessionResult.message);
+          toast('Session check failed. Please refresh the page.', 'error');
+          return;
+        }
+
+        console.log('✅ Session is valid, user type:', sessionResult.data.user_type);
+
+        // Test pets API
+        console.log('2. Testing pets API...');
+        const petsResponse = await fetch('../api/pet_reports_api.php?action=get_pet_list&limit=100');
+        console.log('Pets API URL:', '../api/pet_reports_api.php?action=get_pet_list&limit=100');
+        console.log('Response status:', petsResponse.status);
+
+        const petsResult = await petsResponse.json();
+        console.log('Pets API full response:', petsResult);
+
+        if (petsResult.success) {
+          console.log('✅ Pets API success! Found', petsResult.data.length, 'pets');
+
+          if (petsResult.data.length === 0) {
+            console.log('⚠️ No pets found - this might be the issue');
+            toast('No pets found in database for this user', 'warning');
+          } else {
+            console.log('📋 Pet details:');
+            petsResult.data.forEach((pet, index) => {
+              console.log(`  ${index + 1}. ${pet.name} (ID: ${pet.id}, Species: ${pet.species}, Owner: ${pet.first_name} ${pet.last_name})`);
+            });
+
+            // Check if pets belong to current user
+            const currentUserPets = petsResult.data.filter(pet => pet.owner_id === sessionResult.data.user.id);
+            console.log('✅ Pets belonging to current user:', currentUserPets.length);
+          }
+        } else {
+          console.error('❌ Pets API failed:', petsResult.message);
+          toast('Pets API failed: ' + petsResult.message, 'error');
+        }
+
+        // Test direct vet_api get_pets
+        console.log('3. Testing vet_api get_pets...');
+        const vetApiResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_pets' })
+        });
+        const vetApiResult = await vetApiResponse.json();
+        console.log('Vet API get_pets result:', vetApiResult);
+
+        if (vetApiResult.success) {
+          console.log('✅ Vet API get_pets success! Found', vetApiResult.data.length, 'pets');
+        } else {
+          console.error('❌ Vet API get_pets failed:', vetApiResult.message);
+        }
+
+      } catch (error) {
+        console.error('❌ Debug error:', error);
+        toast('Debug error: ' + error.message, 'error');
+      }
+
+      console.log('=== DEBUG COMPLETE ===');
+    }
+
+    // Add to window for console access
+    window.debugPetReports = debugPetReports;
+    window.loadPetsDropdown = loadPetsDropdown;
+
+    // Test Medical Report Display function (for debugging)
+    window.testMedicalReportDisplay = function() {
+      console.log('=== TESTING MEDICAL REPORT DISPLAY ===');
+
+      // Test data
+      const testData = {
+        pet: {
+          name: 'Bogart',
+          species: 'Dog',
+          breed: 'Puspin',
+          gender: 'Male',
+          weight: '25',
+          color: 'Blue'
+        },
+        owner: {
+          name: 'John Cedrick Unida',
+          email: 'unida99@gmail.com',
+          phone: '09286077247',
+          address: 'Not provided'
+        },
+        medical_history: [
+          {
+            created_at: '2025-10-15 09:00:00',
+            staff_name: 'Dr. Smith',
+            service_name: 'Vaccination',
+            diagnosis: 'Routine health check',
+            treatment: 'Annual vaccination administered',
+            medications: 'DHPP vaccine, Rabies vaccine',
+            notes: 'Patient was healthy and cooperative'
+          }
+        ],
+        statistics: {
+          total_appointments: 1,
+          total_vaccinations: 1,
+          total_medical_records: 1,
+          last_visit: '2025-10-15'
+        }
+      };
+
+      // Find the report preview element
+      const reportPreview = document.getElementById('reportPreview');
+      if (reportPreview) {
+        console.log('✅ Found report preview element');
+
+        // Generate HTML content
+        let html = `
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-paw" style="color: #667eea;"></i> Pet Information
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div><strong>Name:</strong> ${testData.pet.name}</div>
+              <div><strong>Species:</strong> ${testData.pet.species}</div>
+              <div><strong>Breed:</strong> ${testData.pet.breed}</div>
+              <div><strong>Gender:</strong> ${testData.pet.gender}</div>
+            </div>
+          </div>
+
+          <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #333; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-stethoscope" style="color: #667eea;"></i> Medical Records
+            </h3>
+            <div style="margin-bottom: 15px; text-align: center;">
+              <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;">
+                Total Records: ${testData.medical_history.length}
+              </span>
+            </div>
+        `;
+
+        testData.medical_history.forEach((record, index) => {
+          html += `
+            <div style="margin: 15px 0; padding: 15px; border: 2px solid #667eea; border-radius: 10px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);">
+              <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e1e5e9;">
+                <h5 style="margin: 0 0 5px 0; color: #667eea; font-size: 14px;">
+                  Visit #${index + 1} - ${new Date(record.created_at).toLocaleDateString()}
+                </h5>
+                <div style="font-size: 12px; color: #666;">
+                  <strong>Staff:</strong> ${record.staff_name} | <strong>Service:</strong> ${record.service_name}
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #667eea;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Diagnosis</div>
+                  <div style="color: #555; font-size: 12px;">${record.diagnosis}</div>
+                </div>
+
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #28a745;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Treatment</div>
+                  <div style="color: #555; font-size: 12px;">${record.treatment}</div>
+                </div>
+
+                <div style="background: #ffffff; padding: 8px; border-radius: 6px; border-left: 3px solid #ffc107;">
+                  <div style="font-weight: bold; color: #333; margin-bottom: 4px; font-size: 12px;">Medications</div>
+                  <div style="color: #555; font-size: 12px;">${record.medications}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+
+        // Display the HTML
+        reportPreview.innerHTML = html;
+        console.log('✅ Medical report displayed with test data');
+
+        return '✅ Medical report test completed successfully';
+      } else {
+        console.error('❌ Report preview element not found');
+        return '❌ Report preview element not found';
+      }
+    };
+
+    // Notification Badge Management for Client
+    function updateNotificationBadge() {
+      const mobileToggle = document.getElementById('clientMobileMenuToggle');
+      if (!mobileToggle) return;
+
+      // Remove existing badge
+      const existingBadge = mobileToggle.querySelector('.notification-badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
+
+      // Check for unread notifications
+      getUnreadNotificationCount().then(count => {
+        if (count > 0) {
+          const badge = document.createElement('div');
+          badge.className = 'notification-badge';
+          badge.textContent = count > 99 ? '99+' : count;
+          mobileToggle.appendChild(badge);
+          console.log(`🔔 Client notification badge added: ${count} unread notifications`);
+        }
+      }).catch(error => {
+        console.error('Error updating notification badge:', error);
+      });
+    }
+
+    async function getUnreadNotificationCount() {
+      try {
+        const response = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_unread_count' })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          return parseInt(result.data.unread_count) || 0;
+        }
+        return 0;
+      } catch (error) {
+        console.error('Error checking notifications:', error);
+        return 0;
+      }
+    }
+
+    // Function to check current select element state
+    function checkSelectState() {
+      console.log('=== CHECKING SELECT ELEMENT STATE ===');
+      const petSelect = document.getElementById('petSelect');
+
+      if (!petSelect) {
+        console.error('❌ Pet select element not found in DOM');
+        return;
+      }
+
+      console.log('✅ Pet select element found');
+      console.log('📊 Select properties:', {
+        id: petSelect.id,
+        tagName: petSelect.tagName,
+        optionsCount: petSelect.options.length,
+        selectedIndex: petSelect.selectedIndex,
+        value: petSelect.value,
+        disabled: petSelect.disabled
+      });
+
+      console.log('📋 Current options:');
+      for (let i = 0; i < petSelect.options.length; i++) {
+        const option = petSelect.options[i];
+        console.log(`  ${i}: value="${option.value}" text="${option.textContent}"`);
+      }
+
+      console.log('=== SELECT STATE CHECK COMPLETE ===');
+    }
+
+    window.checkSelectState = checkSelectState;
+
 
     // Client-specific functions
     async function cancelAppointment(appointmentId) {
@@ -3508,18 +3664,6 @@
       }
     }
 
-    // Helper function to update appointment status in UI
-    function updateAppointmentStatusInUI(appointmentId, newStatus) {
-      // Find and update the appointment row in the table
-      const appointmentRows = document.querySelectorAll('#appointmentsTableBody tr');
-      appointmentRows.forEach(row => {
-        const statusCell = row.querySelector('.appointment-status');
-        if (statusCell && statusCell.getAttribute('data-appointment-id') == appointmentId) {
-          statusCell.textContent = newStatus;
-          statusCell.className = `appointment-status status-${newStatus.toLowerCase()}`;
-        }
-      });
-    }
   </script>
 </body>
 </html>

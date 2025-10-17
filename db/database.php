@@ -104,6 +104,11 @@ class VetDatabase {
                    address TEXT,
                    profile_picture TEXT,
                    is_active INTEGER DEFAULT 1,
+                   email_verification_token TEXT,
+                   token_expiry DATETIME,
+                   email_verified_at DATETIME,
+                   password_reset_token TEXT,
+                   reset_token_expiry DATETIME,
                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                )
            ",
@@ -134,6 +139,7 @@ class VetDatabase {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     description TEXT,
+                    duration INTEGER DEFAULT 30,
                     is_active INTEGER DEFAULT 1,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
@@ -198,6 +204,7 @@ class VetDatabase {
                     user_id INTEGER NOT NULL,
                     total_amount REAL NOT NULL,
                     status TEXT DEFAULT 'pending',
+                    payment_method TEXT,
                     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES users(id)
                 )
@@ -283,6 +290,20 @@ class VetDatabase {
                 )
             ",
 
+            // Login attempts tracking table
+            'login_attempts' => "
+                CREATE TABLE IF NOT EXISTS login_attempts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL,
+                    ip_address TEXT,
+                    user_agent TEXT,
+                    attempt_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    is_successful INTEGER DEFAULT 0,
+                    lockout_until DATETIME,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ",
+
         ];
         
         foreach ($tables as $name => $sql) {
@@ -304,31 +325,43 @@ class VetDatabase {
             // Insert default admin user
             $adminPassword = password_hash('admin123', PASSWORD_DEFAULT);
             $this->pdo->exec("
-                INSERT INTO users (first_name, last_name, email, phone, password, user_type, employee_id)
-                VALUES ('Admin', 'User', 'admin@tattoovet.com', '0917-519-4639', '$adminPassword', 'staff', 'ADMIN001')
+                INSERT INTO users (first_name, last_name, email, phone, password, user_type, employee_id, is_active, email_verified_at)
+                VALUES ('Admin', 'User', 'admin@tattoovet.com', '0917-519-4639', '$adminPassword', 'staff', 'ADMIN001', 1, datetime('now'))
             ");
 
-            // Insert sample client users
+            // Insert sample client users (already verified)
             $clientPassword = password_hash('client123', PASSWORD_DEFAULT);
             $this->pdo->exec("
-                INSERT INTO users (first_name, last_name, email, phone, password, user_type, is_active) VALUES
-                ('John', 'Smith', 'john.smith@email.com', '0917-123-4567', '$clientPassword', 'client', 1),
-                ('Sarah', 'Johnson', 'sarah.johnson@email.com', '0917-234-5678', '$clientPassword', 'client', 1),
-                ('Michael', 'Brown', 'michael.brown@email.com', '0917-345-6789', '$clientPassword', 'client', 1),
-                ('Emily', 'Davis', 'emily.davis@email.com', '0917-456-7890', '$clientPassword', 'client', 1),
-                ('David', 'Wilson', 'david.wilson@email.com', '0917-567-8901', '$clientPassword', 'client', 1)
+                INSERT INTO users (first_name, last_name, email, phone, password, user_type, is_active, email_verified_at) VALUES
+                ('John', 'Smith', 'john.smith@email.com', '0917-123-4567', '$clientPassword', 'client', 1, datetime('now')),
+                ('Sarah', 'Johnson', 'sarah.johnson@email.com', '0917-234-5678', '$clientPassword', 'client', 1, datetime('now')),
+                ('Michael', 'Brown', 'michael.brown@email.com', '0917-345-6789', '$clientPassword', 'client', 1, datetime('now')),
+                ('Emily', 'Davis', 'emily.davis@email.com', '0917-456-7890', '$clientPassword', 'client', 1, datetime('now')),
+                ('David', 'Wilson', 'david.wilson@email.com', '0917-567-8901', '$clientPassword', 'client', 1, datetime('now'))
             ");
             
             
             // Insert sample services
             $this->pdo->exec("
-                INSERT INTO services (name, description, is_active) VALUES
-                ('General Checkup', 'Comprehensive health examination', 1),
-                ('Vaccination', 'Routine vaccination services', 1),
-                ('Deworming', 'Internal parasite treatment', 1),
-                ('Grooming', 'Professional pet grooming', 1),
-                ('Dental Care', 'Dental cleaning and care', 1),
-                ('Emergency Care', 'Emergency veterinary services', 1)
+                INSERT INTO services (name, description, duration, is_active) VALUES
+                ('General Checkup', 'Comprehensive health examination', 30, 1),
+                ('Vaccination', 'Routine vaccination services', 15, 1),
+                ('Deworming', 'Internal parasite treatment', 20, 1),
+                ('Grooming', 'Professional pet grooming', 60, 1),
+                ('Dental Care', 'Dental cleaning and care', 45, 1),
+                ('Emergency Care', 'Emergency veterinary services', 30, 1),
+                ('BASIC OBEDIENCE TRAINING', 'Basic obedience training for dogs', 60, 1),
+                ('DEWORMING', 'Internal and external parasite treatment', 20, 1),
+                ('MICROCHIP IMPLANTING', 'Pet microchip identification implant', 15, 1),
+                ('VACCINATION', 'Vaccination and immunization services', 15, 1),
+                ('PET BOARDING', 'Pet boarding and daycare services', 60, 1),
+                ('EXTERNAL PARASITE PREVENTION', 'Flea and tick prevention treatment', 20, 1),
+                ('EUTHANASIA', 'Humane euthanasia services', 30, 1),
+                ('COMPREHENSIVE GENERAL CHECK UP', 'Complete physical examination', 45, 1),
+                ('GROOMING', 'Professional pet grooming and styling', 60, 1),
+                ('DENTAL SURGERY', 'Dental surgery and oral care', 90, 1),
+                ('SURGERY', 'General surgical procedures', 120, 1),
+                ('HOME SERVICE BY APPOINTMENT', 'Veterinary services at your home', 60, 1)
             ");
 
             // Insert sample products
@@ -570,6 +603,141 @@ class VetDatabase {
             try {
                 $this->pdo->exec("ALTER TABLE appointments ADD COLUMN cancellation_reason TEXT");
                 echo "✅ Added missing cancellation_reason column to appointments table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if orders table has payment_method column
+        $columns = $this->pdo->query("PRAGMA table_info(orders)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasPaymentMethod = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'payment_method') {
+                $hasPaymentMethod = true;
+                break;
+            }
+        }
+
+        // Add payment_method column if missing
+        if (!$hasPaymentMethod) {
+            try {
+                $this->pdo->exec("ALTER TABLE orders ADD COLUMN payment_method TEXT");
+                echo "✅ Added missing payment_method column to orders table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if services table has duration column
+        $columns = $this->pdo->query("PRAGMA table_info(services)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasDuration = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'duration') {
+                $hasDuration = true;
+                break;
+            }
+        }
+
+        // Add duration column if missing
+        if (!$hasDuration) {
+            try {
+                $this->pdo->exec("ALTER TABLE services ADD COLUMN duration INTEGER DEFAULT 30");
+                echo "✅ Added missing duration column to services table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if users table has email_verification_token column
+        $columns = $this->pdo->query("PRAGMA table_info(users)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasEmailVerificationToken = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'email_verification_token') {
+                $hasEmailVerificationToken = true;
+                break;
+            }
+        }
+
+        // Add email verification columns if missing
+        if (!$hasEmailVerificationToken) {
+            try {
+                $this->pdo->exec("ALTER TABLE users ADD COLUMN email_verification_token TEXT");
+                echo "✅ Added missing email_verification_token column to users table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if users table has token_expiry column
+        $hasTokenExpiry = false;
+        foreach ($columns as $column) {
+            if ($column['name'] === 'token_expiry') {
+                $hasTokenExpiry = true;
+                break;
+            }
+        }
+
+        if (!$hasTokenExpiry) {
+            try {
+                $this->pdo->exec("ALTER TABLE users ADD COLUMN token_expiry DATETIME");
+                echo "✅ Added missing token_expiry column to users table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if users table has email_verified_at column
+        $hasEmailVerifiedAt = false;
+        foreach ($columns as $column) {
+            if ($column['name'] === 'email_verified_at') {
+                $hasEmailVerifiedAt = true;
+                break;
+            }
+        }
+
+        if (!$hasEmailVerifiedAt) {
+            try {
+                $this->pdo->exec("ALTER TABLE users ADD COLUMN email_verified_at DATETIME");
+                echo "✅ Added missing email_verified_at column to users table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if users table has password_reset_token column
+        $hasPasswordResetToken = false;
+        foreach ($columns as $column) {
+            if ($column['name'] === 'password_reset_token') {
+                $hasPasswordResetToken = true;
+                break;
+            }
+        }
+
+        if (!$hasPasswordResetToken) {
+            try {
+                $this->pdo->exec("ALTER TABLE users ADD COLUMN password_reset_token TEXT");
+                echo "✅ Added missing password_reset_token column to users table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if users table has reset_token_expiry column
+        $hasResetTokenExpiry = false;
+        foreach ($columns as $column) {
+            if ($column['name'] === 'reset_token_expiry') {
+                $hasResetTokenExpiry = true;
+                break;
+            }
+        }
+
+        if (!$hasResetTokenExpiry) {
+            try {
+                $this->pdo->exec("ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME");
+                echo "✅ Added missing reset_token_expiry column to users table\n";
             } catch (Exception $e) {
                 // Column might already exist, continue silently
             }

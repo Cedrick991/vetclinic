@@ -13,14 +13,14 @@ export const Auth = {
             if (!result.success || !result.data.logged_in || result.data.user_type !== 'staff') {
                 UI.showToast('Access denied. Staff login required.', 'error');
                 setTimeout(() => {
-                    window.location.href = '../public/homepage.html';
+                    window.location.href = '../index.html';
                 }, 2000);
                 return false;
             }
             return true;
         } catch (error) {
             console.error('Authentication check failed:', error);
-            window.location.href = '../public/homepage.html';
+            window.location.href = '../index.html';
             return false;
         }
     },
@@ -65,7 +65,7 @@ export const Auth = {
                     localStorage.removeItem('user_session');
 
                     setTimeout(() => {
-                        window.location.href = '../public/homepage.html';
+                        window.location.href = '../index.html';
                     }, 1500);
                 } else {
                     UI.showToast('Logout failed. Please try again.', 'error');

@@ -92,6 +92,26 @@ try {
             $response = registerUser($db, $input);
             break;
 
+        case 'verify_email':
+            $response = verifyEmail($db, $input);
+            break;
+
+        case 'resend_verification':
+            $response = resendVerificationEmail($db, $input);
+            break;
+
+        case 'resend_verification_from_token':
+            $response = resendVerificationFromToken($db, $input);
+            break;
+
+        case 'request_password_reset':
+            $response = requestPasswordReset($db, $input);
+            break;
+
+        case 'reset_password':
+            $response = resetPassword($db, $input);
+            break;
+
         case 'login':
             $response = loginUser($db, $input);
             break;
@@ -219,6 +239,18 @@ try {
 
         case 'get_orders':
             $response = getOrders($db, $input);
+            break;
+
+        case 'get_all_orders':
+            $response = getAllOrders($db, $input);
+            break;
+
+        case 'get_client_orders':
+            $response = getClientOrders($db, $input);
+            break;
+
+        case 'update_order_status':
+            $response = updateOrderStatus($db, $input);
             break;
 
         case 'add_to_order':
@@ -362,28 +394,39 @@ function registerUser($db, $input) {
     // Hash password and insert
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+    // Generate email verification token
+    $verificationToken = generateVerificationToken();
+    $tokenExpiry = date('Y-m-d H:i:s', time() + 24 * 3600); // 24 hours from now
+
     $db->execute(
-        'INSERT INTO users (first_name, last_name, email, phone, password, user_type) VALUES (?, ?, ?, ?, ?, ?)',
-        [$firstName, $lastName, $email, $phone, $hashedPassword, $userType]
+        'INSERT INTO users (first_name, last_name, email, phone, password, user_type, email_verification_token, token_expiry, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [$firstName, $lastName, $email, $phone, $hashedPassword, $userType, $verificationToken, $tokenExpiry, 0]
     );
 
     $userId = $db->lastInsertId();
 
-    // Set session
-    $_SESSION['user_id']   = $userId;
-    $_SESSION['user_type'] = $userType;
-    $_SESSION['user_name'] = $firstName . ' ' . $lastName;
-    $_SESSION['login_time'] = time();
+    // Send verification email (don't fail registration if email fails)
+    $emailSent = sendVerificationEmail($email, $firstName, $verificationToken);
+
+    if (!$emailSent['success']) {
+        error_log('Failed to send verification email to ' . $email . ': ' . $emailSent['message']);
+        // Continue with registration even if email fails
+    }
 
     return [
         'success' => true,
-        'message' => 'Registration successful!',
+        'message' => 'Registration successful! Welcome to Tattao Veterinary Clinic! You can now log in to your account.',
         'user' => [
             'id'    => $userId,
             'name'  => $firstName . ' ' . $lastName,
             'email' => $email,
             'type'  => $userType
-        ]
+        ],
+        'email_verification_required' => false,
+        'email_sent' => $emailSent['success'],
+        'verification_token' => $verificationToken,
+        'verification_url' => $emailSent['success'] ? $emailSent['verification_url'] : null,
+        'note' => 'Email verification is optional but recommended for account security and password reset functionality'
     ];
 }
 
@@ -395,11 +438,57 @@ function loginUser($db, $input) {
         throw new Exception('Email and password are required');
     }
 
+    // Get client IP address and user agent
+    $ipAddress = getClientIP();
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+    // Check if account is locked out
+    $lockoutInfo = checkAccountLockout($db, $email);
+    if ($lockoutInfo['locked']) {
+        // Log failed attempt (even though locked)
+        logLoginAttempt($db, $email, $ipAddress, $userAgent, false);
+
+        $remainingTime = ceil(($lockoutInfo['lockout_until'] - time()) / 60);
+        throw new Exception("Account temporarily locked due to multiple failed login attempts. Please try again in {$remainingTime} minutes.");
+    }
+
     // Get user
     $user = $db->fetch('SELECT * FROM users WHERE email = ?', [$email]);
     if (!$user || !password_verify($password, $user['password'])) {
-        throw new Exception('Invalid login credentials');
+        // Log failed attempt
+        logLoginAttempt($db, $email, $ipAddress, $userAgent, false);
+
+        // Check if this attempt should trigger a lockout
+        $attempts = getFailedLoginAttempts($db, $email);
+
+        if ($attempts >= 4) { // If this is the 5th attempt (attempts = 4 means 4 previous failures)
+            // Log this failed attempt that triggered the lockout
+            logLoginAttempt($db, $email, $ipAddress, $userAgent, false);
+
+            // Lock out the account and notify staff
+            lockoutAccount($db, $email, $ipAddress, $userAgent);
+
+            // Notify staff about the lockout
+            notifyStaffOfLockout($db, $email, $ipAddress, $userAgent);
+
+            $lockoutMinutes = 15;
+            throw new Exception("Too many failed login attempts. Account has been locked for {$lockoutMinutes} minutes for security reasons. For immediate assistance, contact admin at 09286077247.");
+        }
+
+        // Log this failed attempt (not the one that triggered lockout)
+        logLoginAttempt($db, $email, $ipAddress, $userAgent, false);
+
+        $remainingAttempts = 4 - $attempts; // Show remaining attempts (5 total - current failed attempts)
+        throw new Exception("Invalid login credentials. {$remainingAttempts} attempts remaining before account lockout.");
     }
+
+    // Email verification is optional - users can log in even if not verified
+    // This allows existing users to continue using the system
+    // Email verification is used for additional security and password reset
+
+    // Successful login - log it and clear any previous failed attempts
+    logLoginAttempt($db, $email, $ipAddress, $userAgent, true);
+    clearFailedLoginAttempts($db, $email);
 
     // Set session variables
     $_SESSION['user_id']   = $user['id'];
@@ -407,6 +496,9 @@ function loginUser($db, $input) {
     $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['login_time'] = time();
+
+    // Ensure session is written immediately
+    session_write_close();
 
     return [
         'success' => true,
@@ -432,52 +524,62 @@ function logoutUser() {
 }
 
 function getUserInfo() {
-    // Ensure session is started
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    // Debug logging
-    error_log("getUserInfo called. Session data: " . json_encode($_SESSION));
-    error_log("Session ID: " . session_id());
-
-    // Check if session variables exist
-    if (!isset($_SESSION['user_id'], $_SESSION['user_type'])) {
-        error_log("No session found - user_id or user_type missing");
-        error_log("Available session keys: " . implode(', ', array_keys($_SESSION)));
-        return [
-            'success' => false,
-            'message' => 'Not logged in',
-            'data' => ['logged_in' => false]
-        ];
-    }
-
-    // Session timeout (24 hours)
-    $loginTime = $_SESSION['login_time'] ?? 0;
-    if (time() - $loginTime > 86400) {
-        error_log("Session expired - login time: $loginTime, current time: " . time());
-        session_destroy();
-        return [
-            'success' => false,
-            'message' => 'Session expired',
-            'data' => ['logged_in' => false]
-        ];
-    }
-
     try {
-        $db = getDB();
-        $userId = $_SESSION['user_id'];
+        // Ensure session is started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        error_log("Looking up user with ID: $userId");
+        // Debug logging
+        error_log("getUserInfo called. Session data: " . json_encode($_SESSION));
+        error_log("Session ID: " . session_id());
 
-        // Get fresh user data from database including profile picture
-        $user = $db->fetch('SELECT first_name, last_name, email, phone, profile_picture, user_type FROM users WHERE id = ?', [$userId]);
-
-        if (!$user) {
-            error_log("User not found in database for ID: $userId");
+        // Check if session variables exist
+        if (!isset($_SESSION['user_id'], $_SESSION['user_type'])) {
+            error_log("No session found - user_id or user_type missing");
+            error_log("Available session keys: " . implode(', ', array_keys($_SESSION)));
             return [
                 'success' => false,
-                'message' => 'User not found',
+                'message' => 'Not logged in',
+                'data' => ['logged_in' => false]
+            ];
+        }
+
+        // Session timeout (24 hours) - be more lenient with time check
+        $loginTime = $_SESSION['login_time'] ?? time();
+        if (time() - $loginTime > 86400) {
+            error_log("Session expired - login time: $loginTime, current time: " . time());
+            session_destroy();
+            return [
+                'success' => false,
+                'message' => 'Session expired',
+                'data' => ['logged_in' => false]
+            ];
+        }
+
+        try {
+            $db = getDB();
+            $userId = $_SESSION['user_id'];
+
+            error_log("Looking up user with ID: $userId");
+
+            // Get fresh user data from database including profile picture
+            $user = $db->fetch('SELECT first_name, last_name, email, phone, profile_picture, user_type FROM users WHERE id = ?', [$userId]);
+
+            if (!$user) {
+                error_log("User not found in database for ID: $userId");
+                return [
+                    'success' => false,
+                    'message' => 'User not found',
+                    'data' => ['logged_in' => false]
+                ];
+            }
+        } catch (Exception $dbException) {
+            error_log("Database connection error in getUserInfo: " . $dbException->getMessage());
+            // Return a more specific error for database issues
+            return [
+                'success' => false,
+                'message' => 'Database connection error. Please try again.',
                 'data' => ['logged_in' => false]
             ];
         }
@@ -913,22 +1015,40 @@ function getClients() {
             ORDER BY u.last_name, u.first_name
         ');
 
-        // Format the data for the frontend
-        $formattedClients = array_map(function($client) {
-            return [
+        error_log('Found ' . count($clients) . ' clients');
+
+        // Get pets for each client
+        $formattedClients = [];
+        foreach ($clients as $client) {
+            error_log('Processing client: ' . $client['first_name'] . ' ' . $client['last_name'] . ' (ID: ' . $client['id'] . ')');
+
+            $clientPets = $db->fetchAll('
+                SELECT id, name, species, breed, gender, weight, color
+                FROM pets
+                WHERE owner_id = ? AND is_active = 1
+                ORDER BY name
+            ', [$client['id']]);
+
+            error_log('Found ' . count($clientPets) . ' pets for client ' . $client['id']);
+
+            $formattedClients[] = [
                 'id' => $client['id'],
                 'first_name' => $client['first_name'],
                 'last_name' => $client['last_name'],
                 'email' => $client['email'],
                 'phone' => $client['phone'],
                 'pet_count' => intval($client['pet_count']),
+                'pets' => $clientPets,
                 'last_visit' => $client['last_visit'] ?: 'Never',
                 'created_at' => $client['created_at']
             ];
-        }, $clients);
+        }
+
+        error_log('Formatted ' . count($formattedClients) . ' clients with pets data');
 
         return ['success' => true, 'data' => $formattedClients];
     } catch (Exception $e) {
+        error_log('Error in getClients: ' . $e->getMessage());
         return ['success' => false, 'message' => 'Failed to load clients: ' . $e->getMessage()];
     }
 }
@@ -1577,14 +1697,42 @@ function addToCart($db, $input) {
             return ['success' => false, 'message' => 'Insufficient stock'];
         }
 
-        // For now, we'll just return success - you can implement actual cart storage
+        // Check if item already exists in cart
+        $existingCartItem = $db->fetch(
+            'SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?',
+            [$_SESSION['user_id'], $productId]
+        );
+
+        if ($existingCartItem) {
+            // Update existing cart item
+            $newQuantity = $existingCartItem['quantity'] + $quantity;
+            if ($product['stock'] < $newQuantity) {
+                return ['success' => false, 'message' => 'Insufficient stock for total quantity'];
+            }
+
+            $db->execute(
+                'UPDATE cart SET quantity = ? WHERE id = ?',
+                [$newQuantity, $existingCartItem['id']]
+            );
+        } else {
+            // Insert new cart item
+            $db->execute(
+                'INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)',
+                [$_SESSION['user_id'], $productId, $quantity]
+            );
+        }
+
+        // Get updated cart count
+        $cartCount = $db->fetch('SELECT COUNT(*) as count FROM cart WHERE user_id = ?', [$_SESSION['user_id']]);
+        $cartCount = $cartCount ? intval($cartCount['count']) : 0;
+
         return [
             'success' => true,
             'message' => 'Product added to cart!',
-            'cart_count' => $quantity
+            'cart_count' => $cartCount
         ];
     } catch (Exception $e) {
-        return ['success' => false, 'message' => 'Failed to add to cart'];
+        return ['success' => false, 'message' => 'Failed to add to cart: ' . $e->getMessage()];
     }
 }
 
@@ -1715,7 +1863,7 @@ function checkout($db, $input) {
 
         // Create order
         $db->execute(
-            'INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)',
+            'INSERT INTO orders (user_id, total_amount, status, order_date) VALUES (?, ?, ?, datetime("now"))',
             [$_SESSION['user_id'], $total, 'pending']
         );
 
@@ -1749,6 +1897,13 @@ function checkout($db, $input) {
                     "New order #{$orderId} placed for ₱{$total}.", 'normal',
                     ['order_id' => $orderId, 'total_amount' => $total]);
             }
+        }
+
+        // Notify the client who placed the order
+        if (isNotificationEnabled($db, $_SESSION['user_id'], 'order_new')) {
+            createNotification($db, $_SESSION['user_id'], 'order_new', 'Order Placed Successfully',
+                "Your order #{$orderId} has been placed successfully for ₱{$total}.", 'normal',
+                ['order_id' => $orderId, 'total_amount' => $total, 'is_client_notification' => true]);
         }
 
         return [
@@ -1794,7 +1949,7 @@ function addToOrder($db, $input) {
 
         // Create order
         $db->execute(
-            'INSERT INTO orders (user_id, total_amount, status) VALUES (?, ?, ?)',
+            'INSERT INTO orders (user_id, total_amount, status, order_date) VALUES (?, ?, ?, datetime("now"))',
             [$_SESSION['user_id'], $totalAmount, 'pending']
         );
 
@@ -1865,7 +2020,7 @@ function buyNow($db, $input) {
 
         // Create order with payment method
         $db->execute(
-            'INSERT INTO orders (user_id, total_amount, status, payment_method) VALUES (?, ?, ?, ?)',
+            'INSERT INTO orders (user_id, total_amount, status, payment_method, order_date) VALUES (?, ?, ?, ?, datetime("now"))',
             [$_SESSION['user_id'], $totalAmount, 'pending', $paymentMethod]
         );
 
@@ -1914,7 +2069,7 @@ function buyCart($db, $input) {
 
     // Validate payment method
     $validPaymentMethods = ['gcash', 'bank', 'cash_on_visit'];
-    if (!in_array($paymentMethod, $validPaymentMethods)) {
+    if (!empty($paymentMethod) && !in_array($paymentMethod, $validPaymentMethods)) {
         return ['success' => false, 'message' => 'Invalid payment method'];
     }
 
@@ -1922,11 +2077,18 @@ function buyCart($db, $input) {
         // Start transaction
         $db->execute('BEGIN TRANSACTION');
 
-        // Create order with payment method
-        $db->execute(
-            'INSERT INTO orders (user_id, total_amount, status, payment_method) VALUES (?, ?, ?, ?)',
-            [$_SESSION['user_id'], $total, 'pending', $paymentMethod]
-        );
+        // Create order with payment method (optional)
+        if (!empty($paymentMethod)) {
+            $db->execute(
+                'INSERT INTO orders (user_id, total_amount, status, payment_method, order_date) VALUES (?, ?, ?, ?, datetime("now"))',
+                [$_SESSION['user_id'], $total, 'pending', $paymentMethod]
+            );
+        } else {
+            $db->execute(
+                'INSERT INTO orders (user_id, total_amount, status, order_date) VALUES (?, ?, ?, datetime("now"))',
+                [$_SESSION['user_id'], $total, 'pending']
+            );
+        }
 
         $orderId = $db->lastInsertId();
 
@@ -2010,6 +2172,156 @@ function getOrders($db, $input) {
         ];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Failed to load orders: ' . $e->getMessage()];
+    }
+}
+
+function getAllOrders($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    // Only staff can get all orders
+    if ($_SESSION['user_type'] !== 'staff') {
+        return ['success' => false, 'message' => 'Only staff can access all orders'];
+    }
+
+    try {
+        // Get all orders with customer details and order items
+        $orders = $db->fetchAll('
+            SELECT o.*, u.first_name, u.last_name, u.email,
+                   (u.first_name || " " || u.last_name) as customer_name
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.order_date DESC
+        ');
+
+        // Get order items for each order
+        foreach ($orders as &$order) {
+            $orderItems = $db->fetchAll('
+                SELECT oi.*, p.name, p.price
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = ?
+                ORDER BY oi.id
+            ', [$order['id']]);
+
+            $order['items'] = $orderItems;
+        }
+
+        return [
+            'success' => true,
+            'data' => $orders
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to load orders: ' . $e->getMessage()];
+    }
+}
+
+function getClientOrders($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    // Only clients can access their own orders
+    if ($_SESSION['user_type'] !== 'client') {
+        return ['success' => false, 'message' => 'Only clients can access their orders'];
+    }
+
+    try {
+        $userId = $_SESSION['user_id'];
+
+        // Get client's orders with order items
+        $orders = $db->fetchAll('
+            SELECT o.*
+            FROM orders o
+            WHERE o.user_id = ?
+            ORDER BY o.order_date DESC
+        ', [$userId]);
+
+        // Get order items for each order
+        foreach ($orders as &$order) {
+            $orderItems = $db->fetchAll('
+                SELECT oi.*, p.name, p.price, p.image
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = ?
+                ORDER BY oi.id
+            ', [$order['id']]);
+
+            $order['items'] = $orderItems;
+        }
+
+        return [
+            'success' => true,
+            'data' => $orders
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to load orders: ' . $e->getMessage()];
+    }
+}
+
+function updateOrderStatus($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    // Only staff can update order status
+    if ($_SESSION['user_type'] !== 'staff') {
+        return ['success' => false, 'message' => 'Only staff can update order status'];
+    }
+
+    $orderId = intval($input['order_id'] ?? 0);
+    $newStatus = trim($input['status'] ?? '');
+
+    if (!$orderId || !$newStatus) {
+        return ['success' => false, 'message' => 'Order ID and status are required'];
+    }
+
+    // Validate status
+    $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!in_array($newStatus, $validStatuses)) {
+        return ['success' => false, 'message' => 'Invalid status. Must be one of: ' . implode(', ', $validStatuses)];
+    }
+
+    try {
+        // Check if order exists
+        $order = $db->fetch('SELECT * FROM orders WHERE id = ?', [$orderId]);
+        if (!$order) {
+            return ['success' => false, 'message' => 'Order not found'];
+        }
+
+        // Update order status
+        $db->execute(
+            'UPDATE orders SET status = ? WHERE id = ?',
+            [$newStatus, $orderId]
+        );
+
+        // Get order details for notification
+        $orderDetails = $db->fetch('
+            SELECT o.*, u.first_name, u.last_name, u.email
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            WHERE o.id = ?
+        ', [$orderId]);
+
+        // Notify client about status change
+        if ($orderDetails) {
+            if (isNotificationEnabled($db, $orderDetails['user_id'], 'order_status_change')) {
+                createNotification($db, $orderDetails['user_id'], 'order_status_change',
+                    'Order Status Updated',
+                    "Your order #{$orderId} status has been updated to: {$newStatus}.",
+                    'normal', ['order_id' => $orderId, 'new_status' => $newStatus]);
+            }
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Order status updated successfully!',
+            'order_id' => $orderId,
+            'new_status' => $newStatus
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to update order status: ' . $e->getMessage()];
     }
 }
 
@@ -3318,19 +3630,524 @@ function createBulkNotifications($db, $userIds, $type, $title, $message, $priori
 }
 
 /**
-* Check if user has enabled notifications for a specific type
-*/
+ * Check if user has enabled notifications for a specific type
+ */
 function isNotificationEnabled($db, $userId, $notificationType) {
-   try {
-       $preference = $db->fetch('
-           SELECT is_enabled FROM notification_preferences
-           WHERE user_id = ? AND notification_type = ?
-       ', [$userId, $notificationType]);
+    try {
+        $preference = $db->fetch('
+            SELECT is_enabled FROM notification_preferences
+            WHERE user_id = ? AND notification_type = ?
+        ', [$userId, $notificationType]);
 
-       return $preference ? (bool)$preference['is_enabled'] : true; // Default to enabled
-   } catch (Exception $e) {
-       error_log('Failed to check notification preference: ' . $e->getMessage());
-       return true; // Default to enabled on error
-   }
+        return $preference ? (bool)$preference['is_enabled'] : true; // Default to enabled
+    } catch (Exception $e) {
+        error_log('Failed to check notification preference: ' . $e->getMessage());
+        return true; // Default to enabled on error
+    }
+}
+
+// ====================
+// EMAIL VERIFICATION FUNCTIONS
+// ====================
+
+function verifyEmail($db, $input) {
+    $token = trim($input['token'] ?? '');
+
+    if (empty($token)) {
+        return ['success' => false, 'message' => 'Verification token is required'];
+    }
+
+    try {
+        // Find user with this token
+        $user = $db->fetch(
+            'SELECT id, first_name, email, email_verification_token, token_expiry, is_active
+             FROM users
+             WHERE email_verification_token = ? AND is_active = 0',
+            [$token]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'Invalid or already used verification token'];
+        }
+
+        // Check if token has expired
+        $expiryTime = strtotime($user['token_expiry']);
+        if (time() > $expiryTime) {
+            return ['success' => false, 'message' => 'Verification token has expired. Please request a new one.'];
+        }
+
+        // Activate the user account
+        $db->execute(
+            'UPDATE users SET is_active = 1, email_verification_token = NULL, token_expiry = NULL, email_verified_at = datetime("now") WHERE id = ?',
+            [$user['id']]
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Email verified successfully! You can now log in to your account.',
+            'user_id' => $user['id'],
+            'user_name' => $user['first_name']
+        ];
+
+    } catch (Exception $e) {
+        error_log('Email verification error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Verification failed. Please try again.'];
+    }
+}
+
+function resendVerificationEmail($db, $input) {
+    $email = trim($input['email'] ?? '');
+
+    if (empty($email)) {
+        return ['success' => false, 'message' => 'Email address is required'];
+    }
+
+    try {
+        // Find user by email
+        $user = $db->fetch(
+            'SELECT id, first_name, email, is_active, email_verification_token, token_expiry
+             FROM users
+             WHERE email = ?',
+            [$email]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'No account found with this email address'];
+        }
+
+        if ($user['is_active'] == 1) {
+            return ['success' => false, 'message' => 'This email address is already verified'];
+        }
+
+        // Check if token is still valid (not expired)
+        $expiryTime = strtotime($user['token_expiry']);
+        if (time() < $expiryTime) {
+            // Token still valid, just resend the same one
+            $emailSent = sendVerificationEmail($email, $user['first_name'], $user['email_verification_token']);
+
+            if ($emailSent['success']) {
+                return [
+                    'success' => true,
+                    'message' => 'Verification email sent successfully. Please check your inbox.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send verification email. Please try again later.'
+                ];
+            }
+        } else {
+            // Token expired, generate new one
+            $newToken = generateVerificationToken();
+            $newExpiry = date('Y-m-d H:i:s', time() + 24 * 3600); // 24 hours from now
+
+            $db->execute(
+                'UPDATE users SET email_verification_token = ?, token_expiry = ? WHERE id = ?',
+                [$newToken, $newExpiry, $user['id']]
+            );
+
+            $emailSent = sendVerificationEmail($email, $user['first_name'], $newToken);
+
+            if ($emailSent['success']) {
+                return [
+                    'success' => true,
+                    'message' => 'New verification email sent successfully. Please check your inbox.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send verification email. Please try again later.'
+                ];
+            }
+        }
+
+    } catch (Exception $e) {
+        error_log('Resend verification email error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to resend verification email. Please try again.'];
+    }
+}
+
+function resendVerificationFromToken($db, $input) {
+    $token = trim($input['token'] ?? '');
+
+    if (empty($token)) {
+        return ['success' => false, 'message' => 'Verification token is required'];
+    }
+
+    try {
+        // Find user with this token
+        $user = $db->fetch(
+            'SELECT id, first_name, email, is_active, email_verification_token, token_expiry
+             FROM users
+             WHERE email_verification_token = ?',
+            [$token]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'Invalid verification token'];
+        }
+
+        if ($user['is_active'] == 1) {
+            return ['success' => false, 'message' => 'This email address is already verified'];
+        }
+
+        // Resend verification email using existing function
+        $emailSent = sendVerificationEmail($user['email'], $user['first_name'], $user['email_verification_token']);
+
+        if ($emailSent['success']) {
+            return [
+                'success' => true,
+                'message' => 'Verification email sent successfully. Please check your inbox.'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Failed to send verification email. Please try again later.'
+            ];
+        }
+
+    } catch (Exception $e) {
+        error_log('Resend verification from token error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to resend verification email. Please try again.'];
+    }
+}
+
+function requestPasswordReset($db, $input) {
+    $email = trim($input['email'] ?? '');
+
+    if (empty($email)) {
+        return ['success' => false, 'message' => 'Email address is required'];
+    }
+
+    try {
+        // Find user by email
+        $user = $db->fetch(
+            'SELECT id, first_name, email, is_active, email_verified_at
+             FROM users
+             WHERE email = ?',
+            [$email]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'No account found with this email address'];
+        }
+
+        // Generate password reset token
+        $resetToken = generatePasswordResetToken();
+        $resetExpiry = date('Y-m-d H:i:s', time() + 3600); // 1 hour from now
+
+        // Store reset token in database
+        $db->execute(
+            'UPDATE users SET password_reset_token = ?, reset_token_expiry = ? WHERE id = ?',
+            [$resetToken, $resetExpiry, $user['id']]
+        );
+
+        // Send password reset email
+        $emailSent = sendPasswordResetEmail($user['email'], $user['first_name'], $resetToken);
+
+        if ($emailSent['success']) {
+            return [
+                'success' => true,
+                'message' => 'Password reset email sent successfully. Please check your inbox.'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Failed to send password reset email. Please try again later.'
+            ];
+        }
+
+    } catch (Exception $e) {
+        error_log('Request password reset error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to process password reset request. Please try again.'];
+    }
+}
+
+function resetPassword($db, $input) {
+    $token = trim($input['token'] ?? '');
+    $newPassword = $input['new_password'] ?? '';
+
+    if (empty($token) || empty($newPassword)) {
+        return ['success' => false, 'message' => 'Reset token and new password are required'];
+    }
+
+    if (strlen($newPassword) < 6) {
+        return ['success' => false, 'message' => 'Password must be at least 6 characters long'];
+    }
+
+    try {
+        // Find user with this reset token
+        $user = $db->fetch(
+            'SELECT id, first_name, email, password_reset_token, reset_token_expiry
+             FROM users
+             WHERE password_reset_token = ?',
+            [$token]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'Invalid or expired reset token'];
+        }
+
+        // Check if token has expired
+        $expiryTime = strtotime($user['reset_token_expiry']);
+        if (time() > $expiryTime) {
+            return ['success' => false, 'message' => 'Reset token has expired. Please request a new password reset.'];
+        }
+
+        // Hash new password and update
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $db->execute(
+            'UPDATE users SET password = ?, password_reset_token = NULL, reset_token_expiry = NULL WHERE id = ?',
+            [$hashedPassword, $user['id']]
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Password reset successfully! You can now log in with your new password.'
+        ];
+
+    } catch (Exception $e) {
+        error_log('Reset password error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to reset password. Please try again.'];
+    }
+}
+
+function sendPasswordResetEmail($email, $firstName, $resetToken) {
+    try {
+        // Since we're using SMTPJS from frontend, we'll return success
+        $resetUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/public/reset_password.php?token=' . $resetToken;
+
+        error_log("Password reset email prepared for: $email, Name: $firstName, Token: $resetToken");
+        error_log("Reset URL: $resetUrl");
+
+        return [
+            'success' => true,
+            'message' => 'Password reset email prepared successfully',
+            'reset_url' => $resetUrl,
+            'note' => 'Email will be sent via SMTPJS from frontend'
+        ];
+
+    } catch (Exception $e) {
+        error_log('Send password reset email error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to prepare password reset email'];
+    }
+}
+
+function generatePasswordResetToken() {
+    return bin2hex(random_bytes(32));
+}
+
+function sendVerificationEmail($email, $firstName, $verificationToken) {
+    try {
+        // Since we're using SMTPJS from the frontend, we'll return success
+        // The actual email sending will be handled by the frontend JavaScript
+        // This prevents PHP mail configuration issues
+
+        $verificationUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/public/verify_email.php?token=' . $verificationToken;
+
+        // Log the verification email details for debugging
+        error_log("Verification email prepared for: $email, Name: $firstName, Token: $verificationToken");
+        error_log("Verification URL: $verificationUrl");
+
+        // Return success - the frontend will handle actual email sending via SMTPJS
+        return [
+            'success' => true,
+            'message' => 'Verification email prepared successfully',
+            'verification_url' => $verificationUrl,
+            'note' => 'Email will be sent via SMTPJS from frontend'
+        ];
+
+    } catch (Exception $e) {
+        error_log('Send verification email error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to prepare verification email'];
+    }
+}
+
+function generateVerificationToken() {
+    return bin2hex(random_bytes(32));
+}
+
+// ====================
+// LOGIN SECURITY FUNCTIONS
+// ====================
+
+/**
+ * Get client IP address
+ */
+function getClientIP() {
+    $ipSources = [
+        'HTTP_CF_CONNECTING_IP', // Cloudflare
+        'HTTP_X_FORWARDED_FOR',  // Proxy
+        'HTTP_X_FORWARDED',      // Proxy
+        'HTTP_X_CLUSTER_CLIENT_IP', // Cluster
+        'HTTP_X_REAL_IP',        // Nginx
+        'HTTP_CLIENT_IP',        // Apache
+        'REMOTE_ADDR'            // Default
+    ];
+
+    foreach ($ipSources as $source) {
+        if (!empty($_SERVER[$source])) {
+            $ip = $_SERVER[$source];
+            // Handle comma-separated IPs (like X-Forwarded-For)
+            if (strpos($ip, ',') !== false) {
+                $ip = trim(explode(',', $ip)[0]);
+            }
+            return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : 'unknown';
+        }
+    }
+
+    return 'unknown';
+}
+
+/**
+ * Log a login attempt
+ */
+function logLoginAttempt($db, $email, $ipAddress, $userAgent, $isSuccessful) {
+    try {
+        $db->execute('
+            INSERT INTO login_attempts (email, ip_address, user_agent, is_successful, created_at)
+            VALUES (?, ?, ?, ?, datetime("now"))
+        ', [$email, $ipAddress, $userAgent, $isSuccessful ? 1 : 0]);
+    } catch (Exception $e) {
+        error_log('Failed to log login attempt: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Get failed login attempts for an email within the last hour
+ */
+function getFailedLoginAttempts($db, $email) {
+    try {
+        $oneHourAgo = date('Y-m-d H:i:s', time() - 3600); // 1 hour ago
+
+        $result = $db->fetch('
+            SELECT COUNT(*) as attempt_count
+            FROM login_attempts
+            WHERE email = ? AND is_successful = 0 AND attempt_time > ?
+        ', [$email, $oneHourAgo]);
+
+        return intval($result['attempt_count']);
+    } catch (Exception $e) {
+        error_log('Failed to get failed login attempts: ' . $e->getMessage());
+        return 0;
+    }
+}
+
+/**
+ * Clear failed login attempts for an email (after successful login)
+ */
+function clearFailedLoginAttempts($db, $email) {
+    try {
+        $db->execute('
+            DELETE FROM login_attempts
+            WHERE email = ? AND is_successful = 0
+        ', [$email]);
+    } catch (Exception $e) {
+        error_log('Failed to clear failed login attempts: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Check if an account is locked out
+ */
+function checkAccountLockout($db, $email) {
+    try {
+        $result = $db->fetch('
+            SELECT lockout_until
+            FROM login_attempts
+            WHERE email = ? AND lockout_until IS NOT NULL AND lockout_until > datetime("now")
+            ORDER BY lockout_until DESC
+            LIMIT 1
+        ', [$email]);
+
+        if ($result && $result['lockout_until']) {
+            $lockoutTime = strtotime($result['lockout_until']);
+            return [
+                'locked' => true,
+                'lockout_until' => $lockoutTime
+            ];
+        }
+
+        return ['locked' => false];
+    } catch (Exception $e) {
+        error_log('Failed to check account lockout: ' . $e->getMessage());
+        return ['locked' => false];
+    }
+}
+
+/**
+ * Lock out an account for 15 minutes
+ */
+function lockoutAccount($db, $email, $ipAddress, $userAgent) {
+    try {
+        $lockoutUntil = date('Y-m-d H:i:s', time() + 15 * 60); // 15 minutes from now
+
+        $db->execute('
+            INSERT INTO login_attempts (email, ip_address, user_agent, lockout_until, created_at)
+            VALUES (?, ?, ?, ?, datetime("now"))
+        ', [$email, $ipAddress, $userAgent, $lockoutUntil]);
+    } catch (Exception $e) {
+        error_log('Failed to lockout account: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Notify staff when someone gets locked out
+ */
+function notifyStaffOfLockout($db, $email, $ipAddress, $userAgent) {
+    try {
+        // Get all active staff members
+        $staffUsers = $db->fetchAll('
+            SELECT id FROM users WHERE user_type = "staff" AND is_active = 1
+        ');
+
+        if (empty($staffUsers)) {
+            error_log('No active staff members found for lockout notification');
+            return;
+        }
+
+        // Get recent failed attempts for context
+        $oneHourAgo = date('Y-m-d H:i:s', time() - 3600);
+        $recentAttempts = $db->fetchAll('
+            SELECT ip_address, user_agent, attempt_time
+            FROM login_attempts
+            WHERE email = ? AND is_successful = 0 AND attempt_time > ?
+            ORDER BY attempt_time DESC
+            LIMIT 5
+        ', [$email, $oneHourAgo]);
+
+        $attemptDetails = [];
+        foreach ($recentAttempts as $attempt) {
+            $attemptDetails[] = [
+                'ip' => $attempt['ip_address'],
+                'time' => $attempt['attempt_time'],
+                'user_agent' => substr($attempt['user_agent'], 0, 100) // Truncate for display
+            ];
+        }
+
+        $notificationData = [
+            'email' => $email,
+            'ip_address' => $ipAddress,
+            'user_agent' => substr($userAgent, 0, 100),
+            'lockout_duration' => '15 minutes',
+            'recent_attempts' => $attemptDetails,
+            'total_attempts' => count($recentAttempts)
+        ];
+
+        // Send notification to all staff members
+        foreach ($staffUsers as $staff) {
+            if (isNotificationEnabled($db, $staff['id'], 'security_lockout')) {
+                createNotification($db, $staff['id'], 'security_lockout',
+                    'Security Alert: Account Locked Out',
+                    "Account {$email} has been temporarily locked due to multiple failed login attempts from IP {$ipAddress}.",
+                    'high',
+                    $notificationData);
+            }
+        }
+
+        error_log("Lockout notification sent to " . count($staffUsers) . " staff members for email: {$email}");
+    } catch (Exception $e) {
+        error_log('Failed to notify staff of lockout: ' . $e->getMessage());
+    }
 }
 

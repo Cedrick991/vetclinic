@@ -8,9 +8,82 @@
   border: 3px solid rgba(255,255,255,.3);
   border-radius: 50%;
   border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background-size: 400px 100%;
+  animation: shimmerLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmerLoading {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.loading-bounce {
+  animation: bounceLoading 1.4s ease-in-out infinite both;
+}
+
+@keyframes bounceLoading {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Enhanced Card Animations */
+.card-hover-effect {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow:
+    0 20px 40px rgba(102, 126, 234, 0.15),
+    0 10px 20px rgba(102, 126, 234, 0.1);
+}
+
+/* Enhanced Button Interactions */
+.btn-hover-lift {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-hover-lift::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-hover-lift:hover::before {
+  left: 100%;
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
 
 
 
@@ -2202,6 +2275,166 @@
    }
  }
 
+ /* Client Medical Records Styling */
+ .client-report-section {
+   background: rgba(255, 255, 255, 0.1);
+   border-radius: 15px;
+   padding: 25px;
+   margin-bottom: 20px;
+   border: 1px solid rgba(255, 255, 255, 0.2);
+   animation: slideInFromLeft 0.6s ease-out;
+ }
+
+ .client-report-section h4 {
+   color: white;
+   font-size: 18px;
+   margin-bottom: 20px;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+ }
+
+ .client-report-section h4 i {
+   color: #ffd700;
+   font-size: 20px;
+ }
+
+ .client-info-grid {
+   display: grid;
+   gap: 8px;
+ }
+
+ .client-info-row {
+   display: flex;
+   align-items: center;
+   padding: 8px 0;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+ }
+
+ .client-info-row:last-child {
+   border-bottom: none;
+ }
+
+ .client-info-label {
+   font-weight: 600;
+   color: #ffd700;
+   min-width: 100px;
+   font-size: 14px;
+ }
+
+ .client-info-value {
+   color: white;
+   flex: 1;
+   font-weight: 500;
+ }
+
+ .client-medical-record {
+   position: relative;
+   overflow: hidden;
+   transition: all 0.3s ease;
+ }
+
+ .client-medical-record::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: -100%;
+   width: 100%;
+   height: 100%;
+   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+   transition: left 0.6s ease;
+ }
+
+ .client-medical-record:hover::before {
+   left: 100%;
+ }
+
+ .client-medical-record:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+ }
+
+ /* Client Medical Summary Cards */
+ .client-summary-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+   gap: 15px;
+   margin: 20px 0;
+ }
+
+ .client-summary-card {
+   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   color: white;
+   padding: 15px;
+   border-radius: 12px;
+   text-align: center;
+   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+   transition: all 0.3s ease;
+ }
+
+ .client-summary-card:hover {
+   transform: translateY(-3px) scale(1.02);
+   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+ }
+
+ .client-summary-number {
+   font-size: 24px;
+   font-weight: 800;
+   margin-bottom: 5px;
+   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+ }
+
+ .client-summary-label {
+   font-size: 11px;
+   opacity: 0.9;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   font-weight: 600;
+ }
+
+ /* Client Medical Records Styling */
+ .pet-reports-container {
+   animation: fadeInUp 0.8s ease-out;
+ }
+
+ .pet-select-section {
+   position: relative;
+   animation: slideInFromLeft 0.8s ease-out;
+ }
+
+ .report-preview-section {
+   animation: slideInFromLeft 0.8s ease-out;
+   animation-delay: 0.2s;
+   animation-fill-mode: both;
+ }
+
+ .report-stats-section {
+   animation: slideInFromLeft 0.8s ease-out;
+   animation-delay: 0.4s;
+   animation-fill-mode: both;
+ }
+
+ /* Enhanced Report Preview Styling */
+ .report-preview-content {
+   transition: all 0.3s ease;
+ }
+
+ .report-preview-content:hover {
+   transform: translateY(-2px);
+ }
+
+ /* Medical Records Animation */
+ .client-medical-record {
+   animation: slideInFromLeft 0.6s ease-out;
+   animation-fill-mode: both;
+ }
+
+ .client-medical-record:nth-child(1) { animation-delay: 0.1s; }
+ .client-medical-record:nth-child(2) { animation-delay: 0.2s; }
+ .client-medical-record:nth-child(3) { animation-delay: 0.3s; }
+ .client-medical-record:nth-child(4) { animation-delay: 0.4s; }
+ .client-medical-record:nth-child(5) { animation-delay: 0.5s; }
+
  /* Mobile responsiveness for reports */
  @media (max-width: 768px) {
    .reports-container {
@@ -2215,6 +2448,37 @@
 
    .report-preview .statistics {
      grid-template-columns: 1fr;
+   }
+
+   .client-summary-grid {
+     grid-template-columns: repeat(2, 1fr);
+     gap: 12px;
+   }
+
+   .client-report-section {
+     padding: 20px 15px;
+   }
+
+   .client-info-row {
+     flex-direction: column;
+     align-items: flex-start;
+     gap: 4px;
+   }
+
+   .client-info-label {
+     min-width: auto;
+   }
+
+   .pet-reports-container {
+     padding: 20px 15px;
+   }
+
+   .pet-select-section {
+     padding: 25px 20px;
+   }
+
+   .report-preview-section {
+     padding: 25px 20px;
    }
  }
 
