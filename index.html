@@ -8,16 +8,26 @@
   <meta name="description" content="Tattao Veterinary Clinic - Professional pet care services in Penablanca, Cagayan">
   <!-- SMTPJS for email sending -->
   <script src="https://smtpjs.com/v3/smtp.js"></script>
+  
+  <!-- OTP Email Service -->
+  <script src="assets/js/otp-email-service.js"></script>
 </head>
 <body>
+  <!-- Anchor point for smooth scrolling to top -->
+  <div id="top"></div>
+
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <a href="#" onclick="toggleSidebar();" class="dashboard-link">🏠 Homepage</a>
-    <a href="#services" onclick="scrollToSection('services'); toggleSidebar();">🩺 Services</a>
-    <a href="#contact" onclick="scrollToSection('contact'); toggleSidebar();">📞 Contact Us</a>
-    <a href="#store" onclick="scrollToSection('store'); toggleSidebar();">🛒 Store</a>
-    <a href="#" onclick="handleLogout(); toggleSidebar();" class="logout-sidebar-btn">🚪 Logout</a>
+    <a href="#top" onclick="scrollToSection('top');" class="dashboard-link">🏠 Homepage</a>
+    <a href="#services" onclick="scrollToSection('services');" class="nav-link">🩺 Services</a>
+    <a href="#store" onclick="scrollToSection('store');" class="nav-link">🛒 Store</a>
+    <a href="#about" onclick="scrollToSection('about');" class="nav-link">ℹ️ About Us</a>
+    <a href="#contact" onclick="scrollToSection('contact');" class="nav-link">📞 Contact Us</a>
+    <a href="#logout" onclick="showLogoutModal();" class="logout-sidebar-btn">🚪 Logout</a>
   </div>
+
+  <!-- Sidebar Overlay (for closing sidebar when clicking outside) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()" style="display: none;"></div>
 
 
   <!-- Fixed Header Bar -->
@@ -169,8 +179,6 @@
     <div class="schedule-container">
       <div class="schedule-left">
         <img src="assets/images/logoo.jpg" alt="Clinic Logo">
-        <p>At Tattao Veterinary Clinic, we offer the <strong>best care</strong> for your fur babies. 
-        Promoting <strong>Responsible Pet Ownership</strong> by providing your pet care needs at a reasonable price.</p>
         
         <div class="footer-social">
           <a href="https://www.facebook.com/share/16H1LSHgNL/" target="_blank" rel="noopener noreferrer" title="Visit our Facebook page">
@@ -219,6 +227,73 @@
       </div>
     </section>
 
+    <!-- About Us Section -->
+    <section class="about-section" id="about">
+      <div class="container">
+        <div class="about-grid">
+          <!-- Left Image -->
+          <div class="image-wrapper">
+            <div class="image-border">
+              <img src="https://images.unsplash.com/photo-1581888227599-779811939961?w=600&h=700&fit=crop"
+                   alt="Veterinarian with pet owner"
+                   class="main-image">
+            </div>
+          </div>
+
+          <!-- Right Content -->
+          <div class="content-wrapper">
+            <div class="title-wrapper">
+              <h1 class="main-title">ABOUT US</h1>
+            </div>
+            <p class="description">
+              <strong>Tattao Veterinary Clinic</strong> is committed to delivering high-quality veterinary care through professional expertise and modern medical practices. We provide a full range of services including preventive care, diagnostics, treatment, and wellness programs to ensure the optimal health of animals. With a focus on excellence, integrity, and compassion, our clinic upholds the highest standards in veterinary medicine to serve both pets and their owners with trust and reliability.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Separator Line -->
+    <div class="section-separator"></div>
+
+    <!-- Meet the Vets Section -->
+    <section class="vets-section">
+      <div class="container">
+        <div class="vets-header">
+          <h2 class="section-title">MEET THE VETS</h2>
+        </div>
+
+        <div class="vets-grid">
+          <!-- Dr. Sheryl Mangulad -->
+          <div class="vet-card">
+            <div class="vet-image-border">
+              <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=300&fit=crop&crop=faces"
+                   alt="Dr. Sheryl Mangulad"
+                   class="vet-image">
+            </div>
+            <h3 class="vet-name">Dr. Sheryl Mangulad</h3>
+            <p class="vet-bio">
+              Friendly and approachable, she combines her strong medical knowledge and genuine empathy for both pets and owners. She specializes in providing gentle care, making every visit a positive and reassuring experience.
+            </p>
+          </div>
+
+          <!-- Dr. Judith Tattao -->
+          <div class="vet-card">
+            <div class="vet-image-border">
+              <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=faces"
+                   alt="Dr. Judith Tattao"
+                   class="vet-image">
+            </div>
+            <h3 class="vet-name">Dr. Judith Tattao</h3>
+            <p class="vet-bio">
+              A skilled veterinarian known for her professionalism, attention to detail, and compassionate care. With expertise in diagnostics and preventive care, she is dedicated to guiding pet owners in keeping their animals healthy and thriving.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <!-- Footer -->
     <footer>
     <div class="footer-container">
@@ -249,8 +324,7 @@
         <button type="submit"><i class="btn-icon">🔓</i> LOGIN</button>
       </form>
       <p>Don't have an account? <a href="#" onclick="showRegisterModal()">Register here</a></p>
-      <p><a href="#" onclick="showForgotPasswordModal()" style="color: #3498db; text-decoration: none;">Forgot your password?</a></p>
-      <p><a href="#" onclick="showResendVerificationModal()" style="color: #e74c3c; text-decoration: none;">Resend verification email?</a></p>
+      <p><a href="#" id="forgotPasswordLink" onclick="showForgotPasswordModal()" style="color: #3498db; text-decoration: none; display: none;">Forgot your password?</a></p>
     </div>
   </div>
 
@@ -307,9 +381,6 @@
         <input type="email" id="forgot_email" name="email" placeholder="✉️ Email Address" title="Enter your email address to reset password" required>
         <button type="submit"><i class="btn-icon">📧</i> SEND RESET LINK</button>
       </form>
-      <p style="text-align: center; margin-top: 20px;">
-        Remember your password? <a href="#" onclick="showLoginModal(); closeModal('forgotPasswordModal');">Login here</a>
-      </p>
     </div>
   </div>
 
@@ -361,10 +432,10 @@
           </div>
 
           <div class="login-prompt-actions">
-            <button class="btn-primary" onclick="showRegisterModal(); closeModal('bookingModal');" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+            <button class="btn-primary" onclick="closeModal('bookingModal'); setTimeout(() => showRegisterModal(), 100);" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
               <i class="fas fa-user-plus"></i> Create Account & Book
             </button>
-            <button class="btn-secondary" onclick="showLoginModal(); closeModal('bookingModal');" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+            <button class="btn-secondary" onclick="closeModal('bookingModal'); setTimeout(() => showLoginModal(), 100);" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
               <i class="fas fa-sign-in-alt"></i> Already have an account?
             </button>
           </div>
@@ -468,24 +539,93 @@
         </div>
       </div>
 
-      <div class="service-modal-footer">
-        <button class="btn-secondary" onclick="closeModal('serviceDetailsModal')">
-          <i class="fas fa-times"></i> Close
-        </button>
-        <button class="btn-primary" onclick="bookServiceFromModal()">
-          <i class="fas fa-calendar-plus"></i> Book This Service
-        </button>
-      </div>
     </div>
   </div>
 
 
+
+  <!-- 2FA OTP Modal -->
+  <div id="twoFAModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('twoFAModal')">&times;</span>
+      <h2><i class="modal-icon">🔐</i> Two-Factor Authentication</h2>
+      <form id="twoFAForm">
+        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+          Please enter the 6-digit verification code sent to your email address.
+        </p>
+        <label for="twofa_otp" class="sr-only">OTP Code</label>
+        <input type="text" id="twofa_otp" name="otp_code" placeholder="🔢 Enter 6-digit code" maxlength="6" pattern="[0-9]{6}" title="Enter the 6-digit verification code" required>
+        <button type="submit"><i class="btn-icon">✅</i> VERIFY & LOGIN</button>
+      </form>
+      <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px;">
+        Didn't receive the code? <a href="#" onclick="resend2FAOTP()" style="color: #3498db;">Resend Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Password Reset OTP Modal -->
+  <div id="passwordResetOTPModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('passwordResetOTPModal')">&times;</span>
+      <h2><i class="modal-icon">🔑</i> Reset Your Password</h2>
+      <form id="passwordResetOTPForm">
+        <p style="text-align: center; margin-bottom: 20px; color: #666;">
+          Enter the 6-digit code sent to your email and your new password.
+        </p>
+        <label for="reset_email" class="sr-only">Email Address</label>
+        <input type="email" id="reset_email" name="email" placeholder="✉️ Email Address" readonly style="background-color: #f5f5f5;">
+        
+        <label for="reset_otp" class="sr-only">OTP Code</label>
+        <input type="text" id="reset_otp" name="otp_code" placeholder="🔢 Enter 6-digit code" maxlength="6" pattern="[0-9]{6}" title="Enter the 6-digit verification code" required>
+        
+        <div class="password-container">
+          <label for="reset_new_password" class="sr-only">New Password</label>
+          <input type="password" id="reset_new_password" name="new_password" placeholder="🔒 New Password (min 8 chars)" title="Enter a new password with at least 8 characters" required minlength="8">
+          <span class="password-toggle" onclick="togglePasswordVisibility('passwordResetOTPForm')" title="Toggle password visibility" aria-label="Show/hide password">👁️</span>
+        </div>
+        
+        <div class="password-strength">
+          <div class="pw-strength-bar" id="resetOTPPwBar"></div>
+          <div class="pw-strength-text" id="resetOTPPwText">Password strength: -</div>
+          <div class="pw-requirements" id="resetOTPPwReq"></div>
+        </div>
+        
+        <button type="submit"><i class="btn-icon">🔄</i> RESET PASSWORD</button>
+      </form>
+      <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px;">
+        Didn't receive the code? <a href="#" id="resendCodeLink" onclick="resendPasswordResetOTP()" style="color: #3498db;">Resend Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('logoutModal')">&times;</span>
+      <h2><i class="modal-icon">🚪</i> Confirm Logout</h2>
+      <p style="text-align: center; margin-bottom: 20px; color: #666;">
+        Are you sure you want to log out? You will need to log in again to access your account.
+      </p>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button onclick="handleLogout(); closeModal('logoutModal');" style="background: #e74c3c; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+          <i class="fas fa-sign-out-alt"></i> Yes, Logout
+        </button>
+        <button onclick="closeModal('logoutModal')" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Notification Toast -->
   <div id="toast" class="toast"></div>
 
   <style>
     /* Red Header Bar and Sidebar Styles */
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -658,21 +798,83 @@
     }
 
     /* Main Content - Account for fixed header */
-    .content, .hero, .services, .contact, .schedule, .store-section {
+    .content, .hero, .services, .contact, .schedule, .store-section, .about-section, .vets-section {
       margin-top: 70px; /* Account for fixed header */
       padding-top: 20px;
     }
 
-    /* Close sidebar when clicking outside on mobile */
-    .sidebar.active::before {
+    /* Additional padding for services section to prevent header overlap */
+    .services {
+      padding-top: 40px;
+    }
+
+    /* Smooth transitions for homepage sections */
+    .hero, .services, .contact, .schedule, .store-section, .about-section, .vets-section {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .hero.hidden, .services.hidden, .contact.hidden, .schedule.hidden, .store-section.hidden, .about-section.hidden, .vets-section.hidden {
+      opacity: 0;
+      transform: translateY(30px);
+      display: none;
+    }
+
+    /* Enhanced navigation link animations */
+    .sidebar a {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar a::before {
       content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .sidebar a:hover::before {
+      left: 100%;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      padding-left: 30px;
+    }
+
+    /* Sidebar Overlay for closing when clicking outside */
+    .sidebar-overlay {
       position: fixed;
-      top: 70px;
-      left: 250px;
-      width: calc(100vw - 250px);
-      height: calc(100vh - 70px);
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: rgba(0, 0, 0, 0.5);
-      z-index: -1;
+      z-index: 998;
+      cursor: pointer;
+      display: none;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
+
+    /* Ensure sidebar is above overlay */
+    .sidebar.active {
+      z-index: 999;
+    }
+
+    /* Hide overlay on desktop, show only on mobile */
+    @media (min-width: 769px) {
+      .sidebar-overlay {
+        display: none !important;
+      }
     }
 
     /* Screen reader only labels */
@@ -741,8 +943,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 15px 20px;
-      margin-bottom: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       cursor: pointer;
@@ -753,8 +955,8 @@
 
     .service-item:hover {
       background: rgba(255, 255, 255, 0.2);
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(3px);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
     }
 
     .service-item .service-icon {
@@ -768,20 +970,29 @@
     .service-item .service-name {
       flex: 1;
       font-weight: 500;
-      font-size: 14px;
+      font-size: 13px;
       color: white;
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     .service-item .service-arrow {
       color: rgba(255, 255, 255, 0.7);
-      font-size: 12px;
+      font-size: 11px;
       transition: all 0.3s ease;
     }
 
     .service-item:hover .service-arrow {
       color: white;
-      transform: translateX(3px);
+      transform: translateX(2px);
+    }
+
+    /* Services section title */
+    .services h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
     /* Modal Icons */
@@ -886,35 +1097,35 @@
     /* Store Section Styles */
     .store-section {
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 20px;
       background: #27406b;
     }
 
     .store-section h2 {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: bold;
       margin-bottom: 5px;
       color: white;
     }
 
     .store-section p {
-      font-size: 14px;
-      margin-bottom: 30px;
+      font-size: 13px;
+      margin-bottom: 25px;
       color: #d1d5db;
     }
 
     .categories {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 15px;
       flex-wrap: wrap;
     }
 
     .category {
       background: linear-gradient(135deg, #3a588c 0%, #2c4a73 100%);
       border-radius: 12px;
-      padding: 20px;
-      width: 250px;
+      padding: 15px;
+      width: 220px;
       text-align: center;
       transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       cursor: pointer;
@@ -966,13 +1177,13 @@
 
     .category img {
       max-width: 100%;
-      height: 150px;
+      height: 120px;
       object-fit: contain;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .category h3 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: white;
       position: relative;
@@ -994,6 +1205,198 @@
       opacity: 0.8;
       transform: translateY(-2px);
     }
+
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, hsl(230, 55%, 45%) 0%, hsl(250, 50%, 55%) 100%);
+      color: white;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      position: relative;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 2rem 0;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (min-width: 768px) {
+      .about-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* Image Wrapper */
+    .image-wrapper {
+      position: relative;
+    }
+
+    .image-border {
+      border: 12px solid hsl(180, 85%, 60%);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .main-image {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+      display: block;
+    }
+
+
+    /* Content Wrapper */
+    .content-wrapper {
+      padding: 0.5rem;
+    }
+
+    .title-wrapper {
+      margin-bottom: 1rem;
+    }
+
+
+    .main-title {
+      font-size: 3rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .main-title {
+        font-size: 3.5rem;
+      }
+    }
+
+    .description {
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    @media (min-width: 768px) {
+      .description {
+        font-size: 1.125rem;
+      }
+    }
+
+    /* Section Separator */
+    .section-separator {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, hsl(180, 85%, 60%), transparent);
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    .section-separator::before {
+      content: '🐾';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, hsl(230, 55%, 45%) 0%, hsl(250, 50%, 55%) 100%);
+      padding: 0 1rem;
+      font-size: 1.5rem;
+      opacity: 0.6;
+    }
+
+    /* Vets Section */
+    .vets-section {
+      padding: 1.5rem 0;
+    }
+
+    .vets-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    @media (min-width: 768px) {
+      .section-title {
+        font-size: 3rem;
+      }
+    }
+
+    /* Vets Grid */
+    .vets-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .vets-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .vet-card {
+      text-align: center;
+    }
+
+    .vet-image-border {
+      display: inline-block;
+      border: 8px solid hsl(180, 85%, 60%);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .vet-image {
+      width: 192px;
+      height: 192px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .vet-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 1rem 0;
+    }
+
+    .vet-bio {
+      font-size: 0.875rem;
+      line-height: 1.75;
+      padding: 0 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .vet-bio {
+        font-size: 1rem;
+      }
+    }
+
 
     /* Service Modal Styles */
     .service-modal {
@@ -1084,17 +1487,14 @@
       line-height: 1.6;
     }
 
-    .service-modal-footer {
-      padding-top: 25px;
-      border-top: 1px solid rgba(255, 215, 0, 0.3);
-      display: flex;
-      gap: 15px;
-      justify-content: flex-end;
-    }
 
     /* Modal animations */
     .modal.show {
       animation: modalFadeIn 0.3s ease-out;
+    }
+
+    .modal.hide {
+      animation: modalFadeOut 0.3s ease-out;
     }
 
     @keyframes modalFadeIn {
@@ -1105,6 +1505,17 @@
       to {
         opacity: 1;
         transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes modalFadeOut {
+      from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
       }
     }
 
@@ -1466,9 +1877,6 @@
         margin: 5vh 2.5vw;
       }
 
-      .service-modal-footer {
-        flex-direction: column;
-      }
 
       .service-modal-header::after {
         width: 40px;
@@ -1484,6 +1892,77 @@
     let currentUser = null;
     let currentUserType = null;
     const API_BASE_URL = 'api/vet_api.php';
+
+    // Resend cooldown variables
+    let resendCooldown = false;
+    let resendTimer = 0;
+    let resendInterval = null;
+
+    // Helper function for API calls with CSRF token - global scope
+    async function apiCall(payload) {
+      try {
+        // Add CSRF token to payload for state-changing actions
+        const csrfActions = ['register', 'login', 'logout', 'book_appointment', 'add_pet', 'update_appointment_status', 'add_to_cart', 'place_order', 'update_staff_profile', 'change_staff_password'];
+        if (csrfActions.includes(payload.action)) {
+          payload.csrf_token = csrfToken;
+        }
+
+        try {
+          console.log('Making API call:', payload);
+          const response = await fetch('api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          // Log response status
+          console.log('API response status:', response.status);
+
+          // Handle non-200 responses
+          if (!response.ok) {
+            let errorText = await response.text();
+            console.error('API error response:', errorText);
+            try {
+              // Try to parse error as JSON
+              const errorJson = JSON.parse(errorText);
+              return { success: false, message: errorJson.message || 'API request failed' };
+            } catch (e) {
+              // If not JSON, return text
+              return { success: false, message: 'API error: ' + errorText };
+            }
+          }
+
+          // Parse JSON response
+          const result = await response.json();
+          console.log('API response:', result);
+          return result;
+        } catch (err) {
+          console.error('API call error:', err);
+          return { success: false, message: 'Connection error: ' + err.message };
+        }
+      } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+      }
+    }
+
+    // Logout function - global scope, without confirm since modal handles it
+    window.handleLogout = async () => {
+      try {
+        const result = await apiCall({ action: 'logout' });
+
+        if (result.success) {
+          toast('Logged out successfully.', 'success');
+          // Reset UI to show login/signup
+          resetHeaderToLoginState();
+        } else {
+          toast('Logout failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        toast('Logout failed. Please try again.', 'error');
+      }
+    };
 
     // Profile Picture Management System
     class ProfilePictureManager {
@@ -1604,8 +2083,380 @@
     // Create global profile picture manager instance
     window.profileManager = new ProfilePictureManager();
 
+    // Global modal functions - defined early so they're available for onclick handlers
+    window.showLoginModal = () => {
+      openModal('loginModal');
+      updateLoginModalWithAttempts(); // Show attempt status when modal opens
+    };
+    window.showRegisterModal = () => openModal('registerModal');
+    window.showForgotPasswordModal = () => openModal('forgotPasswordModal');
+    window.showResendVerificationModal = () => openModal('resendVerificationModal');
+    window.showLogoutModal = () => openModal('logoutModal');
+    window.showBookingModal = async function() {
+      console.log('🗓️ Booking modal triggered');
+
+      try {
+        // Check if user is logged in
+        const response = await fetch('api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_user_info' })
+        });
+
+        const result = await response.json();
+        console.log('📊 Login check result:', result);
+
+        if (result.success && result.data && result.data.logged_in) {
+          // User is logged in
+          const userType = result.data.user_type;
+          console.log('✅ User logged in as:', userType);
+
+          if (userType === 'staff') {
+            // Redirect staff to their dashboard
+            console.log('🔄 Redirecting staff to dashboard');
+            window.location.href = 'public/staff.html';
+            return;
+          } else if (userType === 'client') {
+            // Redirect client to their dashboard appointments section
+            console.log('🔄 Redirecting client to dashboard appointments');
+            window.location.href = 'public/client.html#appointments';
+            return;
+          }
+        }
+
+        // User is not logged in or login check failed
+        console.log('❌ User not logged in, showing signup prompt');
+
+        const modal = document.getElementById('bookingModal');
+        if (modal) {
+          modal.style.display = 'flex';
+
+          // Show login required message and hide booking form
+          const loginRequiredMsg = document.getElementById('loginRequiredMessage');
+          const bookingForm = document.getElementById('bookingForm');
+
+          if (loginRequiredMsg) {
+            loginRequiredMsg.style.display = 'block';
+          }
+          if (bookingForm) {
+            bookingForm.style.display = 'none';
+          }
+
+          // Add animation
+          setTimeout(() => {
+            modal.classList.add('show');
+          }, 10);
+
+          console.log('✅ Booking modal shown with signup prompt');
+        } else {
+          console.error('❌ Booking modal not found');
+        }
+
+      } catch (error) {
+        console.error('❌ Error in booking modal:', error);
+
+        // On error, show signup prompt as fallback
+        const modal = document.getElementById('bookingModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          document.getElementById('loginRequiredMessage').style.display = 'block';
+          document.getElementById('bookingForm').style.display = 'none';
+        }
+      }
+    };
+    window.closeModal = (id) => {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    };
+
+    function openModal(id) {
+      document.getElementById(id)?.style.setProperty('display', 'flex');
+    }
+
+    // 2FA and OTP Functions - defined early for global access
+    function show2FAModal(email) {
+      closeModal('loginModal');
+      openModal('twoFAModal');
+      // Store email for verification
+      window.currentOTPEmail = email;
+    }
+
+    function showPasswordResetOTPModal(email) {
+      // Clear any existing interval and reset link
+      if (resendInterval) {
+        clearInterval(resendInterval);
+        resendInterval = null;
+      }
+      resendCooldown = false;
+      resendTimer = 0;
+      const link = document.getElementById('resendCodeLink');
+      if (link) {
+        link.textContent = 'Resend Code';
+        link.style.pointerEvents = 'auto';
+        link.style.color = '#3498db';
+      }
+
+      openModal('passwordResetOTPModal');
+      document.getElementById('reset_email').value = email;
+      window.currentResetEmail = email;
+    }
+
+    async function resend2FAOTP() {
+      if (!window.currentOTPEmail) {
+        toast('Session expired. Please login again.', 'error');
+        closeModal('twoFAModal');
+        showLoginModal();
+        return;
+      }
+
+      try {
+        // Re-trigger login to get new OTP
+        const result = await apiCall({
+          action: 'login',
+          email: window.currentOTPEmail,
+          password: window.currentOTPPassword // This won't work, user needs to re-enter
+        });
+
+        // Instead, let's use a direct OTP generation
+        toast('Please login again to receive a new code.', 'info');
+        closeModal('twoFAModal');
+        showLoginModal();
+
+      } catch (error) {
+        console.error('Resend 2FA OTP error:', error);
+        toast('Please login again to receive a new code.', 'info');
+        closeModal('twoFAModal');
+        showLoginModal();
+      }
+    }
+
+    async function resendPasswordResetOTP() {
+      // Clear any existing interval
+      if (resendInterval) {
+        clearInterval(resendInterval);
+        resendInterval = null;
+      }
+
+      if (resendCooldown) {
+        return;
+      }
+
+      if (!window.currentResetEmail) {
+        toast('Session expired. Please try again.', 'error');
+        closeModal('passwordResetOTPModal');
+        return;
+      }
+
+      // Start cooldown
+      resendCooldown = true;
+      resendTimer = 60;
+      const link = document.getElementById('resendCodeLink');
+      if (link) {
+        link.textContent = `Resend Code (${resendTimer}s)`;
+        link.style.pointerEvents = 'none';
+        link.style.color = '#999';
+      }
+
+      // Start countdown
+      resendInterval = setInterval(() => {
+        resendTimer--;
+        if (link) {
+          link.textContent = `Resend Code (${resendTimer}s)`;
+        }
+        if (resendTimer <= 0) {
+          clearInterval(resendInterval);
+          resendInterval = null;
+          resendCooldown = false;
+          if (link) {
+            link.textContent = 'Resend Code';
+            link.style.pointerEvents = 'auto';
+            link.style.color = '#3498db';
+          }
+        }
+      }, 1000);
+
+      try {
+        const result = await apiCall({
+          action: 'forgot_password_otp',
+          email: window.currentResetEmail
+        });
+
+        if (result.success) {
+          // Send new OTP email
+          if (window.otpEmailService && result.otp_code) {
+            try {
+              const emailResult = await window.otpEmailService.sendPasswordResetOTP(
+                result.user_email,
+                result.user_name,
+                result.otp_code
+              );
+
+              if (emailResult.success) {
+                toast('New verification code sent to your email!', 'success');
+              } else {
+                if (emailResult.mock) {
+                  // Development mode - show different message
+                  toast('New verification code generated! Check console for mock email details.', 'info');
+                } else {
+                  // Real email failed
+                  toast('New verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+                }
+              }
+            } catch (emailError) {
+              console.error('Email error:', emailError);
+              toast('New verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+            }
+          } else {
+            console.warn('⚠️ Password reset email service not available');
+            toast('New verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+          }
+        } else {
+          toast(result.message || 'Failed to send new code', 'error');
+        }
+      } catch (error) {
+        console.error('Resend password reset OTP error:', error);
+        toast('Connection error. Please try again.', 'error');
+      }
+    }
+
+    // Assign to window object for global access
+    window.show2FAModal = show2FAModal;
+    window.showPasswordResetOTPModal = showPasswordResetOTPModal;
+    window.resend2FAOTP = resend2FAOTP;
+    window.resendPasswordResetOTP = resendPasswordResetOTP;
+
+    // Form handlers - defined early for global access
+    async function handle2FAVerification(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const otpCode = form.otp_code.value.trim();
+
+      if (!otpCode) {
+        toast('Please enter the verification code.', 'error');
+        return;
+      }
+
+      if (otpCode.length !== 6) {
+        toast('Verification code must be 6 digits.', 'error');
+        return;
+      }
+
+      try {
+        const result = await apiCall({
+          action: 'verify_otp',
+          otp_code: otpCode
+        });
+
+        if (result.success) {
+          toast('Login successful! Redirecting...', 'success');
+          closeModal('twoFAModal');
+          form.reset();
+
+          // Redirect based on user type
+          setTimeout(() => {
+            if (result.user && result.user.type === 'staff') {
+              window.location.href = 'public/staff.html';
+            } else {
+              window.location.href = 'public/client.html';
+            }
+          }, 1500);
+        } else {
+          toast(result.message || '2FA verification failed', 'error');
+        }
+      } catch (error) {
+        console.error('2FA verification error:', error);
+        toast('Connection error. Please try again.', 'error');
+      }
+    }
+
+    async function handlePasswordResetOTP(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const email = form.email.value.trim();
+      const otpCode = form.otp_code.value.trim();
+      const newPassword = form.new_password.value;
+
+      if (!otpCode) {
+        toast('Please enter the verification code.', 'error');
+        return;
+      }
+
+      if (otpCode.length !== 6) {
+        toast('Verification code must be 6 digits.', 'error');
+        return;
+      }
+
+      if (!newPassword) {
+        toast('Please enter your new password.', 'error');
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        toast('Password must be at least 8 characters long.', 'error');
+        return;
+      }
+
+      // Check password strength requirements
+      const hasUpper = /[A-Z]/.test(newPassword);
+      const hasLower = /[a-z]/.test(newPassword);
+      const hasDigit = /\d/.test(newPassword);
+      const hasSymbol = /[^A-Za-z0-9]/.test(newPassword);
+
+      if (!(hasUpper && hasLower && hasDigit && hasSymbol)) {
+        toast('Password must include uppercase, lowercase, number, and symbol.', 'error');
+        return;
+      }
+
+      try {
+        const result = await apiCall({
+          action: 'reset_password_with_otp',
+          email: email,
+          otp_code: otpCode,
+          new_password: newPassword
+        });
+
+        if (result.success) {
+          toast('Password reset successfully! You can now login with your new password.', 'success');
+          closeModal('passwordResetOTPModal');
+          form.reset();
+
+          // Show login modal after short delay
+          setTimeout(() => {
+            showLoginModal();
+          }, 2000);
+        } else {
+          toast(result.message || 'Password reset failed', 'error');
+        }
+      } catch (error) {
+        console.error('Password reset error:', error);
+        toast('Connection error. Please try again.', 'error');
+      }
+    }
+
+    // Assign form handlers to window for global access
+    window.handle2FAVerification = handle2FAVerification;
+    window.handlePasswordResetOTP = handlePasswordResetOTP;
+
+
     // Modern JavaScript with reduced redundancy
     document.addEventListener('DOMContentLoaded', async function () {
+      // Log email service status for debugging
+      if (window.otpEmailService) {
+        const status = window.otpEmailService.getStatus();
+        console.log('📧 Email Service Status:', status);
+        if (status.ready) {
+          console.log('✅ Email service is ready!');
+        } else if (status.mock) {
+          console.log('🚀 Email service in development mode - using mock emails');
+        } else {
+          console.log('⚠️ Email service not configured - check otp-email-service.js');
+        }
+      }
+
       // Initialize profile picture manager
       if (window.profileManager) {
         profileManager.init();
@@ -1658,53 +2509,6 @@
         }
       }
 
-      // Helper function for API calls with CSRF token
-      async function apiCall(payload) {
-        try {
-          // Add CSRF token to payload for state-changing actions
-          const csrfActions = ['register', 'login', 'logout', 'book_appointment', 'add_pet', 'update_appointment_status', 'add_to_cart', 'place_order', 'update_staff_profile', 'change_staff_password'];
-          if (csrfActions.includes(payload.action)) {
-            payload.csrf_token = csrfToken;
-          }
-
-        try {
-            console.log('Making API call:', payload);
-            const response = await fetch('api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            // Log response status
-            console.log('API response status:', response.status);
-            
-            // Handle non-200 responses
-            if (!response.ok) {
-                let errorText = await response.text();
-                console.error('API error response:', errorText);
-                try {
-                    // Try to parse error as JSON
-                    const errorJson = JSON.parse(errorText);
-                    return { success: false, message: errorJson.message || 'API request failed' };
-                } catch (e) {
-                    // If not JSON, return text
-                    return { success: false, message: 'API error: ' + errorText };
-                }
-            }
-
-            // Parse JSON response
-            const result = await response.json();
-            console.log('API response:', result);
-            return result;
-        } catch (err) {
-            console.error('API call error:', err);
-            return { success: false, message: 'Connection error: ' + err.message };
-        }
-      } catch (error) {
-        console.error('API call failed:', error);
-        throw error;
-      }
-      }
 
       // Check login status on page load and update UI accordingly
       async function checkLoginStatusOnLoad() {
@@ -1781,6 +2585,9 @@
         resetBookingButtonsToDefault();
       }
 
+      // Make function globally accessible
+      window.resetToLoggedOutState = resetToLoggedOutState;
+
       // Reset booking buttons to default logged-out text
       function resetBookingButtonsToDefault() {
         const bookingBtns = document.querySelectorAll('.booking-btn, nav a[onclick*="showBookingModal"]');
@@ -1793,96 +2600,6 @@
         });
       }
 
-      // Global modal functions
-      window.showLoginModal = () => {
-        openModal('loginModal');
-        updateLoginModalWithAttempts(); // Show attempt status when modal opens
-      };
-      window.showRegisterModal = () => openModal('registerModal');
-      window.showForgotPasswordModal = () => openModal('forgotPasswordModal');
-      window.showResendVerificationModal = () => openModal('resendVerificationModal');
-      window.showBookingModal = async function() {
-        console.log('🗓️ Booking modal triggered');
-
-        try {
-          // Check if user is logged in
-          const response = await fetch('api/vet_api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_user_info' })
-          });
-
-          const result = await response.json();
-          console.log('📊 Login check result:', result);
-
-          if (result.success && result.data && result.data.logged_in) {
-            // User is logged in
-            const userType = result.data.user_type;
-            console.log('✅ User logged in as:', userType);
-
-            if (userType === 'staff') {
-              // Redirect staff to their dashboard
-              console.log('🔄 Redirecting staff to dashboard');
-              window.location.href = 'public/staff.html';
-              return;
-            } else if (userType === 'client') {
-              // Redirect client to their dashboard appointments section
-              console.log('🔄 Redirecting client to dashboard appointments');
-              window.location.href = 'public/client.html#appointments';
-              return;
-            }
-          }
-
-          // User is not logged in or login check failed
-          console.log('❌ User not logged in, showing signup prompt');
-
-          const modal = document.getElementById('bookingModal');
-          if (modal) {
-            modal.style.display = 'flex';
-
-            // Show login required message and hide booking form
-            const loginRequiredMsg = document.getElementById('loginRequiredMessage');
-            const bookingForm = document.getElementById('bookingForm');
-
-            if (loginRequiredMsg) {
-              loginRequiredMsg.style.display = 'block';
-            }
-            if (bookingForm) {
-              bookingForm.style.display = 'none';
-            }
-
-            // Add animation
-            setTimeout(() => {
-              modal.classList.add('show');
-            }, 10);
-
-            console.log('✅ Booking modal shown with signup prompt');
-          } else {
-            console.error('❌ Booking modal not found');
-          }
-
-        } catch (error) {
-          console.error('❌ Error in booking modal:', error);
-
-          // On error, show signup prompt as fallback
-          const modal = document.getElementById('bookingModal');
-          if (modal) {
-            modal.style.display = 'flex';
-            document.getElementById('loginRequiredMessage').style.display = 'block';
-            document.getElementById('bookingForm').style.display = 'none';
-          }
-        }
-      };
-      window.closeModal = (id) => {
-        const modal = document.getElementById(id);
-        if (modal) {
-          modal.style.display = 'none';
-        }
-      };
-
-      function openModal(id) {
-        document.getElementById(id)?.style.setProperty('display', 'flex');
-      }
 
       // Enhanced toast notification system with icons
       window.toast = function(message, type = 'success') {
@@ -2233,6 +2950,7 @@
       // Wire up strength meters
       wirePasswordStrength('registerForm', 'register');
       wirePasswordStrength('signupForm', 'signup');
+      wirePasswordStrength('passwordResetOTPForm', 'resetOTP');
 
       // Form handlers with PHP API integration
       const loginForm = document.getElementById('loginForm');
@@ -2252,7 +2970,9 @@
 
       const bookingForm = document.getElementById('bookingForm');
       if (bookingForm) bookingForm.addEventListener('submit', handleBooking);
+      
 
+      
       // Booking functionality now handled by client dashboard
       
       // Login attempt tracking functions
@@ -2340,6 +3060,16 @@
           passwordField.parentNode.insertBefore(statusDiv, passwordField.nextSibling);
         }
 
+        // Control forgot password link visibility based on attempts
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        if (forgotLink) {
+          if (attempts.count >= 1) {
+            forgotLink.style.display = 'block';
+          } else {
+            forgotLink.style.display = 'none';
+          }
+        }
+
         // Add event listeners to clear status when user starts typing
         const emailInput = document.getElementById('login_email');
         const passwordInput = document.getElementById('login_password');
@@ -2392,6 +3122,48 @@
           });
 
           if (result.success) {
+            // Check if 2FA is required
+            if (result.requires_2fa) {
+              console.log('🔐 2FA required, showing OTP input');
+              
+              // Send OTP email
+              if (window.otpEmailService && result.otp_code) {
+                try {
+                  const emailResult = await window.otpEmailService.send2FAOTP(
+                    result.email,
+                    result.email.split('@')[0], // Use email prefix as name fallback
+                    result.otp_code
+                  );
+
+                  if (emailResult.success) {
+                    console.log('✅ 2FA OTP email sent successfully');
+                  } else {
+                    console.warn('⚠️ 2FA OTP email failed:', emailResult.message);
+                    if (emailResult.mock) {
+                      // Development mode - show different message
+                      toast('Verification code generated! Check console for mock email details.', 'info');
+                    } else {
+                      // Real email failed
+                      toast('Verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+                    }
+                  }
+                } catch (emailError) {
+                  console.error('❌ 2FA OTP email error:', emailError);
+                  // Still show success message since OTP was generated, just email failed
+                  toast('Verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+                }
+              } else {
+                console.warn('⚠️ OTP email service not available');
+                toast('Verification code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+              }
+              
+              // Show OTP verification modal
+              show2FAModal(result.email);
+              toast('Please check your email for the 6-digit verification code', 'info');
+              return;
+            }
+            
+            // Regular login success without 2FA
             // Reset login attempts on successful login
             resetLoginAttempts();
             clearLoginModalStatus();
@@ -2435,17 +3207,7 @@
             const attempts = incrementLoginAttempts();
             updateLoginModalWithAttempts();
 
-            // Show specific error message or attempt warning
-            if (result.message) {
-              toast(result.message, 'error');
-            } else {
-              const remainingAttempts = 5 - attempts.count;
-              if (remainingAttempts > 0) {
-                toast(`Login failed. ${remainingAttempts} attempt(s) remaining before lockout.`, 'error');
-              } else {
-                toast('Account locked due to multiple failed attempts. Please wait 15 minutes. For immediate assistance, contact admin at 09286077247.', 'error');
-              }
-            }
+            // No toast notifications for login errors, as the modal already displays the status
           }
         } catch (error) {
           console.error('Login error:', error);
@@ -2511,60 +3273,59 @@
           const result = await apiCall(payload);
           
           if (result.success) {
-            let welcomeMsg = `Registration successful! Welcome ${firstName}! You can now log in with your account.`;
+            let welcomeMsg = result.auto_login ? 
+              `Registration successful! Welcome ${firstName}! You are now logged in.` : 
+              `Registration successful! Welcome ${firstName}! You can now log in with your account.`;
 
-            // Send verification email using SMTPJS (optional)
+            closeModal('registerModal');
+            form.reset();
+            updateRegisterForm();
+
+            // Show success message
+            toast(welcomeMsg, 'success');
+
+            // If auto-login is enabled, update UI and redirect
+            if (result.auto_login && result.user) {
+              // Update the UI to show logged-in state
+              updateUIForLoggedInUser(result.user, result.user.type);
+              
+              // Show additional success message for auto-login
+              setTimeout(() => {
+                toast('Redirecting to your dashboard...', 'success');
+              }, 1000);
+
+              // Add longer delay to allow session to be properly established
+              setTimeout(() => {
+                console.log('✅ Session should be established, redirecting to dashboard...');
+                // Store user info in sessionStorage as backup
+                sessionStorage.setItem('registration_user', JSON.stringify({
+                  id: result.user.id,
+                  name: result.user.name,
+                  email: result.user.email,
+                  type: result.user.type,
+                  auto_logged_in: true,
+                  timestamp: Date.now()
+                }));
+                
+                if (result.user.type === 'staff') {
+                  window.location.href = 'public/staff.html';
+                } else if (result.user.type === 'client') {
+                  window.location.href = 'public/client.html';
+                }
+              }, 3000); // Increased delay to 3 seconds
+            }
+
+            // Send verification email using SMTPJS (optional, doesn't affect user experience)
             if (typeof emailService !== 'undefined' && result.verification_token) {
               emailService.sendVerificationEmail(email, firstName, result.verification_token)
                 .then(emailResult => {
                   if (emailResult.success) {
-                    toast(welcomeMsg + ' (Optional: Check your email for account verification link for enhanced security)', 'success');
-                  } else {
-                    toast(welcomeMsg + ' (Optional: Email verification available for enhanced security)', 'success');
-                  }
-
-                  closeModal('registerModal');
-                  form.reset();
-                  updateRegisterForm();
-
-                  // Auto-redirect for new users
-                  if (result.user && result.user.type === 'client') {
-                    toast('Redirecting to your dashboard...', 'success');
-                    setTimeout(() => {
-                      window.location.href = 'public/client.html';
-                    }, 1500);
-                    updateUIForLoggedInUser(result.user, 'client');
+                    console.log('Verification email sent successfully');
                   }
                 })
                 .catch(emailError => {
                   console.error('Email sending error:', emailError);
-                  toast(welcomeMsg, 'success');
-                  closeModal('registerModal');
-                  form.reset();
-                  updateRegisterForm();
-
-                  // Auto-redirect even if email fails
-                  if (result.user && result.user.type === 'client') {
-                    setTimeout(() => {
-                      window.location.href = 'public/client.html#appointments';
-                    }, 1500);
-                    updateUIForLoggedInUser(result.user, 'client');
-                  }
                 });
-            } else {
-              toast(welcomeMsg, 'success');
-              closeModal('registerModal');
-              form.reset();
-              updateRegisterForm();
-
-              // Auto-redirect for new users
-              if (result.user && result.user.type === 'client') {
-                toast('Redirecting to your dashboard...', 'success');
-                setTimeout(() => {
-                  window.location.href = 'public/client.html#appointments';
-                }, 1500);
-                updateUIForLoggedInUser(result.user, 'client');
-              }
             }
           } else {
             toast(result.message || 'Registration failed. Please try again.', 'error');
@@ -2575,55 +3336,74 @@
       }
     }
 
-    async function handleForgotPassword(e) {
-      e.preventDefault();
+      async function handleForgotPassword(e) {
+        e.preventDefault();
 
-      const form = e.target;
-      const email = form.email.value.trim();
+        const form = e.target;
+        const email = form.email.value.trim();
 
-      if (!email) {
-        toast('Please enter your email address.', 'error');
-        return;
-      }
+        if (!email) {
+          toast('Please enter your email address.', 'error');
+          return;
+        }
 
-      try {
-        const result = await apiCall({
-          action: 'request_password_reset',
-          email: email
-        });
+        if (!validateEmail(email)) {
+          toast('Please enter a valid email address.', 'error');
+          return;
+        }
 
-        if (result.success) {
-          // Send password reset email using SMTPJS
-          if (typeof emailService !== 'undefined') {
-            emailService.sendPasswordResetEmail(email, 'Valued Customer', 'reset_token')
-              .then(emailResult => {
+        try {
+          const result = await apiCall({
+            action: 'forgot_password_otp',
+            email: email
+          });
+
+          if (result.success) {
+            // Send OTP email using SMTPJS
+            if (window.otpEmailService && result.otp_code) {
+              try {
+                const emailResult = await window.otpEmailService.sendPasswordResetOTP(
+                  result.user_email,
+                  result.user_name,
+                  result.otp_code
+                );
+
                 if (emailResult.success) {
-                  toast('Password reset email sent successfully! Please check your inbox.', 'success');
+                  console.log('✅ Password reset OTP email sent successfully');
+                  toast('Password reset code sent to your email!', 'success');
                 } else {
-                  toast('Reset request processed. Please check your email for the reset link.', 'success');
+                  console.warn('⚠️ Password reset OTP email failed:', emailResult.message);
+                  if (emailResult.mock) {
+                    // Development mode - show different message
+                    toast('Reset code generated! Check console for mock email details.', 'info');
+                  } else {
+                    // Real email failed
+                    toast('Reset code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+                  }
                 }
-                closeModal('forgotPasswordModal');
-                form.reset();
-              })
-              .catch(emailError => {
-                console.error('Email sending error:', emailError);
-                toast('Reset request processed. Please check your email for the reset link.', 'success');
-                closeModal('forgotPasswordModal');
-                form.reset();
-              });
-          } else {
-            toast('Password reset link sent! Please check your email.', 'success');
+              } catch (emailError) {
+                console.error('❌ Password reset OTP email error:', emailError);
+                toast('Reset code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+              }
+            } else {
+              console.warn('⚠️ Password reset email service not available');
+              toast('Reset code generated. Please check your email or contact support if you don\'t receive it.', 'info');
+            }
+            
             closeModal('forgotPasswordModal');
             form.reset();
+            
+            // Show password reset OTP modal
+            showPasswordResetOTPModal(email);
+            
+          } else {
+            toast(result.message || 'Failed to generate reset code.', 'error');
           }
-        } else {
-          toast(result.message || 'Failed to send reset link.', 'error');
+        } catch (error) {
+          console.error('Forgot password error:', error);
+          toast('Connection error. Please try again.', 'error');
         }
-      } catch (error) {
-        console.error('Forgot password error:', error);
-        toast('Connection error. Please try again.', 'error');
       }
-    }
 
     async function handleResendVerification(e) {
       e.preventDefault();
@@ -2741,21 +3521,6 @@
         console.log('UI updated successfully for user:', userName);
       }
       
-      // Logout function
-      window.handleLogout = async () => {
-        try {
-          const result = await apiCall({ action: 'logout' });
-
-          if (result.success) {
-            toast('Logged out successfully.', 'success');
-            // Reset UI to show login/signup
-            resetHeaderToLoginState();
-          }
-        } catch (error) {
-          console.error('Logout error:', error);
-          toast('Logout failed.', 'error');
-        }
-      };
 
       // Reset header to login state
       function resetHeaderToLoginState() {
@@ -2779,6 +3544,9 @@
         // Use centralized logged out state management
         resetToLoggedOutState();
       }
+
+      // Make function globally accessible
+      window.resetHeaderToLoginState = resetHeaderToLoginState;
 
       // Booking functionality now handled by client dashboard
       
@@ -2925,7 +3693,7 @@
   // Ensure all modals exist before adding event listeners
   function initializeModalHandlers() {
     // List of required modal IDs (removed bookingModal since it redirects to client dashboard)
-    const modalIds = ['loginModal', 'registerModal', 'forgotPasswordModal'];
+    const modalIds = ['loginModal', 'registerModal', 'forgotPasswordModal', 'logoutModal'];
 
     // Check if all modals exist
     const missingModals = modalIds.filter(id => !document.getElementById(id));
@@ -2957,35 +3725,132 @@
   const sidebar = document.getElementById('sidebar');
   const menuBtn = document.getElementById('menuBtn');
 
+  // Get sidebar overlay element
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
   // Hamburger menu button functionality
   if (menuBtn) {
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      sidebar.classList.toggle('active');
+      toggleSidebar();
     });
   }
 
-  // Close sidebar when clicking outside
-  document.addEventListener('click', (e) => {
-    if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== menuBtn) {
+  // Function to toggle sidebar with overlay
+  function toggleSidebar() {
+    if (sidebar) {
+      const isActive = sidebar.classList.contains('active');
+      if (isActive) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+  }
+
+  // Function to open sidebar
+  function openSidebar() {
+    if (sidebar) {
+      sidebar.classList.add('active');
+      if (sidebarOverlay) {
+        sidebarOverlay.classList.add('active');
+      }
+    }
+  }
+
+  // Function to close sidebar
+  function closeSidebar() {
+    if (sidebar) {
       sidebar.classList.remove('active');
+    }
+    if (sidebarOverlay) {
+      sidebarOverlay.classList.remove('active');
+    }
+  }
+
+  // Close sidebar when clicking on overlay
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+
+  // Close sidebar when clicking outside (fallback)
+  document.addEventListener('click', (e) => {
+    if (sidebar && sidebar.classList.contains('active')) {
+      // Check if click is outside sidebar and not on menu button
+      if (!sidebar.contains(e.target) && e.target !== menuBtn && e.target !== sidebarOverlay) {
+        closeSidebar();
+      }
     }
   });
 
-  // Allow sidebar to be toggled programmatically
-  window.toggleSidebar = () => {
-    if (sidebar) {
-      sidebar.classList.toggle('active');
-    }
-  };
+  // Prevent event propagation on sidebar clicks to avoid immediate closing
+  if (sidebar) {
+    sidebar.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 
-  // Scroll to section function for homepage navigation
+  // Close sidebar on Escape key press
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('active')) {
+      closeSidebar();
+    }
+  });
+
+  // Handle mobile touch events for better mobile experience
+  if (sidebarOverlay) {
+    // Prevent scrolling when overlay is active on mobile
+    sidebarOverlay.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  // Allow sidebar functions to be called globally
+  window.toggleSidebar = toggleSidebar;
+  window.closeSidebar = closeSidebar;
+
+  // Enhanced scroll to section function with smooth animation
   function scrollToSection(sectionId) {
     const section = document.getElementById(sectionId);
     if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Add offset for fixed header
+      const headerHeight = 70; // Height of fixed header
+      const sectionPosition = section.offsetTop - headerHeight;
+
+      // Smooth scroll to the calculated position
+      window.scrollTo({
+        top: sectionPosition,
+        behavior: 'smooth'
+      });
+
+      // Close sidebar after navigation
+      setTimeout(() => {
+        closeSidebar();
+      }, 300);
     }
   }
+
+  // Enhanced smooth scroll for any element
+  function smoothScrollToElement(elementId, offset = 70) {
+    const element = document.getElementById(elementId) || document.querySelector(elementId);
+    if (element) {
+      const elementPosition = element.offsetTop - offset;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  // Enhanced navigation with smooth scrolling for anchor links
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('a[href^="#"]');
+    if (target && target.getAttribute('href').length > 1) {
+      e.preventDefault();
+      const sectionId = target.getAttribute('href').substring(1);
+      scrollToSection(sectionId);
+    }
+  });
 
   // Service details data mapping
   const serviceDetailsData = {
@@ -3332,20 +4197,14 @@
     const modal = document.getElementById(id);
     if (modal) {
       modal.classList.remove('show');
+      modal.classList.add('hide');
       setTimeout(() => {
         modal.style.display = 'none';
+        modal.classList.remove('hide');
       }, 300); // Match CSS transition time
     }
   };
 
-  // Book service from modal function
-  window.bookServiceFromModal = function() {
-    // Close service details modal
-    closeModal('serviceDetailsModal');
-
-    // Redirect to client dashboard for booking
-    window.location.href = 'public/client.html#appointments';
-  };
 
   </script>
 </body>
