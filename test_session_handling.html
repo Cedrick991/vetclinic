@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Handling Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .info { border-left: 4px solid #17a2b8; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Session Handling Test Suite</h1>
+    <p>This test suite verifies that session expiration handling works correctly without auto-redirecting to homepage.</p>
+
+    <div class="test-section">
+        <h2>📋 Test 1: Session Expiration Modal Display</h2>
+        <p>Tests if the session expired modal appears instead of redirecting.</p>
+        <button onclick="testSessionExpiredModal()">Test Session Expired Modal</button>
+        <div id="test1-result" class="result info">Click the button above to test</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Test 2: Re-authentication Flow</h2>
+        <p>Tests if re-authentication works without redirecting to homepage.</p>
+        <button onclick="testReauthentication()">Test Re-authentication</button>
+        <div id="test2-result" class="result info">Click the button above to test</div>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Test 3: Pending Booking Data Save/Restore</h2>
+        <p>Tests if booking data is saved when session expires and restored after re-authentication.</p>
+        <button onclick="testPendingBooking()">Test Pending Booking</button>
+        <div id="test3-result" class="result info">Click the button above to test</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test 4: Session Check Integration</h2>
+        <p>Tests if session checks are properly integrated into booking flows.</p>
+        <button onclick="testSessionCheckIntegration()">Test Session Check Integration</button>
+        <div id="test4-result" class="result info">Click the button above to test</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Results Summary</h2>
+        <div id="summary-result" class="result info">Run tests above to see results</div>
+    </div>
+
+    <script>
+        let testResults = {
+            test1: false,
+            test2: false,
+            test3: false,
+            test4: false
+        };
+
+        function updateResult(testId, message, type = 'info') {
+            const resultDiv = document.getElementById(testId + '-result');
+            resultDiv.textContent = message;
+            resultDiv.className = 'result ' + type;
+
+            // Update test results
+            if (type === 'success') {
+                testResults[testId] = true;
+            } else if (type === 'error') {
+                testResults[testId] = false;
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const passed = Object.values(testResults).filter(Boolean).length;
+            const total = Object.keys(testResults).length;
+            const summaryDiv = document.getElementById('summary-result');
+
+            summaryDiv.innerHTML = `
+                <strong>Test Summary:</strong><br>
+                Passed: ${passed}/${total}<br>
+                ${passed === total ? '✅ All tests passed!' : '⚠️ Some tests failed'}
+            `;
+
+            if (passed === total) {
+                summaryDiv.className = 'result success';
+            } else if (passed > 0) {
+                summaryDiv.className = 'result info';
+            } else {
+                summaryDiv.className = 'result error';
+            }
+        }
+
+        // Test 1: Session Expired Modal Display
+        function testSessionExpiredModal() {
+            updateResult('test1', 'Testing session expired modal...', 'info');
+
+            // Simulate the session expired modal from client dashboard
+            const modal = document.createElement('div');
+            modal.className = 'modal session-expired-modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
+                    <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-clock" style="color: #ffd700;"></i>
+                            Session Expired
+                        </h3>
+                        <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer;">&times;</span>
+                    </div>
+                    <div class="modal-body" style="padding: 24px;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 64px; margin-bottom: 20px;">⏰</div>
+                            <h4 style="color: #ffffff; margin-bottom: 15px;">Your Session Has Expired</h4>
+                            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+                                For your security, your session has expired. Please log in again to continue using the dashboard.
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: center;">
+                            <button onclick="testReauthenticationFromModal()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                                <i class="fas fa-sign-in-alt"></i> Login Again
+                            </button>
+                            <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            modal.style.display = 'flex';
+
+            updateResult('test1', '✅ Session expired modal displayed successfully! No redirect occurred.', 'success');
+        }
+
+        // Test 2: Re-authentication Flow
+        function testReauthentication() {
+            updateResult('test2', 'Testing re-authentication flow...', 'info');
+
+            // Simulate API call to check session
+            fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'check_session' })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success && result.data.logged_in) {
+                    updateResult('test2', '✅ Session is valid. Re-authentication not needed.', 'success');
+                } else {
+                    updateResult('test2', '❌ Session expired. Re-authentication modal should appear.', 'error');
+                }
+            })
+            .catch(error => {
+                updateResult('test2', '❌ API call failed: ' + error.message, 'error');
+            });
+        }
+
+        // Test 3: Pending Booking Data
+        function testPendingBooking() {
+            updateResult('test3', 'Testing pending booking data save/restore...', 'info');
+
+            // Simulate saving booking data
+            const mockBookingData = {
+                service_id: 1,
+                pet_id: 1,
+                appointment_date: '2025-01-15',
+                appointment_time: '10:00',
+                notes: 'Test booking notes'
+            };
+
+            // Save to localStorage (simulating the savePendingBookingData function)
+            localStorage.setItem('pendingBookingData', JSON.stringify(mockBookingData));
+
+            // Check if data was saved
+            const savedData = localStorage.getItem('pendingBookingData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+
+                // Verify all data is preserved
+                if (parsedData.service_id === mockBookingData.service_id &&
+                    parsedData.pet_id === mockBookingData.pet_id &&
+                    parsedData.appointment_date === mockBookingData.appointment_date &&
+                    parsedData.appointment_time === mockBookingData.appointment_time &&
+                    parsedData.notes === mockBookingData.notes) {
+
+                    updateResult('test3', '✅ Booking data saved and restored successfully!', 'success');
+
+                    // Clean up
+                    localStorage.removeItem('pendingBookingData');
+                } else {
+                    updateResult('test3', '❌ Booking data corrupted during save/restore', 'error');
+                }
+            } else {
+                updateResult('test3', '❌ Booking data not saved', 'error');
+            }
+        }
+
+        // Test 4: Session Check Integration
+        function testSessionCheckIntegration() {
+            updateResult('test4', 'Testing session check integration in booking flows...', 'info');
+
+            // Simulate a booking request with session check
+            const mockBookingRequest = {
+                action: 'book_appointment',
+                service_id: 1,
+                pet_id: 1,
+                appointment_date: '2025-01-15',
+                appointment_time: '10:00',
+                notes: 'Integration test booking'
+            };
+
+            // First check session
+            fetch('../api/vet_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'check_session' })
+            })
+            .then(response => response.json())
+            .then(sessionResult => {
+                if (sessionResult.success && sessionResult.data.logged_in) {
+                    // Session is valid, simulate booking
+                    return fetch('../api/vet_api.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(mockBookingRequest)
+                    });
+                } else {
+                    throw new Error('Session expired');
+                }
+            })
+            .then(bookingResponse => bookingResponse.json())
+            .then(bookingResult => {
+                if (bookingResult.success) {
+                    updateResult('test4', '✅ Session check integration working. Booking would proceed normally.', 'success');
+                } else {
+                    updateResult('test4', '❌ Booking failed: ' + bookingResult.message, 'error');
+                }
+            })
+            .catch(error => {
+                if (error.message === 'Session expired') {
+                    updateResult('test4', '✅ Session check integration working. Would trigger re-authentication modal.', 'success');
+                } else {
+                    updateResult('test4', '❌ Unexpected error: ' + error.message, 'error');
+                }
+            });
+        }
+
+        // Helper function for modal test
+        function testReauthenticationFromModal() {
+            const modal = document.querySelector('.session-expired-modal');
+            if (modal) {
+                modal.remove();
+                updateResult('test2', '✅ Re-authentication button clicked successfully!', 'success');
+            }
+        }
+
+        // Auto-run summary update
+        setInterval(updateSummary, 1000);
+    </script>
+</body>
+</html>

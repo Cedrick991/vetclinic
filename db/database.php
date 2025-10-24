@@ -742,6 +742,29 @@ class VetDatabase {
                 // Column might already exist, continue silently
             }
         }
+
+        // Check and add 2FA related columns
+        $columns = $this->pdo->query("PRAGMA table_info(users)")->fetchAll(PDO::FETCH_ASSOC);
+        $existingColumns = array_column($columns, 'name');
+        
+        $twoFAColumns = [
+            'two_factor_enabled' => 'INTEGER DEFAULT 0',
+            'otp_code' => 'TEXT',
+            'otp_expiry' => 'DATETIME',
+            'backup_codes' => 'TEXT',  // JSON array of backup codes
+            'last_otp_request' => 'DATETIME'
+        ];
+
+        foreach ($twoFAColumns as $columnName => $columnType) {
+            if (!in_array($columnName, $existingColumns)) {
+                try {
+                    $this->pdo->exec("ALTER TABLE users ADD COLUMN $columnName $columnType");
+                    echo "✅ Added missing $columnName column to users table\n";
+                } catch (Exception $e) {
+                    // Column might already exist, continue silently
+                }
+            }
+        }
     }
 
     private function getTables() {

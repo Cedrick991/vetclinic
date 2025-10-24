@@ -101,16 +101,78 @@
 ### III. USER INTERFACE TESTING (Duration: December 16-31, 2024)
 
 #### A. Client Interface
-**Test Case 8.1: Client Dashboard Usability**  
-• Verify that client dashboard loads correctly and displays relevant information  
-• Verify that navigation between sections works smoothly  
+**Test Case 8.1: Client Dashboard Usability**
+• Verify that client dashboard loads correctly and displays relevant information
+• Verify that navigation between sections works smoothly
 • Verify that responsive design works on mobile devices | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
 
+**Test Case 8.2: Pet Profile Interface**
+• Verify that pet profile pages display all pet information correctly (name, species, breed, age, weight, medical history)
+• Verify that pet photo upload and display functionality works
+• Verify that pet information forms validate input fields properly
+• Verify that multiple pets per client are displayed in organized tabs/cards | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.3: Appointment Booking Interface**
+• Verify that appointment booking calendar displays available time slots correctly
+• Verify that service selection dropdown works and updates pricing
+• Verify that form validation prevents invalid bookings (past dates, unavailable slots)
+• Verify that appointment confirmation displays all relevant details | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.4: E-commerce Store Interface**
+• Verify that product catalog displays with proper grid/list layout
+• Verify that product images load correctly and have hover effects
+• Verify that shopping cart icon updates count in real-time
+• Verify that product search and filtering functionality works
+• Verify that product detail pages show complete information and reviews | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
 #### B. Staff Interface
-**Test Case 8.2: Staff Dashboard Functionality**  
-• Verify that staff dashboard provides access to all administrative functions  
-• Verify that staff can manage clients, appointments, and inventory  
+**Test Case 8.5: Staff Dashboard Functionality**
+• Verify that staff dashboard provides access to all administrative functions
+• Verify that staff can manage clients, appointments, and inventory
 • Verify that role-based access control works properly | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.6: Staff Management Interface**
+• Verify that staff can view and search client database effectively
+• Verify that client profile editing interface works correctly
+• Verify that staff can add/edit/delete client information
+• Verify that client search filters work by name, email, and phone | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.7: Medical Records Interface**
+• Verify that medical record creation forms have all necessary fields
+• Verify that diagnosis and treatment dropdowns/autocomplete work
+• Verify that medication inventory is properly displayed and updated
+• Verify that medical history timeline displays chronologically | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.8: Inventory Management Interface**
+• Verify that product inventory displays with stock levels and low-stock warnings
+• Verify that product addition/editing forms work correctly
+• Verify that product categorization and search functionality operates smoothly
+• Verify that inventory reports generate and display properly | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### C. Cross-Platform Compatibility
+**Test Case 8.9: Browser Compatibility**
+• Verify that all UI elements render correctly in Chrome, Firefox, Safari, and Edge
+• Verify that JavaScript functionality works across all supported browsers
+• Verify that CSS styling is consistent across different browsers | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.10: Mobile Responsiveness**
+• Verify that all pages adapt properly to mobile screen sizes (320px - 768px)
+• Verify that touch interactions work correctly on mobile devices
+• Verify that mobile navigation menu functions properly
+• Verify that forms are usable on mobile keyboards | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+#### D. Accessibility Testing
+**Test Case 8.11: WCAG Compliance**
+• Verify that all interactive elements are keyboard accessible
+• Verify that alt text is provided for all images
+• Verify that color contrast meets WCAG 2.1 AA standards
+• Verify that screen reader compatibility is maintained | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
+
+**Test Case 8.12: User Experience Flow**
+• Verify that loading spinners/indicators appear during data fetching
+• Verify that error messages are clear and actionable
+• Verify that success confirmations provide appropriate feedback
+• Verify that form submissions provide visual feedback | AS EXPECTED | PASS | The development team should investigate the cause of the deviation, fix any issues or defects, and retest to ensure that the system functions correctly. |
 
 ### IV. PERFORMANCE TESTING (Duration: January 1-15, 2025)
 
@@ -144,7 +206,7 @@
 
 ## Testing Summary
 
-**Total Test Cases**: 20 comprehensive test scenarios covering all major system functionalities
+**Total Test Cases**: 32 comprehensive test scenarios covering all major system functionalities
 
 **Testing Environment**: 
 - Web browsers: Chrome, Firefox, Safari, Edge

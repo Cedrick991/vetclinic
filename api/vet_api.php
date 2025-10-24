@@ -309,6 +309,10 @@ try {
             $response = deletePet($db, $input);
             break;
 
+        case 'delete_client':
+            $response = deleteClient($db, $input);
+            break;
+
         // Notification endpoints
         case 'get_notifications':
             $response = getNotifications($db, $input);
@@ -344,6 +348,35 @@ try {
 
         case 'clear_all_notifications':
             $response = clearAllNotifications($db, $input);
+            break;
+
+        // 2FA and OTP endpoints
+        case 'enable_2fa':
+            $response = enable2FA($db, $input);
+            break;
+
+        case 'disable_2fa':
+            $response = disable2FA($db, $input);
+            break;
+
+        case 'generate_otp':
+            $response = generateOTP($db, $input);
+            break;
+
+        case 'verify_otp':
+            $response = verifyOTP($db, $input);
+            break;
+
+        case 'forgot_password_otp':
+            $response = forgotPasswordOTP($db, $input);
+            break;
+
+        case 'reset_password_with_otp':
+            $response = resetPasswordWithOTP($db, $input);
+            break;
+
+        case 'get_2fa_settings':
+            $response = get2FASettings($db, $input);
             break;
 
         default:
@@ -398,12 +431,29 @@ function registerUser($db, $input) {
     $verificationToken = generateVerificationToken();
     $tokenExpiry = date('Y-m-d H:i:s', time() + 24 * 3600); // 24 hours from now
 
+    // Insert user as active since email verification is optional
     $db->execute(
         'INSERT INTO users (first_name, last_name, email, phone, password, user_type, email_verification_token, token_expiry, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [$firstName, $lastName, $email, $phone, $hashedPassword, $userType, $verificationToken, $tokenExpiry, 0]
+        [$firstName, $lastName, $email, $phone, $hashedPassword, $userType, $verificationToken, $tokenExpiry, 1]
     );
 
     $userId = $db->lastInsertId();
+
+    // Auto-login the user after successful registration
+    $_SESSION['user_id']   = $userId;
+    $_SESSION['user_type'] = $userType;
+    $_SESSION['user_name'] = $firstName . ' ' . $lastName;
+    $_SESSION['user_email'] = $email;
+    $_SESSION['login_time'] = time();
+
+    // Force session regeneration for security and consistency
+    session_regenerate_id(true);
+    
+    // Ensure session is written immediately
+    session_write_close();
+    
+    // Restart session to ensure it's available for subsequent requests
+    session_start();
 
     // Send verification email (don't fail registration if email fails)
     $emailSent = sendVerificationEmail($email, $firstName, $verificationToken);
@@ -415,7 +465,8 @@ function registerUser($db, $input) {
 
     return [
         'success' => true,
-        'message' => 'Registration successful! Welcome to Tattao Veterinary Clinic! You can now log in to your account.',
+        'message' => 'Registration successful! Welcome to Tattao Veterinary Clinic! You are now logged in.',
+        'auto_login' => true,
         'user' => [
             'id'    => $userId,
             'name'  => $firstName . ' ' . $lastName,
@@ -452,7 +503,7 @@ function loginUser($db, $input) {
         throw new Exception("Account temporarily locked due to multiple failed login attempts. Please try again in {$remainingTime} minutes.");
     }
 
-    // Get user
+    // Get user with 2FA info
     $user = $db->fetch('SELECT * FROM users WHERE email = ?', [$email]);
     if (!$user || !password_verify($password, $user['password'])) {
         // Log failed attempt
@@ -486,7 +537,38 @@ function loginUser($db, $input) {
     // This allows existing users to continue using the system
     // Email verification is used for additional security and password reset
 
-    // Successful login - log it and clear any previous failed attempts
+    // Check if 2FA is enabled for this user
+    if ($user['two_factor_enabled'] == 1) {
+        // Generate OTP for 2FA
+        $otp = generateSixDigitOTP();
+        $otpExpiry = date('Y-m-d H:i:s', time() + 300); // 5 minutes
+        
+        // Store OTP in database
+        $db->execute(
+            'UPDATE users SET otp_code = ?, otp_expiry = ?, last_otp_request = datetime("now") WHERE id = ?',
+            [$otp, $otpExpiry, $user['id']]
+        );
+        
+        // Store user info temporarily in session for 2FA verification
+        $_SESSION['2fa_user_id'] = $user['id'];
+        $_SESSION['2fa_user_email'] = $user['email'];
+        $_SESSION['2fa_user_type'] = $user['user_type'];
+        $_SESSION['2fa_timestamp'] = time();
+        
+        // Log successful password verification but pending 2FA
+        logLoginAttempt($db, $email, $ipAddress, $userAgent, false);
+        
+        return [
+            'success' => true,
+            'requires_2fa' => true,
+            'message' => 'Password verified. Please check your email for the 6-digit verification code.',
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'otp_code' => $otp // This will be used by frontend to send email
+        ];
+    }
+
+    // Successful login without 2FA - log it and clear any previous failed attempts
     logLoginAttempt($db, $email, $ipAddress, $userAgent, true);
     clearFailedLoginAttempts($db, $email);
 
@@ -3263,6 +3345,65 @@ function deletePet($db, $input) {
     }
 }
 
+function deleteClient($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    // Only staff can delete clients
+    if ($_SESSION['user_type'] !== 'staff') {
+        return ['success' => false, 'message' => 'Only staff members can delete clients'];
+    }
+
+    $clientId = intval($input['client_id'] ?? 0);
+
+    if (!$clientId) {
+        return ['success' => false, 'message' => 'Client ID is required'];
+    }
+
+    try {
+        // Check if client exists
+        $client = $db->fetch('SELECT * FROM users WHERE id = ? AND user_type = "client" AND is_active = 1', [$clientId]);
+        if (!$client) {
+            return ['success' => false, 'message' => 'Client not found or already inactive'];
+        }
+
+        // Start transaction
+        $db->execute('BEGIN TRANSACTION');
+
+        // Soft delete client by setting is_active to 0
+        $db->execute(
+            'UPDATE users SET is_active = 0 WHERE id = ?',
+            [$clientId]
+        );
+
+        // Also soft delete all pets belonging to this client
+        $db->execute(
+            'UPDATE pets SET is_active = 0 WHERE owner_id = ?',
+            [$clientId]
+        );
+
+        // Also soft delete all appointments for this client
+        $db->execute(
+            'UPDATE appointments SET status = "cancelled" WHERE client_id = ?',
+            [$clientId]
+        );
+
+        // Commit transaction
+        $db->execute('COMMIT');
+
+        return [
+            'success' => true,
+            'message' => 'Client and all associated data deleted successfully!',
+            'client_id' => $clientId
+        ];
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $db->execute('ROLLBACK');
+        return ['success' => false, 'message' => 'Failed to delete client: ' . $e->getMessage()];
+    }
+}
+
 // ====================
 // NOTIFICATION FUNCTIONS
 // ====================
@@ -3965,6 +4106,320 @@ function sendVerificationEmail($email, $firstName, $verificationToken) {
 
 function generateVerificationToken() {
     return bin2hex(random_bytes(32));
+}
+
+// ====================
+// 2FA AND OTP FUNCTIONS
+// ====================
+
+/**
+ * Generate a 6-digit OTP
+ */
+function generateSixDigitOTP() {
+    return str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+}
+
+/**
+ * Enable 2FA for a user
+ */
+function enable2FA($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    try {
+        $userId = $_SESSION['user_id'];
+        
+        // Generate backup codes
+        $backupCodes = [];
+        for ($i = 0; $i < 10; $i++) {
+            $backupCodes[] = strtoupper(bin2hex(random_bytes(4)));
+        }
+        
+        $db->execute(
+            'UPDATE users SET two_factor_enabled = 1, backup_codes = ? WHERE id = ?',
+            [json_encode($backupCodes), $userId]
+        );
+        
+        return [
+            'success' => true,
+            'message' => '2FA enabled successfully',
+            'backup_codes' => $backupCodes
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to enable 2FA: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Disable 2FA for a user
+ */
+function disable2FA($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    try {
+        $userId = $_SESSION['user_id'];
+        
+        $db->execute(
+            'UPDATE users SET two_factor_enabled = 0, otp_code = NULL, otp_expiry = NULL, backup_codes = NULL WHERE id = ?',
+            [$userId]
+        );
+        
+        return [
+            'success' => true,
+            'message' => '2FA disabled successfully'
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to disable 2FA: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Generate OTP for logged-in user (for testing or manual request)
+ */
+function generateOTP($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    try {
+        $userId = $_SESSION['user_id'];
+        $user = $db->fetch('SELECT email, first_name FROM users WHERE id = ?', [$userId]);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found'];
+        }
+        
+        $otp = generateSixDigitOTP();
+        $otpExpiry = date('Y-m-d H:i:s', time() + 300); // 5 minutes
+        
+        $db->execute(
+            'UPDATE users SET otp_code = ?, otp_expiry = ?, last_otp_request = datetime("now") WHERE id = ?',
+            [$otp, $otpExpiry, $userId]
+        );
+        
+        return [
+            'success' => true,
+            'message' => 'OTP generated successfully',
+            'otp_code' => $otp,
+            'user_email' => $user['email'],
+            'user_name' => $user['first_name']
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to generate OTP: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Verify OTP for 2FA login
+ */
+function verifyOTP($db, $input) {
+    $otpCode = trim($input['otp_code'] ?? '');
+    
+    if (!$otpCode) {
+        return ['success' => false, 'message' => 'OTP code is required'];
+    }
+    
+    // Check if we have a pending 2FA session
+    if (!isset($_SESSION['2fa_user_id'])) {
+        return ['success' => false, 'message' => 'No pending 2FA verification found'];
+    }
+    
+    // Check session timeout (10 minutes)
+    if (isset($_SESSION['2fa_timestamp']) && (time() - $_SESSION['2fa_timestamp']) > 600) {
+        // Clear 2FA session
+        unset($_SESSION['2fa_user_id'], $_SESSION['2fa_user_email'], $_SESSION['2fa_user_type'], $_SESSION['2fa_timestamp']);
+        return ['success' => false, 'message' => '2FA session expired. Please login again.'];
+    }
+    
+    try {
+        $userId = $_SESSION['2fa_user_id'];
+        $user = $db->fetch('SELECT * FROM users WHERE id = ?', [$userId]);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found'];
+        }
+        
+        // Check if OTP is valid and not expired
+        if ($user['otp_code'] !== $otpCode) {
+            // Check backup codes
+            if ($user['backup_codes']) {
+                $backupCodes = json_decode($user['backup_codes'], true);
+                if (in_array(strtoupper($otpCode), $backupCodes)) {
+                    // Remove used backup code
+                    $backupCodes = array_values(array_diff($backupCodes, [strtoupper($otpCode)]));
+                    $db->execute(
+                        'UPDATE users SET backup_codes = ? WHERE id = ?',
+                        [json_encode($backupCodes), $userId]
+                    );
+                } else {
+                    return ['success' => false, 'message' => 'Invalid OTP code'];
+                }
+            } else {
+                return ['success' => false, 'message' => 'Invalid OTP code'];
+            }
+        } else {
+            // Check OTP expiry
+            if (strtotime($user['otp_expiry']) < time()) {
+                return ['success' => false, 'message' => 'OTP has expired. Please login again.'];
+            }
+        }
+        
+        // Clear OTP from database
+        $db->execute(
+            'UPDATE users SET otp_code = NULL, otp_expiry = NULL WHERE id = ?',
+            [$userId]
+        );
+        
+        // Complete login - set full session
+        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['user_type'] = $user['user_type'];
+        $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
+        $_SESSION['user_email'] = $user['email'];
+        $_SESSION['login_time'] = time();
+        
+        // Clear 2FA session variables
+        unset($_SESSION['2fa_user_id'], $_SESSION['2fa_user_email'], $_SESSION['2fa_user_type'], $_SESSION['2fa_timestamp']);
+        
+        // Log successful login
+        logLoginAttempt($db, $user['email'], getClientIP(), $_SERVER['HTTP_USER_AGENT'] ?? '', true);
+        clearFailedLoginAttempts($db, $user['email']);
+        
+        session_write_close();
+        
+        return [
+            'success' => true,
+            'message' => 'Login successful!',
+            'redirect' => $user['user_type'] === 'staff' ? 'staff.html' : 'client.html',
+            'user' => [
+                'id'    => $user['id'],
+                'name'  => $user['first_name'] . ' ' . $user['last_name'],
+                'email' => $user['email'],
+                'type'  => $user['user_type']
+            ]
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to verify OTP: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Generate OTP for forgot password
+ */
+function forgotPasswordOTP($db, $input) {
+    $email = trim($input['email'] ?? '');
+    
+    if (!$email) {
+        return ['success' => false, 'message' => 'Email is required'];
+    }
+    
+    try {
+        $user = $db->fetch('SELECT id, first_name, email FROM users WHERE email = ?', [$email]);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'No account found with this email address'];
+        }
+        
+        // Generate 6-digit OTP for password reset
+        $otp = generateSixDigitOTP();
+        $otpExpiry = date('Y-m-d H:i:s', time() + 300); // 5 minutes
+        
+        $db->execute(
+            'UPDATE users SET otp_code = ?, otp_expiry = ?, last_otp_request = datetime("now") WHERE id = ?',
+            [$otp, $otpExpiry, $user['id']]
+        );
+        
+        return [
+            'success' => true,
+            'message' => 'OTP sent to your email address',
+            'otp_code' => $otp,
+            'user_email' => $user['email'],
+            'user_name' => $user['first_name'],
+            'user_id' => $user['id']
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to generate OTP: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Reset password with OTP verification
+ */
+function resetPasswordWithOTP($db, $input) {
+    $email = trim($input['email'] ?? '');
+    $otpCode = trim($input['otp_code'] ?? '');
+    $newPassword = $input['new_password'] ?? '';
+    
+    if (!$email || !$otpCode || !$newPassword) {
+        return ['success' => false, 'message' => 'Email, OTP code, and new password are required'];
+    }
+    
+    if (strlen($newPassword) < 8) {
+        return ['success' => false, 'message' => 'Password must be at least 8 characters long'];
+    }
+    
+    try {
+        $user = $db->fetch('SELECT * FROM users WHERE email = ?', [$email]);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found'];
+        }
+        
+        // Check OTP
+        if ($user['otp_code'] !== $otpCode || strtotime($user['otp_expiry']) < time()) {
+            return ['success' => false, 'message' => 'Invalid or expired OTP'];
+        }
+        
+        // Update password and clear OTP
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $db->execute(
+            'UPDATE users SET password = ?, otp_code = NULL, otp_expiry = NULL WHERE id = ?',
+            [$hashedPassword, $user['id']]
+        );
+        
+        return [
+            'success' => true,
+            'message' => 'Password reset successfully! You can now login with your new password.'
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to reset password: ' . $e->getMessage()];
+    }
+}
+
+/**
+ * Get 2FA settings for current user
+ */
+function get2FASettings($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+    
+    try {
+        $userId = $_SESSION['user_id'];
+        $user = $db->fetch('SELECT two_factor_enabled, backup_codes FROM users WHERE id = ?', [$userId]);
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found'];
+        }
+        
+        $backupCodes = $user['backup_codes'] ? json_decode($user['backup_codes'], true) : [];
+        
+        return [
+            'success' => true,
+            'data' => [
+                'two_factor_enabled' => (bool)$user['two_factor_enabled'],
+                'backup_codes_count' => count($backupCodes)
+            ]
+        ];
+        
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to get 2FA settings: ' . $e->getMessage()];
+    }
 }
 
 // ====================

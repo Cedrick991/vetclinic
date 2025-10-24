@@ -20,7 +20,10 @@ export const Utils = {
     },
 
     validatePhone(phone) {
-        return /^\+?[\d\s-]{10,}$/.test(phone);
+        // Remove all non-digit characters for validation
+        const digitsOnly = phone.replace(/\D/g, '');
+        // Accept 10-15 digits (most international phone numbers)
+        return digitsOnly.length >= 10 && digitsOnly.length <= 15;
     },
 
     generateStatusBadge(status) {

@@ -147,6 +147,29 @@ class ClientDashboard {
     let retryCount = 0;
     const maxRetries = 3;
 
+    // Check if this is a fresh registration
+    const registrationUser = sessionStorage.getItem('registration_user');
+    if (registrationUser) {
+      try {
+        const userData = JSON.parse(registrationUser);
+        console.log('🆕 Detected fresh registration, user data:', userData);
+        
+        // Check if registration is recent (within last 5 minutes)
+        if (Date.now() - userData.timestamp < 5 * 60 * 1000) {
+          console.log('✅ Recent registration detected, allowing extra time for session establishment...');
+          
+          // Give additional time for session to establish
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Clear the registration marker after successful handling
+          sessionStorage.removeItem('registration_user');
+        }
+      } catch (e) {
+        console.warn('⚠️ Error parsing registration user data:', e);
+        sessionStorage.removeItem('registration_user');
+      }
+    }
+
     while (retryCount < maxRetries) {
       try {
         console.log(`🔄 Session check attempt ${retryCount + 1}/${maxRetries}`);
@@ -254,7 +277,7 @@ class ClientDashboard {
 
     // Create a session recovery modal
     const modal = document.createElement('div');
-    modal.className = 'modal';
+    modal.className = 'modal session-error-modal';
     modal.innerHTML = `
       <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
         <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
@@ -286,8 +309,8 @@ class ClientDashboard {
             <button onclick="window.location.reload()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
               <i class="fas fa-refresh"></i> Refresh Page
             </button>
-            <button onclick="window.location.href='../index.html'" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
-              <i class="fas fa-home"></i> Go to Homepage
+            <button onclick="clientDashboard.reauthenticateSession()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+              <i class="fas fa-sign-in-alt"></i> Login Again
             </button>
           </div>
         </div>
@@ -332,9 +355,9 @@ class ClientDashboard {
     // Reset session flags
     this.sessionValidated = false;
 
-    // Show session expired modal with login option
+    // Show session expired modal with login option (stay on current page)
     const modal = document.createElement('div');
-    modal.className = 'modal';
+    modal.className = 'modal session-expired-modal';
     modal.innerHTML = `
       <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
         <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
@@ -354,7 +377,7 @@ class ClientDashboard {
           </div>
 
           <div style="display: flex; gap: 12px; justify-content: center;">
-            <button onclick="window.location.href='../index.html'" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+            <button onclick="clientDashboard.reauthenticateSession()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
               <i class="fas fa-sign-in-alt"></i> Login Again
             </button>
             <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
@@ -367,6 +390,112 @@ class ClientDashboard {
 
     document.body.appendChild(modal);
     modal.style.display = 'flex';
+  }
+
+  // Re-authenticate session without redirecting
+  async reauthenticateSession() {
+    console.log('🔄 Attempting to re-authenticate session...');
+
+    // Close the expired session modal
+    const expiredModal = document.querySelector('.session-expired-modal');
+    if (expiredModal) {
+      expiredModal.remove();
+    }
+
+    // Show loading state
+    this.showToast('Re-authenticating...', 'info');
+
+    try {
+      // Attempt to re-validate the session
+      const sessionValid = await this.checkSession();
+
+      if (sessionValid) {
+        this.showToast('Session restored successfully!', 'success');
+
+        // Resume any ongoing operations (like booking)
+        if (this.pendingBookingData) {
+          console.log('📋 Resuming pending booking...');
+          this.showToast('Resuming your booking...', 'info');
+          // Restore booking modal state if needed
+          setTimeout(() => {
+            this.resumePendingBooking();
+          }, 1000);
+        }
+      } else {
+        // If session check still fails, show modal and let user decide
+        this.showToast('Please log in again', 'warning');
+        // Modal is already shown by showSessionError(), no automatic redirect
+      }
+    } catch (error) {
+      console.error('❌ Re-authentication failed:', error);
+      this.showToast('Re-authentication failed. Please try again or login manually.', 'error');
+      // Modal is already shown by showSessionError(), no automatic redirect
+    }
+  }
+
+  // Resume pending booking after successful re-authentication
+  resumePendingBooking() {
+    if (this.pendingBookingData) {
+      console.log('🔄 Resuming booking with data:', this.pendingBookingData);
+
+      // Show booking modal
+      this.showBookingModal();
+
+      // Pre-fill the form with saved data
+      setTimeout(() => {
+        this.prefillBookingForm(this.pendingBookingData);
+      }, 500);
+
+      // Clear pending data
+      this.pendingBookingData = null;
+    }
+  }
+
+  // Pre-fill booking form with saved data
+  prefillBookingForm(bookingData) {
+    console.log('📝 Pre-filling booking form with data:', bookingData);
+
+    const serviceSelect = document.getElementById('clientBookingService');
+    const petSelect = document.getElementById('clientBookingPet');
+    const dateInput = document.getElementById('clientBookingDate');
+    const timeSelect = document.getElementById('clientBookingTime');
+    const notesInput = document.getElementById('clientBookingNotes');
+
+    // Pre-fill form fields
+    if (serviceSelect && bookingData.service_id) {
+      serviceSelect.value = bookingData.service_id;
+    }
+
+    if (petSelect && bookingData.pet_id) {
+      petSelect.value = bookingData.pet_id;
+    }
+
+    if (dateInput && bookingData.appointment_date) {
+      dateInput.value = bookingData.appointment_date;
+    }
+
+    if (timeSelect && bookingData.appointment_time) {
+      timeSelect.value = bookingData.appointment_time;
+    }
+
+    if (notesInput && bookingData.notes) {
+      notesInput.value = bookingData.notes;
+    }
+
+    // If date is set, load available time slots
+    if (dateInput && bookingData.appointment_date) {
+      setTimeout(() => {
+        this.loadAvailableTimeSlots();
+      }, 100);
+    }
+
+    this.showToast('Booking form restored. Please review and submit.', 'info');
+  }
+
+  // Save booking data before session expires
+  savePendingBookingData(bookingData) {
+    this.pendingBookingData = bookingData;
+    console.log('💾 Saved pending booking data:', bookingData);
   }
 
   // Show session expiry warning
@@ -2822,6 +2951,24 @@ class ClientDashboard {
     console.log(`=== CLIENT ${isEditMode ? 'APPOINTMENT UPDATE' : 'BOOKING'} FORM SUBMISSION ===`);
     console.log('Booking data:', bookingData);
 
+    // Check session before submitting booking
+    try {
+      const sessionValid = await this.checkSession();
+      if (!sessionValid) {
+        console.log('⚠️ Session expired during booking submission, saving data for later...');
+        this.savePendingBookingData(bookingData);
+        this.showToast('Session expired. Please log in again to continue booking.', 'warning');
+        this.handleSessionExpired();
+        return;
+      }
+    } catch (error) {
+      console.error('❌ Session check failed during booking:', error);
+      this.savePendingBookingData(bookingData);
+      this.showToast('Session check failed. Please log in again to continue booking.', 'warning');
+      this.handleSessionExpired();
+      return;
+    }
+
     // Validation
     const missingFields = [];
     if (!bookingData.service_id) missingFields.push('Service');
@@ -3101,9 +3248,11 @@ document.addEventListener('DOMContentLoaded', async function() {
       this.checkSession().then(success => {
         if (!success) {
           console.log('⚠️ Periodic session check failed');
+          this.showSessionError();
         }
       }).catch(error => {
         console.error('❌ Periodic session check error:', error);
+        this.showSessionError();
       });
     }
   }, 5 * 60 * 1000); // 5 minutes
@@ -3116,9 +3265,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         this.checkSession().then(success => {
           if (!success) {
             console.log('⚠️ Session invalid after returning to tab');
+            this.showSessionError();
           }
         }).catch(error => {
           console.error('❌ Session check error after visibility change:', error);
+          this.showSessionError();
         });
       }, 1000);
     }

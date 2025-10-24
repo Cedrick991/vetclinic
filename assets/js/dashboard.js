@@ -41,7 +41,7 @@ class Dashboard {
 
         } catch (error) {
             console.error('Dashboard initialization error:', error);
-            this.redirectToLogin();
+            this.showSessionErrorModal();
         }
     }
 
@@ -96,13 +96,11 @@ class Dashboard {
     }
 
     handleSessionExpired() {
-        this.showToast('Your session has expired. Redirecting to login...', 'error');
+        this.showToast('Your session has expired. Please login again.', 'error');
         clearInterval(this.sessionCheckInterval);
         clearInterval(this.sessionWarningInterval);
 
-        setTimeout(() => {
-            this.redirectToLogin();
-        }, 3000);
+        this.showSessionExpiredModal();
     }
 
     stopSessionMonitoring() {
@@ -1301,6 +1299,24 @@ class Dashboard {
                 notes: formData.get('notes')
             };
 
+            // Check session before submitting booking
+            try {
+                const sessionValid = await this.checkSession();
+                if (!sessionValid) {
+                    console.log('⚠️ Session expired during booking submission, saving data for later...');
+                    this.savePendingOperation({ type: 'booking', data: bookingData });
+                    this.showToast('Session expired. Please log in again to continue booking.', 'warning');
+                    this.handleSessionExpired();
+                    return;
+                }
+            } catch (error) {
+                console.error('❌ Session check failed during booking:', error);
+                this.savePendingOperation({ type: 'booking', data: bookingData });
+                this.showToast('Session check failed. Please log in again to continue booking.', 'warning');
+                this.handleSessionExpired();
+                return;
+            }
+
             const response = await fetch('../api/vet_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2322,9 +2338,234 @@ class Dashboard {
 
     redirectToLogin() {
         this.showToast('Please log in to access the dashboard', 'warning');
-        setTimeout(() => {
-            window.location.href = '../index.html';
-        }, 2000);
+        this.showSessionErrorModal();
+    }
+
+    showSessionExpiredModal() {
+        console.log('🔧 Showing session expired modal');
+
+        // Create a session expired modal
+        const modal = document.createElement('div');
+        modal.className = 'modal session-expired-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
+                <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-clock" style="color: #ffd700;"></i>
+                        Session Expired
+                    </h3>
+                    <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer;">&times;</span>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">⏰</div>
+                        <h4 style="color: #ffffff; margin-bottom: 15px;">Your Session Has Expired</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+                            For your security, your session has expired. Please log in again to continue using the dashboard.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button onclick="dashboardInstance.reauthenticateSession()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-sign-in-alt"></i> Login Again
+                        </button>
+                        <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+    }
+
+    showSessionErrorModal() {
+        console.log('🔧 Showing session error modal for initial failure');
+
+        // Create a session error modal
+        const modal = document.createElement('div');
+        modal.className = 'modal session-error-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
+                <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-exclamation-triangle" style="color: #ffd700;"></i>
+                        Session Verification Failed
+                    </h3>
+                    <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer;">&times;</span>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+                        <h4 style="color: #ffffff; margin-bottom: 15px;">Session Verification Failed</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+                            We couldn't verify your login session. This might be due to:
+                        </p>
+                        <ul style="color: rgba(255, 255, 255, 0.8); text-align: left; display: inline-block;">
+                            <li>Network connection issues</li>
+                            <li>Session timeout</li>
+                            <li>Browser cache problems</li>
+                            <li>Server maintenance</li>
+                        </ul>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button onclick="dashboardInstance.retrySession()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Retry Session
+                        </button>
+                        <button onclick="window.location.reload()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-sync-alt"></i> Refresh Page
+                        </button>
+                        <button onclick="window.location.href='../index.html'" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-sign-in-alt"></i> Login Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+    }
+
+    async reauthenticateSession() {
+        console.log('🔄 Attempting to re-authenticate session...');
+
+        // Close the expired session modal
+        const expiredModal = document.querySelector('.session-expired-modal');
+        if (expiredModal) {
+            expiredModal.remove();
+        }
+
+        // Show loading state
+        this.showToast('Re-authenticating...', 'info');
+
+        try {
+            // Attempt to re-validate the session
+            const sessionValid = await this.checkSession();
+
+            if (sessionValid) {
+                this.showToast('Session restored successfully!', 'success');
+
+                // Resume session monitoring
+                this.startSessionMonitoring();
+
+                // Resume any ongoing operations if needed
+                if (this.pendingOperation) {
+                    console.log('📋 Resuming pending operation...');
+                    this.showToast('Resuming your work...', 'info');
+                    setTimeout(() => {
+                        this.resumePendingOperation();
+                    }, 1000);
+                }
+            } else {
+                // If session check still fails, show modal and let user decide
+                this.showToast('Please log in again', 'warning');
+                // Modal is already shown by showSessionError(), no automatic redirect
+            }
+        } catch (error) {
+            console.error('❌ Re-authentication failed:', error);
+            this.showToast('Re-authentication failed. Please log in again.', 'error');
+            this.showSessionErrorModal();
+        }
+    }
+
+    async retrySession() {
+        console.log('🔄 Retrying session check...');
+
+        // Close the error modal
+        const errorModal = document.querySelector('.session-error-modal');
+        if (errorModal) {
+            errorModal.remove();
+        }
+
+        // Show loading state
+        this.showToast('Retrying session...', 'info');
+
+        try {
+            // Attempt to check session
+            await this.checkSession();
+            this.showToast('Session verified successfully!', 'success');
+
+            // Proceed with loading dashboard
+            await this.loadUserData();
+            await this.loadDashboardData();
+            this.setupEventListeners();
+            this.startSessionMonitoring();
+            this.showToast('Welcome to your dashboard!', 'success');
+
+        } catch (error) {
+            console.error('❌ Session retry failed:', error);
+            this.showToast('Session retry failed. Please try again or log in.', 'error');
+            // Show the modal again
+            this.showSessionErrorModal();
+        }
+    }
+
+    resumePendingOperation() {
+        if (this.pendingOperation) {
+            console.log('🔄 Resuming pending operation:', this.pendingOperation);
+
+            if (this.pendingOperation.type === 'booking' && this.pendingOperation.data) {
+                // Resume booking creation
+                console.log('📋 Resuming booking creation...');
+                this.showBookingModal();
+
+                // Pre-fill the form with saved data
+                setTimeout(() => {
+                    this.prefillBookingForm(this.pendingOperation.data);
+                }, 500);
+            } else {
+                // Generic operation resume
+                this.showToast('Operation resumed successfully!', 'success');
+            }
+
+            this.pendingOperation = null;
+        }
+    }
+
+    prefillBookingForm(bookingData) {
+        console.log('📝 Pre-filling booking form with data:', bookingData);
+
+        const serviceSelect = document.getElementById('serviceSelect');
+        const petSelect = document.getElementById('petSelect');
+        const dateInput = document.getElementById('appointmentDate');
+        const timeSelect = document.getElementById('appointmentTime');
+        const notesInput = document.getElementById('appointmentNotes');
+
+        // Pre-fill form fields
+        if (serviceSelect && bookingData.service_id) {
+            serviceSelect.value = bookingData.service_id;
+        }
+
+        if (petSelect && bookingData.pet_id) {
+            petSelect.value = bookingData.pet_id;
+        }
+
+        if (dateInput && bookingData.appointment_date) {
+            dateInput.value = bookingData.appointment_date;
+            // Trigger time slot loading
+            setTimeout(() => {
+                this.loadAvailableTimes(bookingData.appointment_date);
+            }, 100);
+        }
+
+        if (timeSelect && bookingData.appointment_time) {
+            timeSelect.value = bookingData.appointment_time;
+        }
+
+        if (notesInput && bookingData.notes) {
+            notesInput.value = bookingData.notes;
+        }
+
+        this.showToast('Booking form restored. Please review and submit.', 'info');
+    }
+
+    savePendingOperation(operationData) {
+        this.pendingOperation = operationData;
+        console.log('💾 Saved pending operation data:', operationData);
     }
 
     // Settings functionality
@@ -2691,7 +2932,11 @@ class Dashboard {
     }
 
     validatePhone(phone) {
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phone) return true; // Optional field
+        // Remove all non-digit characters for validation
+        const digitsOnly = phone.replace(/\D/g, '');
+        // Accept 10-15 digits (most international phone numbers)
+        return digitsOnly.length >= 10 && digitsOnly.length <= 15;
         return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
     }
 

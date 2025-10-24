@@ -112,13 +112,11 @@ class StaffDashboard {
     }
 
     handleSessionExpired() {
-        this.showToast('Your session has expired. Redirecting to login...', 'error');
+        this.showToast('Your session has expired. Please login again.', 'error');
         clearInterval(this.sessionCheckInterval);
         clearInterval(this.sessionWarningInterval);
 
-        setTimeout(() => {
-            this.redirectToLogin();
-        }, 3000);
+        this.showSessionExpiredModal();
     }
 
     stopSessionMonitoring() {
@@ -1885,6 +1883,24 @@ class StaffDashboard {
 
             console.log('All validations passed, submitting appointment...');
 
+            // Check session before submitting appointment
+            try {
+                const sessionValid = await this.checkSession();
+                if (!sessionValid) {
+                    console.log('⚠️ Session expired during appointment creation, saving data for later...');
+                    this.savePendingOperation({ type: 'appointment', data: appointmentData });
+                    this.showToast('Session expired. Please log in again to continue.', 'warning');
+                    this.handleSessionExpired();
+                    return;
+                }
+            } catch (error) {
+                console.error('❌ Session check failed during appointment creation:', error);
+                this.savePendingOperation({ type: 'appointment', data: appointmentData });
+                this.showToast('Session check failed. Please log in again to continue.', 'warning');
+                this.handleSessionExpired();
+                return;
+            }
+
             try {
                 console.log('Sending appointment data to API:', appointmentData);
                 const response = await fetch('../api/vet_api.php', {
@@ -2541,11 +2557,11 @@ class StaffDashboard {
                         </div>
                     </div>
                     <div class="client-actions">
-                        <button class="action-btn view" onclick="viewClientDetails('${client.id}')">
-                            <i class="fas fa-eye"></i> View Details
-                        </button>
-                        <button class="action-btn edit" onclick="editClient('${client.id}')">
+                        <button class="action-btn edit" onclick="editClient('${client.id}')" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
                             <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete" onclick="deleteClient('${client.id}', '${client.first_name} ${client.last_name || ''}')" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
                 </div>
@@ -3996,42 +4012,42 @@ class StaffDashboard {
             return;
         }
 
-        const confirmMessage = `Are you sure you want to delete "${product.name}"?\n\nThis action cannot be undone and will:\n• Permanently delete the product\n• Remove the product image\n• Delete all associated data\n\nType "DELETE" to confirm:`;
+        // Set delete target for modal confirmation
+        window.deleteTarget = { id: productId, name: product.name };
+        window.deleteType = 'product';
 
-        const userInput = prompt(confirmMessage);
-        if (userInput !== 'DELETE') {
-            if (userInput !== null) { // User didn't cancel
-                this.showToast('Deletion cancelled. Type "DELETE" exactly to confirm.', 'info');
-            }
-            return;
+        // Populate the delete confirmation modal
+        const content = document.getElementById('deleteConfirmContent');
+        if (content) {
+            content.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: rgba(220, 53, 69, 0.1); padding: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; margin-bottom: 20px;">
+                        <i class="fas fa-trash" style="font-size: 40px; color: #dc3545;"></i>
+                    </div>
+                    <h3 style="color: #ffffff; margin: 0 0 15px 0; font-size: 18px;">Delete Product</h3>
+                    <p style="color: rgba(255, 255, 255, 0.9); margin: 0 0 10px 0; font-size: 14px;">
+                        Are you sure you want to delete the product <strong>"${product.name}"</strong>?
+                    </p>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="color: #ffffff; margin: 0; font-size: 13px; line-height: 1.4;">
+                            <strong style="color: #ffc107;">Warning:</strong> This action will permanently delete:
+                        </p>
+                        <ul style="color: rgba(255, 255, 255, 0.8); margin: 8px 0 0 0; padding-left: 20px; font-size: 12px; line-height: 1.4;">
+                            <li>All product information and data</li>
+                            <li>Product image and associated files</li>
+                            <li>This action cannot be undone</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
         }
 
-        try {
-            console.log('🗑️ Deleting product with ID:', productId);
-
-            const response = await fetch('../api/vet_api.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'delete_product',
-                    product_id: parseInt(productId)
-                })
-            });
-
-            const result = await response.json();
-            console.log('📡 Delete product response:', result);
-
-            if (result.success) {
-                this.showToast('Product deleted successfully!', 'success');
-                // Refresh the products grid and dashboard data
-                await this.loadStoreSection();
-                await this.loadDashboardData();
-            } else {
-                this.showToast(result.message || 'Failed to delete product', 'error');
-            }
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            this.showToast('Error deleting product. Please try again.', 'error');
+        // Show the delete confirmation modal
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) {
+            modal.style.display = 'block';
+        } else {
+            this.showToast('Delete confirmation modal not found', 'error');
         }
     }
 
@@ -5064,7 +5080,11 @@ class StaffDashboard {
     }
 
     validatePhone(phone) {
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phone) return true; // Optional field
+        // Remove all non-digit characters for validation
+        const digitsOnly = phone.replace(/\D/g, '');
+        // Accept 10-15 digits (most international phone numbers)
+        return digitsOnly.length >= 10 && digitsOnly.length <= 15;
         return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
     }
 
@@ -5207,10 +5227,245 @@ class StaffDashboard {
     }
 
     redirectToLogin() {
-        this.showToast('Please log in to access the staff dashboard', 'warning');
-        setTimeout(() => {
-            window.location.href = '../index.html';
-        }, 2000);
+        this.showSessionError();
+    }
+
+    showSessionExpiredModal() {
+        console.log('🔧 Showing staff session expired modal');
+
+        // Create a session expired modal
+        const modal = document.createElement('div');
+        modal.className = 'modal session-expired-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
+                <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-clock" style="color: #ffd700;"></i>
+                        Session Expired
+                    </h3>
+                    <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer;">&times;</span>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">⏰</div>
+                        <h4 style="color: #ffffff; margin-bottom: 15px;">Your Session Has Expired</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+                            For your security, your session has expired. Please log in again to continue using the staff dashboard.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button onclick="staffDashboard.reauthenticateSession()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-sign-in-alt"></i> Login Again
+                        </button>
+                        <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+    }
+
+    async reauthenticateSession() {
+        console.log('🔄 Staff attempting to re-authenticate session...');
+
+        // Close the expired session modal
+        const expiredModal = document.querySelector('.session-expired-modal');
+        if (expiredModal) {
+            expiredModal.remove();
+        }
+
+        // Show loading state
+        this.showToast('Re-authenticating...', 'info');
+
+        try {
+            // Attempt to re-validate the session
+            const sessionValid = await this.checkSession();
+
+            if (sessionValid) {
+                this.showToast('Session restored successfully!', 'success');
+
+                // Resume session monitoring
+                this.startSessionMonitoring();
+
+                // Resume any ongoing operations if needed
+                if (this.pendingOperation) {
+                    console.log('📋 Resuming pending operation...');
+                    this.showToast('Resuming your work...', 'info');
+                    setTimeout(() => {
+                        this.resumePendingOperation();
+                    }, 1000);
+                }
+            } else {
+                // If session check still fails, show modal and let user decide
+                this.showToast('Please log in again', 'warning');
+                // Modal is already shown by showSessionError(), no automatic redirect
+            }
+        } catch (error) {
+            console.error('❌ Staff re-authentication failed:', error);
+            this.showToast('Re-authentication failed. Please try again or login manually.', 'error');
+            // Modal is already shown by showSessionError(), no automatic redirect
+        }
+    }
+
+    resumePendingOperation() {
+        if (this.pendingOperation) {
+            console.log('🔄 Resuming pending operation:', this.pendingOperation);
+
+            if (this.pendingOperation.type === 'appointment' && this.pendingOperation.data) {
+                // Resume appointment creation
+                console.log('📋 Resuming appointment creation...');
+                this.showAddAppointmentModal();
+
+                // Pre-fill the form with saved data
+                setTimeout(() => {
+                    this.prefillAppointmentForm(this.pendingOperation.data);
+                }, 500);
+            } else {
+                // Generic operation resume
+                this.showToast('Operation resumed successfully!', 'success');
+            }
+
+            this.pendingOperation = null;
+        }
+    }
+
+    prefillAppointmentForm(appointmentData) {
+        console.log('📝 Pre-filling appointment form with data:', appointmentData);
+
+        const clientSelect = document.getElementById('appointmentClient');
+        const petSelect = document.getElementById('appointmentPet');
+        const serviceSelect = document.getElementById('appointmentService');
+        const dateInput = document.getElementById('appointmentDate');
+        const timeSelect = document.getElementById('appointmentTime');
+        const notesInput = document.getElementById('appointmentNotes');
+
+        // Pre-fill form fields
+        if (clientSelect && appointmentData.client_id) {
+            clientSelect.value = appointmentData.client_id;
+            // Trigger pet loading
+            setTimeout(() => {
+                this.loadPetsForAppointment();
+            }, 100);
+        }
+
+        if (petSelect && appointmentData.pet_id) {
+            petSelect.value = appointmentData.pet_id;
+        }
+
+        if (serviceSelect && appointmentData.service_id) {
+            serviceSelect.value = appointmentData.service_id;
+        }
+
+        if (dateInput && appointmentData.appointment_date) {
+            dateInput.value = appointmentData.appointment_date;
+            // Trigger time slot loading
+            setTimeout(() => {
+                this.loadAvailableTimeSlotsForAppointment();
+            }, 100);
+        }
+
+        if (timeSelect && appointmentData.appointment_time) {
+            timeSelect.value = appointmentData.appointment_time;
+        }
+
+        if (notesInput && appointmentData.notes) {
+            notesInput.value = appointmentData.notes;
+        }
+
+        this.showToast('Appointment form restored. Please review and submit.', 'info');
+    }
+
+    savePendingOperation(operationData) {
+        this.pendingOperation = operationData;
+        console.log('💾 Saved pending operation data:', operationData);
+    }
+
+    // Show session error with recovery options
+    showSessionError() {
+        console.log('🔧 Showing session error with recovery options');
+
+        // Show toast notification about session issue
+        this.showToast('Session verification failed. Please login again.', 'error');
+
+        // Create a session recovery modal
+        const modal = document.createElement('div');
+        modal.className = 'modal session-error-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px; background: linear-gradient(135deg, #2E5BAA, #1E3F7A); border-radius: 16px;">
+                <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-exclamation-triangle" style="color: #ffd700;"></i>
+                        Session Error
+                    </h3>
+                    <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer;">&times;</span>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+                        <h4 style="color: #ffffff; margin-bottom: 15px;">Session Verification Failed</h4>
+                        <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+                            We couldn't verify your login session. This might be due to:
+                        </p>
+                        <ul style="color: rgba(255, 255, 255, 0.8); text-align: left; margin-bottom: 25px; padding-left: 20px;">
+                            <li>Network connection issues</li>
+                            <li>Session timeout</li>
+                            <li>Browser cache problems</li>
+                            <li>Server maintenance</li>
+                        </ul>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button onclick="staffDashboard.retrySessionCheck()" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Retry Session
+                        </button>
+                        <button onclick="window.location.reload()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-refresh"></i> Refresh Page
+                        </button>
+                        <button onclick="staffDashboard.reauthenticateSession()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            <i class="fas fa-sign-in-alt"></i> Login Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+    }
+
+    async retrySessionCheck() {
+        console.log('🔄 Staff retrying session check...');
+
+        // Close the error modal
+        const errorModal = document.querySelector('.session-error-modal');
+        if (errorModal) {
+            errorModal.remove();
+        }
+
+        // Show retry toast
+        this.showToast('Retrying session validation...', 'info');
+
+        try {
+            // Retry session check
+            const sessionValid = await this.checkSession();
+            if (sessionValid) {
+                this.showToast('Session validated successfully!', 'success');
+                // Resume session monitoring
+                this.startSessionMonitoring();
+            } else {
+                this.showToast('Session validation still failed. Please login again.', 'error');
+                this.showSessionExpiredModal();
+            }
+        } catch (error) {
+            console.error('❌ Staff session retry failed:', error);
+            this.showToast('Session retry failed. Please login again.', 'error');
+            this.showSessionExpiredModal();
+        }
     }
 
     async logout() {

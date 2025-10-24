@@ -7,6 +7,11 @@
   <!-- Link CSS -->
   <link rel="stylesheet" href="homepage.css">
   <style>
+    /* Global smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
     /* Blue Theme Body Background */
     body {
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
@@ -1015,6 +1020,107 @@
       background: #059669;
     }
 
+    /* Login Prompt Modal */
+    .login-prompt-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-prompt-modal.show {
+      display: flex;
+    }
+
+    .login-prompt-content {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+      position: relative;
+    }
+
+    .login-prompt-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      color: #6b7280;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .login-prompt-close:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .login-prompt-content h3 {
+      color: #1e40af;
+      margin: 0 0 15px 0;
+      font-size: 20px;
+    }
+
+    .login-prompt-content p {
+      color: #64748b;
+      margin: 0 0 25px 0;
+      line-height: 1.5;
+    }
+
+    .login-prompt-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .login-prompt-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .login-prompt-btn-primary {
+      background: #1e40af;
+      color: white;
+    }
+
+    .login-prompt-btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .login-prompt-btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .login-prompt-btn-secondary:hover {
+      background: #4b5563;
+    }
+
     /* Buy Now Modal */
     .buy-now-modal .buy-now-content {
       max-width: 600px;
@@ -1903,6 +2009,23 @@
     </div>
   </div>
 
+  <!-- Login Prompt Modal -->
+  <div id="loginPromptModal" class="login-prompt-modal">
+    <div class="login-prompt-content">
+      <span class="login-prompt-close" onclick="closeLoginPromptModal()">&times;</span>
+      <h3><i class="fas fa-user-lock"></i> Login Required</h3>
+      <p>Please login to add items to your cart and complete your purchase.</p>
+      <div class="login-prompt-actions">
+        <button onclick="redirectToLogin()" class="login-prompt-btn login-prompt-btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Login Now
+        </button>
+        <button onclick="closeLoginPromptModal()" class="login-prompt-btn login-prompt-btn-secondary">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Filter Buttons -->
   <div id="filter-buttons" class="filter-buttons">
@@ -2086,6 +2209,20 @@
 
     function redirectToLogin() {
       window.location.href = '../index.html'; // Assuming login page is index.html
+    }
+
+    function showLoginPromptModal() {
+      const modal = document.getElementById('loginPromptModal');
+      if (modal) {
+        modal.classList.add('show');
+      }
+    }
+
+    function closeLoginPromptModal() {
+      const modal = document.getElementById('loginPromptModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
     }
 
     function goBackToHomepage() {
@@ -2690,7 +2827,7 @@
       // Check if user is logged in
       if (!currentUser) {
         console.log('❌ User not logged in');
-        alert('Please login to add items to cart');
+        showLoginPromptModal();
         return;
       }
 
@@ -3004,6 +3141,8 @@
     window.initializeOrderStatusCount = initializeOrderStatusCount;
     window.toast = toast;
     window.updateNotificationBadge = updateNotificationBadge;
+    window.showLoginPromptModal = showLoginPromptModal;
+    window.closeLoginPromptModal = closeLoginPromptModal;
 
     // Mobile menu toggle functionality
     function toggleMobileMenu() {
@@ -3021,6 +3160,17 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeFloatingOrderWindow();
+        closeLoginPromptModal();
+      }
+    });
+
+    // Close login prompt modal when clicking outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('loginPromptModal');
+      if (modal && modal.classList.contains('show')) {
+        if (e.target === modal) {
+          closeLoginPromptModal();
+        }
       }
     });
 
