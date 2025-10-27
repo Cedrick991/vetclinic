@@ -245,7 +245,7 @@ class Dashboard {
             // Load other sections
             await this.loadPetsSection();
             await this.loadAppointmentsSection();
-            await this.loadOrdersSection();
+            // Orders section removed - functionality moved to modal
 
         } catch (error) {
             console.error('Failed to load dashboard data:', error);

@@ -521,6 +521,14 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Store Section - Blue Theme Override */
+#storeSection.content-section {
+    background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%) !important;
+    border: none !important;
+    position: relative;
+    overflow: hidden;
+}
+
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -730,7 +738,7 @@ body {
     /* Cart Icon - Manual Position */
     .cart-icon {
         position: fixed;
-        top: 15px;
+        top: 120px;
         right: 20px;
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
@@ -771,6 +779,16 @@ body {
     /* Ensure main-content doesn't interfere with mobile layout */
     .main-content {
         position: static !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-icon {
+        top: 100px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        padding: 10px;
     }
     
     .dashboard-content {
@@ -969,14 +987,70 @@ body {
     }
 }
 
-/* Responsive toast */
-@media (max-width: 768px) {
+/* Mobile responsive toast - Phone size */
+@media (max-width: 480px) {
     .toast {
-        right: 16px;
-        bottom: 16px;
-        left: 16px;
+        bottom: 20px;
+        right: 20px;
+        left: auto;
         min-width: auto;
         max-width: none;
+        padding: 14px 18px;
+        font-size: 13px;
+        height: 32px;
+    }
+
+    .toast-icon {
+        font-size: 10px;
+        height: 10px;
+    }
+}
+
+/* Tablet size */
+@media (min-width: 481px) and (max-width: 768px) {
+    .toast {
+        bottom: 25px;
+        right: 25px;
+        padding: 16px 20px;
+        font-size: 14px;
+        height: 38px;
+    }
+
+    .toast-icon {
+        font-size: 12px;
+        height: 12px;
+    }
+}
+
+/* Laptop size */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .toast {
+        bottom: 30px;
+        right: 30px;
+        padding: 18px 22px;
+        font-size: 14px;
+        height: 40px;
+    }
+
+    .toast-icon {
+        font-size: 13px;
+        height: 13px;
+    }
+}
+
+/* Desktop size */
+@media (min-width: 1025px) {
+    .toast {
+        bottom: 35px;
+        right: 35px;
+        padding: 20px 24px;
+        font-size: 15px;
+        height: 42px;
+    }
+
+    .toast-icon {
+        font-size: 14px;
+        height: 14px;
     }
 }
 

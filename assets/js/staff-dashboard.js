@@ -572,23 +572,8 @@ class StaffDashboard {
             });
         }
 
-        // Add product form
-        const addProductForm = document.getElementById('addProductForm');
-        if (addProductForm) {
-            addProductForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleAddProduct(addProductForm);
-            });
-        }
-
-        // Edit product form
-        const editProductForm = document.getElementById('editProductForm');
-        if (editProductForm) {
-            editProductForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleEditProduct(editProductForm);
-            });
-        }
+        // Product forms are handled by inline event listeners in staff.html
+        // to prevent duplicate submissions
 
         // Product image upload
         const productImageInput = document.getElementById('productImageInput');
@@ -3928,15 +3913,6 @@ class StaffDashboard {
                 description: 'High-quality nutrition for dogs',
                 price: 45.99,
                 stock: 25,
-                image: null
-            },
-            {
-                id: 2,
-                name: 'Cat Toys Set',
-                category: 'Toys',
-                description: 'Interactive toys for cats',
-                price: 12.50,
-                stock: 8,
                 image: null
             }
         ];

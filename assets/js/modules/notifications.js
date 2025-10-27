@@ -1356,7 +1356,7 @@ if (typeof window.NotificationSystem !== 'undefined') {
             }
 
             if (diffInSeconds < 60) {
-                return 'now';
+                return 'Just now';
             } else if (diffInSeconds < 3600) {
                 const minutes = Math.floor(diffInSeconds / 60);
                 return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;

@@ -127,6 +127,7 @@ class VetDatabase {
                     weight REAL,
                     color TEXT,
                     notes TEXT,
+                    profile_image TEXT,
                     is_active INTEGER DEFAULT 1,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (owner_id) REFERENCES users(id)
@@ -369,7 +370,6 @@ class VetDatabase {
                 INSERT INTO products (name, description, category, price, stock) VALUES
                 ('Premium Dog Food 5kg', 'High-quality dry dog food', 'Food', 1200.00, 50),
                 ('Cat Food Wet 400g', 'Nutritious wet cat food', 'Food', 180.00, 100),
-                ('Dog Toy Ball', 'Durable rubber ball', 'Toys', 250.00, 30),
                 ('Pet Shampoo', 'Gentle pet shampoo', 'Grooming', 220.00, 25),
                 ('Pet Collar', 'Adjustable pet collar', 'Accessories', 180.00, 40)
             ");
@@ -645,6 +645,27 @@ class VetDatabase {
             try {
                 $this->pdo->exec("ALTER TABLE services ADD COLUMN duration INTEGER DEFAULT 30");
                 echo "✅ Added missing duration column to services table\n";
+            } catch (Exception $e) {
+                // Column might already exist, continue silently
+            }
+        }
+
+        // Check if pets table has profile_image column
+        $columns = $this->pdo->query("PRAGMA table_info(pets)")->fetchAll(PDO::FETCH_ASSOC);
+        $hasProfileImage = false;
+
+        foreach ($columns as $column) {
+            if ($column['name'] === 'profile_image') {
+                $hasProfileImage = true;
+                break;
+            }
+        }
+
+        // Add profile_image column if missing
+        if (!$hasProfileImage) {
+            try {
+                $this->pdo->exec("ALTER TABLE pets ADD COLUMN profile_image TEXT");
+                echo "✅ Added missing profile_image column to pets table\n";
             } catch (Exception $e) {
                 // Column might already exist, continue silently
             }

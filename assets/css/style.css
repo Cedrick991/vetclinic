@@ -1724,16 +1724,16 @@ footer {
 .toast {
   position: fixed;
   bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
+  right: 30px;
+  transform: translateY(100px);
   z-index: 10001;
-  
+
   /* Beautiful Styling */
   background: linear-gradient(135deg, rgba(0,31,84,0.95), rgba(65,105,225,0.95));
   backdrop-filter: blur(15px) saturate(1.2);
   border: 2px solid rgba(255, 215, 0, 0.8);
   border-radius: 20px;
-  
+
   /* Content Styling */
   color: white;
   padding: 18px 30px;
@@ -1741,18 +1741,18 @@ footer {
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
-  
+
   /* Shadow and Effects */
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.4),
     0 0 30px rgba(255, 215, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  
+
   /* Responsive Width */
   min-width: 300px;
   max-width: 500px;
   width: auto;
-  
+
   /* Transition */
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1760,7 +1760,7 @@ footer {
 
 .toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
   animation: toastSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
@@ -1793,33 +1793,76 @@ footer {
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-/* Mobile responsive toast */
-@media (max-width: 600px) {
+/* Mobile responsive toast - Phone size */
+@media (max-width: 480px) {
   .toast {
     bottom: 20px;
-    left: 20px;
     right: 20px;
+    left: auto;
     transform: none;
     min-width: auto;
     max-width: none;
     width: auto;
-    padding: 16px 20px;
-    font-size: 15px;
+    padding: 14px 18px;
+    font-size: 13px;
+    height: 32px;
   }
-  
+
+  .toast-icon {
+    font-size: 10px;
+    height: 10px;
+  }
+
   .toast.show {
     transform: none;
   }
 }
 
-@media (max-width: 400px) {
+/* Tablet size */
+@media (min-width: 481px) and (max-width: 768px) {
   .toast {
-    bottom: 15px;
-    left: 15px;
-    right: 15px;
-    padding: 14px 18px;
+    bottom: 25px;
+    right: 25px;
+    padding: 16px 20px;
     font-size: 14px;
-    border-radius: 15px;
+    height: 38px;
+  }
+
+  .toast-icon {
+    font-size: 12px;
+    height: 12px;
+  }
+}
+
+/* Laptop size */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .toast {
+    bottom: 30px;
+    right: 30px;
+    padding: 18px 22px;
+    font-size: 14px;
+    height: 40px;
+  }
+
+  .toast-icon {
+    font-size: 13px;
+    height: 13px;
+  }
+}
+
+/* Desktop size */
+@media (min-width: 1025px) {
+  .toast {
+    bottom: 35px;
+    right: 35px;
+    padding: 20px 24px;
+    font-size: 15px;
+    height: 42px;
+  }
+
+  .toast-icon {
+    font-size: 14px;
+    height: 14px;
   }
 }
 

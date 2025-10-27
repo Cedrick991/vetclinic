@@ -1,7 +1,6 @@
 // Client Dashboard JavaScript
 class ClientDashboard {
   constructor() {
-    this.cart = JSON.parse(localStorage.getItem('clientCart') || '[]');
     this.currentReportData = null;
     this.selectedPetId = null;
     this.isSubmittingBooking = false; // Flag to prevent duplicate submissions
@@ -14,6 +13,8 @@ class ClientDashboard {
   init() {
     this.setupEventListeners();
     this.updateCartCount();
+    this.addBlueThemeStyles();
+    this.loadNotifications();
   }
 
   setupEventListeners() {
@@ -65,6 +66,13 @@ class ClientDashboard {
         }
       });
     });
+    
+    // Global function for loading orders (called from HTML button)
+    function loadClientOrders() {
+      if (window.clientDashboard) {
+        window.clientDashboard.loadOrders();
+      }
+    }
   }
 
   showSection(sectionName) {
@@ -120,7 +128,7 @@ class ClientDashboard {
         this.loadClientSettingsData();
         break;
       case 'orders':
-        this.loadOrders();
+        // Do not auto-load orders, wait for button click
         break;
     }
   }
@@ -692,25 +700,37 @@ class ClientDashboard {
 
   // Store functionality
   async loadStoreSection() {
-    const productsGrid = document.getElementById('clientProductsGrid');
+    const productsGrid = document.getElementById('storeProductsGrid');
     if (!productsGrid) return;
 
     try {
       productsGrid.innerHTML = '<div class="loading"><div class="spinner"></div>Loading products...</div>';
 
+      // Add cache-busting to force fresh data
+      const timestamp = Date.now();
       const response = await fetch('../api/vet_api.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get_products' })
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        },
+        body: JSON.stringify({
+          action: 'get_products',
+          cache_buster: 'true',
+          timestamp: timestamp
+        })
       });
 
       const result = await response.json();
 
       if (result.success && result.data && Array.isArray(result.data)) {
+        this.allProducts = result.data; // Store products for cart selection
         if (result.data.length === 0) {
           productsGrid.innerHTML = '<div class="loading"><p>No products available at the moment. Please check back later!</p></div>';
         } else {
           this.displayClientProducts(result.data);
+          console.log('✅ Products loaded with cache-busting timestamp:', timestamp);
         }
       } else {
         const errorMessage = result.message || 'Failed to load products';
@@ -723,7 +743,7 @@ class ClientDashboard {
   }
 
   displayClientProducts(products) {
-    const productsGrid = document.getElementById('clientProductsGrid');
+    const productsGrid = document.getElementById('storeProductsGrid');
     if (!productsGrid) return;
 
     if (products.length === 0) {
@@ -736,45 +756,89 @@ class ClientDashboard {
 
   createClientProductCard(product) {
     let imageHtml = '';
-    let placeholderHtml = '<div class="product-image-placeholder"><i class="fas fa-image"></i></div>';
+    let placeholderHtml = '<div class="product-image-placeholder" style="display: flex;"><i class="fas fa-image"></i></div>';
 
     if (product.image && product.image.trim() !== '' && product.image !== null && product.image !== 'null') {
-      const correctPath = '../assets/images/products/' + product.image;
-      imageHtml = `<img src="${correctPath}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" loading="lazy">`;
+      // Try multiple possible image paths
+      const imagePaths = [
+        product.image, // Original path
+        product.image.replace(/\.(jpg|jpeg|png)$/i, '.jpg'), // Try as .jpg
+        product.image.replace(/\.(jpg|jpeg|png)$/i, '.png'), // Try as .png
+      ];
+
+      // Remove duplicates and empty paths
+      const uniquePaths = [...new Set(imagePaths)].filter(path => path && path.trim() !== '');
+
+      if (uniquePaths.length > 0) {
+        // Try multiple path variations to ensure we find the correct one
+        const possiblePaths = [];
+
+        uniquePaths.forEach(path => {
+          // Try with full prefix
+          if (path.startsWith('assets/images/products/')) {
+            possiblePaths.push('../' + path);
+          } else {
+            possiblePaths.push('../assets/images/products/' + path);
+          }
+
+          // Also try without the ../ prefix
+          if (path.startsWith('assets/images/products/')) {
+            possiblePaths.push(path);
+          } else {
+            possiblePaths.push('assets/images/products/' + path);
+          }
+        });
+
+        // Remove duplicates
+        const finalPaths = [...new Set(possiblePaths)];
+        const correctPath = finalPaths[0];
+
+        imageHtml = `<img src="${correctPath}" alt="${product.name}"
+          onload="const container = this.closest('.product-image'); if (container) { const placeholder = container.querySelector('.product-image-placeholder'); if (placeholder) placeholder.style.display = 'none'; }"
+          onerror="tryNextImage(this, '${product.image}', '${finalPaths.join('|')}')"
+          loading="lazy">`;
+
+        // Hide placeholder initially since we have an image
+        placeholderHtml = '<div class="product-image-placeholder" style="display: none;"><i class="fas fa-image"></i></div>';
+      }
+    } else {
+      // No image, show placeholder
+      placeholderHtml = '<div class="product-image-placeholder" style="display: flex;"><i class="fas fa-image"></i></div>';
+      imageHtml = '';
     }
 
     const stockClass = product.stock === 0 ? 'stock-out' : product.stock < 10 ? 'stock-low' : 'stock-good';
     const stockText = product.stock === 0 ? 'Out of Stock' : product.stock < 10 ? 'Low Stock' : 'In Stock';
 
     const addToCartButton = product.stock === 0
-      ? `<button class="action-btn add-to-cart" disabled title="Out of Stock">
+      ? `<button class="action-btn add-to-cart" disabled title="Out of Stock" style="background: linear-gradient(135deg, #90a4ae 0%, #b0bec5 100%); cursor: not-allowed; box-shadow: none; transform: none;">
           <i class="fas fa-shopping-cart"></i> Out of Stock
         </button>`
-      : `<button class="action-btn add-to-cart" onclick="clientDashboard.addToCart(${product.id}, '${product.name}', ${product.price})" title="Add to Order">
+      : `<button class="action-btn add-to-cart" onclick="clientDashboard.openProductSelectionModal()" title="Add to Order" style="background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3); min-width: 120px; justify-content: center;">
           <i class="fas fa-shopping-cart"></i> Add to Order
         </button>`;
 
     const inStockClass = product.stock > 0 ? 'in-stock' : '';
 
     return `
-      <div class="product-card ${inStockClass}">
-        <div class="product-image">
+      <div class="product-card ${inStockClass}" style="background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%); border: 2px solid #2196f3; border-radius: 15px; padding: 20px; box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15); transition: all 0.3s ease;">
+        <div class="product-image" style="position: relative; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 12px; overflow: hidden; border: 2px solid #2196f3; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);">
           ${imageHtml}
-          ${imageHtml ? '' : placeholderHtml}
+          ${placeholderHtml}
         </div>
-        <div class="product-info">
-          <div class="product-name">${product.name}</div>
-          <div class="product-category">${product.category}</div>
-          <div class="product-description">${product.description || 'No description available'}</div>
-          <div class="product-details">
-            <div class="product-price">₱${parseFloat(product.price).toFixed(2)}</div>
-            <div class="product-stock">
-              <span class="stock-badge ${stockClass}">${stockText} (${product.stock})</span>
+        <div class="product-info" style="text-align: center;">
+          <div class="product-name" style="font-size: 18px; font-weight: 700; color: #1976d2; margin-bottom: 8px; text-shadow: 0 1px 2px rgba(25, 118, 210, 0.1);">${product.name}</div>
+          <div class="product-category" style="font-size: 14px; color: #42a5f5; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">${product.category}</div>
+          <div class="product-description" style="font-size: 13px; color: #546e7a; margin-bottom: 15px; line-height: 1.4;">${product.description || 'No description available'}</div>
+          <div class="product-details" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 0; border-top: 1px solid #e3f2fd;">
+            <div class="product-price" style="font-size: 24px; font-weight: 800; color: #2e7d32; text-shadow: 0 1px 2px rgba(46, 125, 50, 0.2);">₱${parseFloat(product.price).toFixed(2)}</div>
+            <div class="product-stock" style="text-align: right;">
+              <span class="stock-badge ${stockClass}" style="padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background: ${stockClass === 'stock-good' ? 'linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)' : stockClass === 'stock-low' ? 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)' : 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)'}; color: white;">${stockText} (${product.stock})</span>
             </div>
           </div>
-          <div class="product-actions">
+          <div class="product-actions" style="display: flex; gap: 10px; justify-content: center;">
             ${addToCartButton}
-            <button class="action-btn buy-now" onclick="clientDashboard.buyNow(${product.id}, '${product.name}', ${product.price})" title="Buy Now">
+            <button class="action-btn buy-now" onclick="clientDashboard.buyNow(${product.id}, '${product.name}', ${product.price})" title="Buy Now" style="background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3); min-width: 120px; justify-content: center;">
               <i class="fas fa-shopping-cart"></i> Buy Now
             </button>
           </div>
@@ -783,109 +847,38 @@ class ClientDashboard {
     `;
   }
 
-  // Cart functionality
-  addToCart(productId, productName, price) {
-    const existingItem = this.cart.find(item => item.id === productId);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      this.cart.push({
-        id: productId,
-        name: productName,
-        price: price,
-        quantity: 1
-      });
-    }
-
-    localStorage.setItem('clientCart', JSON.stringify(this.cart));
-    this.updateCartCount();
-    this.showToast(`${productName} added to order!`, 'success');
-  }
-
-  buyNow(productId, productName, price) {
-    const existingItem = this.cart.find(item => item.id === productId);
-
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      this.cart.push({
-        id: productId,
-        name: productName,
-        price: price,
-        quantity: 1
-      });
-    }
-
-    localStorage.setItem('clientCart', JSON.stringify(this.cart));
-    this.updateCartCount();
-    this.showToast(`${productName} added to order! Proceeding to checkout...`, 'success');
-
-    setTimeout(() => {
-      this.checkout();
-    }, 1000);
-  }
-
-  updateCartCount() {
-    const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
-
-    cartCountElements.forEach(element => {
-      element.textContent = totalItems;
-    });
-
-    const cartIcon = document.getElementById('cartIcon');
-    if (cartIcon) {
-      cartIcon.style.display = totalItems > 0 ? 'block' : 'none';
-    }
-  }
-
-  viewCart() {
-    if (this.cart.length === 0) {
-      this.showToast('Your cart is empty', 'info');
-      return;
-    }
+  // Open selection modal to choose multiple products
+  openProductSelectionModal() {
+    // Ensure products are loaded
+    const products = this.allProducts || [];
+    const available = products.filter(p => (p.stock ?? 0) > 0);
 
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `
-      <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-content" style="max-width: 700px;">
         <div class="modal-header">
-          <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+          <h3><i class="fas fa-list-check"></i> Select Products to Add</h3>
           <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
         </div>
         <div class="modal-body">
-          <div class="cart-items">
-            ${this.cart.map(item => `
-              <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e1e5e9;">
-                <div>
-                  <h4 style="margin: 0; font-size: 16px;">${item.name}</h4>
-                  <p style="margin: 4px 0; color: #666;">₱${item.price.toFixed(2)} each</p>
+          ${available.length === 0 ? '<div>No products available to add.</div>' : ''}
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+            ${available.map(p => `
+              <label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;">
+                <input type="checkbox" class="product-select-checkbox" data-product-id="${p.id}" />
+                <div style="flex:1;">
+                  <div style="font-weight:600;">${p.name}</div>
+                  <div style="font-size:12px;color:#6b7280;">₱${parseFloat(p.price).toFixed(2)} • Stock: ${p.stock}</div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <button onclick="clientDashboard.updateCartItemQuantity(${item.id}, ${item.quantity - 1})" style="width: 24px; height: 24px; border: none; background: #f8f9fa; border-radius: 4px; cursor: pointer;">-</button>
-                    <span style="min-width: 20px; text-align: center; font-weight: 500; color: #333; font-size: 16px;">${item.quantity}</span>
-                    <button onclick="clientDashboard.updateCartItemQuantity(${item.id}, ${item.quantity + 1})" style="width: 24px; height: 24px; border: none; background: #f8f9fa; border-radius: 4px; cursor: pointer;">+</button>
-                  </div>
-                  <button onclick="clientDashboard.removeFromCart(${item.id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </div>
+                <input type="number" class="product-select-qty" data-product-id="${p.id}" min="1" max="99" value="1" style="width:70px;" />
+              </label>
             `).join('')}
           </div>
-          <div class="cart-total" style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e1e5e9; text-align: right;">
-            <h3 style="margin: 0; font-size: 18px;">
-              Total: ₱${this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
-            </h3>
-          </div>
-          <div class="cart-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
-            <button onclick="this.closest('.modal').remove()" class="btn-secondary">Continue Shopping</button>
-            <button onclick="clientDashboard.checkout()" class="btn-primary">
-              <i class="fas fa-shopping-bag"></i> Buy Now
-            </button>
-          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+          <button class="btn-primary" onclick="clientDashboard.addSelectedToCart()"><i class="fas fa-plus"></i> Add Selected</button>
         </div>
       </div>
     `;
@@ -894,50 +887,866 @@ class ClientDashboard {
     modal.style.display = 'block';
   }
 
-  updateCartItemQuantity(productId, newQuantity) {
-    if (newQuantity <= 0) {
+  // Add selected products to cart
+  async addSelectedToCart() {
+    const checkboxes = Array.from(document.querySelectorAll('.product-select-checkbox:checked'));
+    if (checkboxes.length === 0) {
+      this.showToast('Select at least one product', 'warning');
+      return;
+    }
+
+    // Prepare batched add requests
+    const items = checkboxes.map(cb => {
+      const id = parseInt(cb.getAttribute('data-product-id'), 10);
+      const qtyInput = document.querySelector(`.product-select-qty[data-product-id="${id}"]`);
+      const qty = Math.min(99, Math.max(1, parseInt(qtyInput?.value || '1', 10)));
+      return { product_id: id, quantity: qty };
+    });
+
+    try {
+      // Send one-by-one to reuse existing API endpoint
+      for (const it of items) {
+        const res = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_to_cart', product_id: it.product_id, quantity: it.quantity })
+        });
+        const json = await res.json();
+        if (!json.success) {
+          throw new Error(json.message || 'Failed adding some items');
+        }
+      }
+
+      // Close modal, update count and notify
+      const modal = document.querySelector('.modal');
+      if (modal) modal.remove();
+      await this.updateCartCount();
+
+      const addedNames = items.map(it => {
+        const p = (this.allProducts || []).find(pp => pp.id == it.product_id);
+        return p ? `${p.name} x${it.quantity}` : `Item ${it.product_id} x${it.quantity}`;
+      }).join(', ');
+
+      this.showToast(`Added: ${addedNames}`, 'success');
+    } catch (e) {
+      console.error(e);
+      this.showToast('Failed to add selected items', 'error');
+    }
+  }
+
+  // Function to try next image path when current one fails
+  tryNextImage(img, originalImage, pipeSeparatedPaths) {
+    const imagePaths = pipeSeparatedPaths.split('|').filter(path => path && path.trim() !== '');
+
+    // If no more paths to try, hide image and show placeholder
+    if (imagePaths.length === 0) {
+      console.log('No more paths to try, hiding image for:', originalImage);
+      img.style.display = 'none';
+
+      // Find and show placeholder
+      const productImageContainer = img.closest('.product-image');
+      if (productImageContainer) {
+        const placeholder = productImageContainer.querySelector('.product-image-placeholder');
+        if (placeholder) {
+          placeholder.style.display = 'flex';
+        }
+      }
+      return;
+    }
+
+    // Try multiple path variations for the first path
+    const currentPath = imagePaths[0];
+    const possiblePaths = [];
+
+    // Try with full prefix
+    if (currentPath.startsWith('assets/images/products/')) {
+      possiblePaths.push('../' + currentPath);
+    } else {
+      possiblePaths.push('../assets/images/products/' + currentPath);
+    }
+
+    // Also try without the ../ prefix
+    if (currentPath.startsWith('assets/images/products/')) {
+      possiblePaths.push(currentPath);
+    } else {
+      possiblePaths.push('assets/images/products/' + currentPath);
+    }
+
+    const nextPath = possiblePaths[0];
+    console.log('Trying path:', nextPath, 'for image:', originalImage);
+
+    img.src = nextPath;
+    img.onload = function() {
+      // Image loaded successfully, hide placeholder
+      const productImageContainer = this.closest('.product-image');
+      if (productImageContainer) {
+        const placeholder = productImageContainer.querySelector('.product-image-placeholder');
+        if (placeholder) {
+          placeholder.style.display = 'none';
+        }
+      }
+    };
+    img.onerror = function() {
+      // Remove the failed path and try again with remaining paths
+      const remainingPaths = imagePaths.slice(1);
+      if (remainingPaths.length > 0) {
+        tryNextImage(img, originalImage, remainingPaths.join('|'));
+      } else {
+        // No more paths, hide image and show placeholder
+        console.log('All paths failed for:', originalImage, 'hiding image');
+        img.style.display = 'none';
+
+        // Find and show placeholder
+        const productImageContainer = img.closest('.product-image');
+        if (productImageContainer) {
+          const placeholder = productImageContainer.querySelector('.product-image-placeholder');
+          if (placeholder) {
+            placeholder.style.display = 'flex';
+          }
+        }
+      }
+    };
+  }
+
+  // Cart functionality
+  async addToCart(productId, productName, price) {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_to_cart',
+          product_id: productId,
+          quantity: 1
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        this.updateCartCount();
+        this.showToast(`${productName} added to order!`, 'success');
+      } else {
+        this.showToast('Error: ' + result.message, 'error');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      this.showToast('Failed to add item to cart', 'error');
+    }
+  }
+
+  async buyNow(productId, productName, price) {
+    // Check if user is logged in
+    if (!this.currentUser) {
+      this.showLoginPromptModal();
+      return;
+    }
+
+    // Only clients can buy, staff should use management functions
+    if (this.isStaff) {
+      this.showToast('Staff users cannot purchase items. Use Edit/Delete buttons to manage products.', 'error');
+      return;
+    }
+
+    try {
+      // Directly create order for single item instead of adding to cart
+      const orderData = {
+        items: [{
+          product_id: productId,
+          name: productName,
+          price: price,
+          quantity: 1
+        }],
+        total: price
+      };
+
+      this.showToast(`${productName} - proceeding to checkout...`, 'success');
+
+      // Show payment modal directly
+      setTimeout(() => {
+        this.showPaymentModalForCart(orderData);
+      }, 1000);
+    } catch (error) {
+      console.error('Error processing buy now:', error);
+      this.showToast('Failed to process purchase', 'error');
+    }
+  }
+
+  // Show login prompt modal for unauthenticated users
+  showLoginPromptModal() {
+    console.log('🔐 Showing login prompt modal for unauthenticated user');
+
+    // Create login prompt modal
+    const modal = document.createElement('div');
+    modal.className = 'modal login-prompt-modal';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 500px; background: linear-gradient(145deg, #2E5BAA, #1E3F7A); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="padding: 24px 24px 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <h3 style="color: #B3B8FF; margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-sign-in-alt" style="color: #ffd700;"></i>
+            Login Required
+          </h3>
+          <span class="close" onclick="this.closest('.modal').remove()" style="color: #ffffff; font-size: 28px; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#B3B8FF'" onmouseout="this.style.color='#ffffff'">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🔐</div>
+            <h4 style="color: #ffffff; margin-bottom: 15px;">Please Log In</h4>
+            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;">
+              You need to be logged in to purchase products and access your account features.
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <button onclick="window.location.href='../index.html'" class="btn-primary" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+              <i class="fas fa-sign-in-alt"></i> Go to Login
+            </button>
+            <button onclick="this.closest('.modal').remove()" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+
+    // Add click outside to close
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+
+  async buySelectedItems() {
+    const selectedItems = document.querySelectorAll('.item-checkbox:checked');
+
+    if (selectedItems.length === 0) {
+      this.showToast('Please select at least one item to buy', 'warning');
+      return;
+    }
+
+    try {
+      // Get current cart data from API to ensure we have the latest information
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_cart' })
+      });
+
+      const result = await response.json();
+
+      if (!result.success || !result.data || result.data.length === 0) {
+        this.showToast('Cart is empty or could not be loaded', 'error');
+        return;
+      }
+
+      // Get selected items data from the cart response
+      const selectedProductIds = Array.from(selectedItems).map(cb => parseInt(cb.getAttribute('data-product-id')));
+      const items = result.data.filter(cartItem => selectedProductIds.includes(cartItem.product_id || cartItem.id)).map(cartItem => ({
+        product_id: cartItem.product_id || cartItem.id,
+        name: cartItem.name,
+        price: parseFloat(cartItem.price || 0),
+        quantity: cartItem.quantity || 1
+      }));
+
+      if (items.length === 0) {
+        this.showToast('No valid items selected', 'error');
+        return;
+      }
+
+      const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      // Close cart modal
+      const cartModal = document.querySelector('.modal');
+      if (cartModal) cartModal.remove();
+
+      // Show payment modal for selected items
+      this.showPaymentModalForSelected(items, total);
+    } catch (error) {
+      console.error('Error in buySelectedItems:', error);
+      this.showToast('Error processing selected items. Please try again.', 'error');
+    }
+  }
+
+  showPaymentModalForSelected(items, total) {
+    // Create payment modal for selected items
+    const modal = document.createElement('div');
+    modal.className = 'modal buy-now-modal';
+    modal.innerHTML = `
+      <div class="modal-content buy-now-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-credit-card"></i> Complete Your Purchase</h3>
+          <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="order-summary">
+            <h4>Order Summary (${items.length} selected items)</h4>
+            <div class="summary-items">
+              ${items.map(item => `
+                <div class="summary-item">
+                  <div class="item-info">
+                    <h5>${item.name}</h5>
+                    <p>Quantity: ${item.quantity} × ₱${parseFloat(item.price).toFixed(2)}</p>
+                  </div>
+                  <div class="item-subtotal">
+                    ₱${(item.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="summary-total">
+              <div class="total-row">
+                <span><strong>Total:</strong></span>
+                <span class="final-total"><strong>₱${total.toFixed(2)}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-section">
+            <h4><i class="fas fa-money-bill-wave"></i> Payment Method</h4>
+            <div class="payment-options">
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="gcash" checked>
+                <div class="payment-info">
+                  <i class="fab fa-google-wallet"></i>
+                  <div>
+                    <div class="payment-name">GCash</div>
+                    <div class="payment-desc">Pay using GCash e-wallet</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="bank">
+                <div class="payment-info">
+                  <i class="fas fa-university"></i>
+                  <div>
+                    <div class="payment-name">Bank Transfer</div>
+                    <div class="payment-desc">Direct bank transfer</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="cash_on_visit">
+                <div class="payment-info">
+                  <i class="fas fa-money-bill-alt"></i>
+                  <div>
+                    <div class="payment-name">Cash on Visit</div>
+                    <div class="payment-desc">Pay cash when picking up</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="order-notes">
+            <h4><i class="fas fa-sticky-note"></i> Order Notes (Optional)</h4>
+            <textarea id="orderNotes" placeholder="Any special instructions or delivery notes..." rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button onclick="this.closest('.modal').remove()" class="btn-secondary">Cancel</button>
+          <button onclick="clientDashboard.processSelectedPayment()" class="btn-primary">
+            <i class="fas fa-check"></i> Complete Purchase
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => {
+      modal.classList.add('show');
+    }, 10);
+  }
+
+  async processSelectedPayment() {
+    // Get payment method
+    const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+    if (!selectedPayment) {
+      this.showToast('Please select a payment method', 'error');
+      return;
+    }
+
+    const paymentMethod = selectedPayment.value;
+    const orderNotes = document.getElementById('orderNotes').value;
+
+    // Get selected items from the modal
+    const summaryItems = document.querySelectorAll('.summary-item');
+    const items = Array.from(summaryItems).map(item => {
+      const name = item.querySelector('h5').textContent;
+      const priceText = item.querySelector('.item-info p').textContent;
+      const priceMatch = priceText.match(/₱([\d.]+)/);
+      const price = parseFloat(priceMatch[1]);
+      const quantityMatch = priceText.match(/Quantity: (\d+)/);
+      const quantity = parseInt(quantityMatch[1]);
+
+      return {
+        name: name,
+        price: price,
+        quantity: quantity
+      };
+    });
+
+    const totalText = document.querySelector('.final-total').textContent;
+    const total = parseFloat(totalText.replace('₱', ''));
+
+    // Show loading state
+    const submitBtn = document.querySelector('.buy-now-modal .btn-primary');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    submitBtn.disabled = true;
+
+    // Create order via API
+    try {
+      const orderResponse = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'buy_cart',
+          items: items,
+          total: total,
+          payment_method: paymentMethod,
+          notes: orderNotes
+        })
+      });
+
+      const orderResult = await orderResponse.json();
+
+      if (orderResult.success) {
+        // Clear cart
+        await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clear_cart' })
+        });
+
+        // Update cart count
+        this.updateCartCount();
+
+        // Close modal
+        const modal = document.querySelector('.buy-now-modal');
+        if (modal) {
+          modal.classList.remove('show');
+          setTimeout(() => modal.remove(), 300);
+        }
+
+        // Show success message
+        this.showToast(`Order placed successfully! Order ID: ${orderResult.order_id}`, 'success');
+
+        console.log('Selected items order placed:', orderResult);
+      } else {
+        this.showToast('Error: ' + orderResult.message, 'error');
+      }
+
+      // Restore button
+      if (submitBtn) {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error processing selected payment:', error);
+      this.showToast('Failed to process payment', 'error');
+
+      // Restore button
+      if (submitBtn) {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+  }
+
+  async updateCartCount() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_cart' })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const totalItems = result.item_count || 0;
+
+        const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
+        cartCountElements.forEach(element => {
+          element.textContent = totalItems;
+        });
+
+        const cartIcon = document.getElementById('cartIcon');
+        if (cartIcon) {
+          cartIcon.style.display = totalItems > 0 ? 'block' : 'none';
+        }
+      } else {
+        const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
+        cartCountElements.forEach(element => {
+          element.textContent = '0';
+        });
+
+        const cartIcon = document.getElementById('cartIcon');
+        if (cartIcon) {
+          cartIcon.style.display = 'none';
+        }
+      }
+    } catch (error) {
+      console.error('Error updating cart count:', error);
+      const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
+      cartCountElements.forEach(element => {
+        element.textContent = '0';
+      });
+
+      const cartIcon = document.getElementById('cartIcon');
+      if (cartIcon) {
+        cartIcon.style.display = 'none';
+      }
+    }
+  }
+
+  async viewCart() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_cart' })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        const cart = result.data;
+        const total = result.total;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+              <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+              <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+            </div>
+            <div class="modal-body">
+              <div class="cart-items">
+                ${cart.map(item => `
+                  <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e1e5e9;">
+                    <div>
+                      <h4 style="margin: 0; font-size: 16px;">${item.name}</h4>
+                      <p style="margin: 4px 0; color: #666;">₱${parseFloat(item.price).toFixed(2)} each</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="number" value="${item.quantity}" min="1" max="99" style="width: 60px; text-align: center; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" onchange="clientDashboard.updateCartItemQuantity(${item.product_id}, this.value)">
+                        <span style="font-size: 14px; color: #666;">Qty</span>
+                      </div>
+                      <button onclick="clientDashboard.removeFromCart(${item.product_id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="cart-total" style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e1e5e9; text-align: right;">
+                <h3 style="margin: 0; font-size: 18px;">
+                  Total: ₱${total.toFixed(2)}
+                </h3>
+              </div>
+              <div class="cart-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
+                <button onclick="this.closest('.modal').remove()" class="btn-secondary">Continue Shopping</button>
+                <button onclick="clientDashboard.buySelectedItems()" class="btn-primary">
+                  <i class="fas fa-shopping-bag"></i> Buy Selected
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+      } else {
+        this.showToast('Your cart is empty', 'info');
+      }
+    } catch (error) {
+      console.error('Error loading cart:', error);
+      this.showToast('Error loading cart', 'error');
+    }
+  }
+
+  async updateCartItemQuantity(productId, quantityValue) {
+    const newQuantity = parseInt(quantityValue, 10);
+
+    if (isNaN(newQuantity) || newQuantity <= 0) {
       this.removeFromCart(productId);
       return;
     }
 
-    const item = this.cart.find(item => item.id === productId);
-    if (item) {
-      item.quantity = newQuantity;
-      localStorage.setItem('clientCart', JSON.stringify(this.cart));
-      this.updateCartCount();
-      this.viewCart();
-    }
-  }
-
-  removeFromCart(productId) {
-    this.cart = this.cart.filter(item => item.id !== productId);
-    localStorage.setItem('clientCart', JSON.stringify(this.cart));
-    this.updateCartCount();
-    this.viewCart();
-  }
-
-  checkout() {
-    if (this.cart.length === 0) {
-      this.showToast('Your cart is empty', 'error');
+    if (newQuantity > 99) {
+      this.showToast('Maximum quantity is 99', 'warning');
+      this.viewCart(); // Refresh to reset the input
       return;
     }
 
-    const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const orderData = {
-      items: this.cart,
-      total: total
-    };
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_cart',
+          product_id: productId,
+          quantity: newQuantity
+        })
+      });
 
-    this.showPaymentModalForCart(orderData);
+      const result = await response.json();
 
-    const cartModal = document.querySelector('.modal');
-    if (cartModal) {
-      cartModal.remove();
+      if (result.success) {
+        this.updateCartCount();
+        this.viewCart(); // Refresh the cart modal
+      } else {
+        this.showToast('Error: ' + result.message, 'error');
+        this.viewCart(); // Refresh to show current state
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      this.showToast('Failed to update cart item', 'error');
+    }
+  }
+
+  async removeFromCart(productId) {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'remove_from_cart',
+          product_id: productId
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        this.updateCartCount();
+        this.viewCart();
+      } else {
+        this.showToast('Error: ' + result.message, 'error');
+        this.viewCart();
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      this.showToast('Failed to remove item from cart', 'error');
+    }
+  }
+
+  async checkout() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_cart' })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        const orderData = {
+          items: result.data,
+          total: result.total
+        };
+
+        this.showPaymentModalForCart(orderData);
+
+        const cartModal = document.querySelector('.modal');
+        if (cartModal) {
+          cartModal.remove();
+        }
+      } else {
+        this.showToast('Your cart is empty', 'error');
+      }
+    } catch (error) {
+      console.error('Error loading cart for checkout:', error);
+      this.showToast('Error loading cart', 'error');
     }
   }
 
   showPaymentModalForCart(orderData) {
-    this.showToast('Payment system is loading. Please try again in a moment.', 'info');
+    // Create payment modal similar to store.html
+    const modal = document.createElement('div');
+    modal.className = 'modal buy-now-modal';
+    modal.innerHTML = `
+      <div class="modal-content buy-now-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-credit-card"></i> Complete Your Purchase</h3>
+          <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="order-summary">
+            <h4>Order Summary</h4>
+            <div class="summary-items">
+              ${orderData.items.map(item => `
+                <div class="summary-item">
+                  <div class="item-info">
+                    <h5>${item.name}</h5>
+                    <p>Quantity: ${item.quantity} × ₱${parseFloat(item.price).toFixed(2)}</p>
+                  </div>
+                  <div class="item-subtotal">
+                    ₱${(item.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="summary-total">
+              <div class="total-row">
+                <span><strong>Total (${orderData.items.reduce((sum, item) => sum + item.quantity, 0)} items):</strong></span>
+                <span class="final-total"><strong>₱${orderData.total.toFixed(2)}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-section">
+            <h4><i class="fas fa-money-bill-wave"></i> Payment Method</h4>
+            <div class="payment-options">
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="gcash" checked>
+                <div class="payment-info">
+                  <i class="fab fa-google-wallet"></i>
+                  <div>
+                    <div class="payment-name">GCash</div>
+                    <div class="payment-desc">Pay using GCash e-wallet</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="bank">
+                <div class="payment-info">
+                  <i class="fas fa-university"></i>
+                  <div>
+                    <div class="payment-name">Bank Transfer</div>
+                    <div class="payment-desc">Direct bank transfer</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="payment_method" value="cash_on_visit">
+                <div class="payment-info">
+                  <i class="fas fa-money-bill-alt"></i>
+                  <div>
+                    <div class="payment-name">Cash on Visit</div>
+                    <div class="payment-desc">Pay cash when picking up</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="order-notes">
+            <h4><i class="fas fa-sticky-note"></i> Order Notes (Optional)</h4>
+            <textarea id="orderNotes" placeholder="Any special instructions or delivery notes..." rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button onclick="this.closest('.modal').remove()" class="btn-secondary">Cancel</button>
+          <button onclick="clientDashboard.processPayment()" class="btn-primary">
+            <i class="fas fa-check"></i> Complete Purchase
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => {
+      modal.classList.add('show');
+    }, 10);
+  }
+
+  async processPayment() {
+    // Get payment method
+    const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+    if (!selectedPayment) {
+      this.showToast('Please select a payment method', 'error');
+      return;
+    }
+
+    const paymentMethod = selectedPayment.value;
+    const orderNotes = document.getElementById('orderNotes').value;
+
+    // Get cart items
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_cart' })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        const cart = result.data;
+        const total = result.total;
+
+        // Show loading state
+        const submitBtn = document.querySelector('.buy-now-modal .btn-primary');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        // Create order via API
+        const orderResponse = await fetch('../api/vet_api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'buy_cart',
+            items: cart,
+            total: total,
+            payment_method: paymentMethod,
+            notes: orderNotes
+          })
+        });
+
+        const orderResult = await orderResponse.json();
+
+        if (orderResult.success) {
+          // Clear cart
+          await fetch('../api/vet_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'clear_cart' })
+          });
+
+          // Update cart count
+          this.updateCartCount();
+
+          // Close modal
+          const modal = document.querySelector('.buy-now-modal');
+          if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+          }
+
+          // Show success message
+          this.showToast(`Order placed successfully! Order ID: ${orderResult.order_id}`, 'success');
+
+          console.log('Order placed:', orderResult);
+        } else {
+          this.showToast('Error: ' + orderResult.message, 'error');
+        }
+
+        // Restore button
+        if (submitBtn) {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }
+      } else {
+        this.showToast('Cart is empty', 'error');
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      this.showToast('Failed to process payment', 'error');
+    }
   }
 
   // Toast notifications
@@ -946,7 +1755,7 @@ class ClientDashboard {
     toast.className = `toast ${type} show`;
     toast.innerHTML = `
       <div class="toast-icon">
-        ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
+        ${type === 'success' ? '✓' : type === 'error' ? '✗' : type === 'warning' ? '!' : 'i'}
       </div>
       <div class="toast-message">${message}</div>
     `;
@@ -2625,7 +3434,123 @@ class ClientDashboard {
   }
 
   async loadOrders() {
-    // Implementation for orders
+    const ordersModalContent = document.getElementById('ordersModalContent');
+    if (!ordersModalContent) return;
+
+    try {
+      // Show loading state
+      ordersModalContent.innerHTML = `
+        <div class="loading" style="text-align: center; padding: 40px;">
+          <div class="spinner"></div>
+          Loading orders...
+        </div>
+      `;
+
+      // Fetch orders from API
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_orders' })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        // Display orders
+        this.displayOrdersInModal(result.data);
+      } else {
+        // Show empty state
+        ordersModalContent.innerHTML = `
+          <div class="orders-empty-state" style="text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8); background: rgba(255,255,255,0.05); border-radius: 15px; border: 2px dashed rgba(255,255,255,0.2);">
+            <i class="fas fa-shopping-bag" style="font-size: 64px; color: rgba(255, 255, 255, 0.3); margin-bottom: 20px;"></i>
+            <h3 style="margin: 0 0 10px 0; color: #ffffff; font-size: 20px;">No Orders Yet</h3>
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 14px;">You haven't placed any orders yet. Visit the store to start shopping!</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      ordersModalContent.innerHTML = `
+        <div class="orders-error-state" style="text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.8); background: rgba(239, 68, 68, 0.1); border-radius: 15px; border: 2px solid rgba(239, 68, 68, 0.3);">
+          <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: #ef4444; margin-bottom: 20px;"></i>
+          <h3 style="margin: 0 0 10px 0; color: #ffffff; font-size: 20px;">Error Loading Orders</h3>
+          <p style="margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 14px;">Failed to load orders. Please try again later.</p>
+        </div>
+      `;
+    }
+  }
+
+  displayOrdersInModal(orders) {
+    const ordersModalContent = document.getElementById('ordersModalContent');
+    if (!ordersModalContent) return;
+
+    const ordersHtml = orders.map(order => this.createOrderCard(order)).join('');
+    ordersModalContent.innerHTML = `
+      <div class="orders-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px; margin-top: 24px; padding: 0 4px; width: 100%; box-sizing: border-box;">
+        ${ordersHtml}
+      </div>
+    `;
+  }
+
+  showOrdersModal() {
+    const modal = document.getElementById('ordersModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      this.loadOrders();
+    }
+  }
+
+  closeOrdersModal() {
+    const modal = document.getElementById('ordersModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  displayOrders(orders) {
+    const ordersContainer = document.getElementById('ordersContainer');
+    if (!ordersContainer) return;
+
+    const ordersHtml = orders.map(order => this.createOrderCard(order)).join('');
+    ordersContainer.innerHTML = `
+      <div class="orders-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px; margin-top: 24px; padding: 0 4px; width: 100%; box-sizing: border-box;">
+        ${ordersHtml}
+      </div>
+    `;
+  }
+
+  createOrderCard(order) {
+    const orderDate = new Date(order.created_at).toLocaleDateString();
+    const totalAmount = parseFloat(order.total_amount || 0).toFixed(2);
+
+    return `
+      <div class="order-card" style="background: #122d47; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.2); display: flex; flex-direction: column; height: 100%;">
+        <div class="order-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+          <div class="order-info">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600;">Order #${order.id}</h3>
+            <div class="order-date" style="margin: 0 0 4px 0; font-size: 14px; opacity: 0.9;">${orderDate}</div>
+            <div class="payment-method" style="margin: 0; font-size: 12px; opacity: 0.8; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-credit-card"></i> ${order.payment_method || 'Cash'}
+            </div>
+          </div>
+        </div>
+        <div class="order-items" style="padding: 20px; flex: 1; background: #122d47; border-radius: 0 0 12px 12px;">
+          <div class="order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div class="item-info">
+              <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #ffffff;">Total Items</h4>
+              <p style="margin: 0; font-size: 14px; color: rgba(255, 255, 255, 0.8); font-weight: 500;">${order.item_count || 0} items</p>
+            </div>
+            <div class="item-price" style="font-weight: 700; color: #28a745; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">₱${totalAmount}</div>
+          </div>
+        </div>
+        <div class="order-total" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 16px 20px; text-align: right; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 18px; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: #667eea; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">Total</strong>
+          <div class="total-amount" style="font-size: 18px; font-weight: 700; color: #667eea; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">₱${totalAmount}</div>
+        </div>
+      </div>
+    `;
   }
 
   async editAppointment(appointmentId) {
@@ -3154,7 +4079,473 @@ class ClientDashboard {
       });
     }
   }
+
+  // Add CSS styles for blue theme
+  addBlueThemeStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .product-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+        border: 2px solid #2196f3;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(33, 150, 243, 0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(33, 150, 243, 0.25);
+        border-color: #1976d2;
+      }
+
+      .product-card.in-stock {
+        border-color: #4caf50;
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.15);
+      }
+
+      .product-card.in-stock:hover {
+        box-shadow: 0 12px 35px rgba(76, 175, 80, 0.25);
+      }
+
+      .product-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1976d2;
+        margin-bottom: 8px;
+        text-shadow: 0 1px 2px rgba(25, 118, 210, 0.1);
+      }
+
+      .product-category {
+        font-size: 14px;
+        color: #42a5f5;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .product-description {
+        font-size: 13px;
+        color: #546e7a;
+        margin-bottom: 15px;
+        line-height: 1.4;
+      }
+
+      .product-price {
+        font-size: 24px;
+        font-weight: 800;
+        color: #2e7d32;
+        text-shadow: 0 1px 2px rgba(46, 125, 50, 0.2);
+      }
+
+      .stock-badge {
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stock-good {
+        background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        color: white;
+      }
+
+      .stock-low {
+        background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+        color: white;
+      }
+
+      .stock-out {
+        background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+        color: white;
+      }
+
+      .action-btn {
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .action-btn.add-to-cart {
+        background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+      }
+
+      .action-btn.add-to-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+      }
+
+      .action-btn.buy-now {
+        background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+      }
+
+      .action-btn.buy-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4);
+        background: linear-gradient(135deg, #e64a19 0%, #ff5722 100%);
+      }
+
+      .action-btn:disabled {
+        background: linear-gradient(135deg, #90a4ae 0%, #b0bec5 100%);
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+
+      .product-image {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #2196f3;
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+      }
+
+      .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        display: block;
+        border-radius: 10px;
+      }
+
+      .product-image-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1976d2;
+        font-size: 48px;
+        z-index: 1;
+        border-radius: 10px;
+      }
+
+      /* Toast Notification Styles */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 10000;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        border-left: 3px solid #667eea;
+        max-width: 300px;
+        font-size: 12px;
+        line-height: 1.1;
+        height: 36px;
+        box-sizing: border-box;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .toast.success {
+        border-left-color: #28a745;
+      }
+
+      .toast.error {
+        border-left-color: #dc3545;
+      }
+
+      .toast.warning {
+        border-left-color: #ffc107;
+      }
+
+      .toast.info {
+        border-left-color: #17a2b8;
+      }
+
+      .toast-icon {
+        font-size: 12px;
+        flex-shrink: 0;
+        line-height: 1;
+        height: 12px;
+        display: flex;
+        align-items: center;
+      }
+
+      .toast-message {
+        flex: 1;
+        color: #333;
+        font-weight: 500;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      /* Notification Styles */
+      .client-notifications {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+      }
+
+      .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .notifications-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .notification-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        transition: background 0.3s ease;
+        cursor: pointer;
+      }
+
+      .notification-item:hover {
+        background: rgba(102, 126, 234, 0.05);
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-item.unread {
+        background: rgba(102, 126, 234, 0.1);
+        border-left: 4px solid #667eea;
+      }
+
+      .notification-content h4 {
+        margin: 0 0 5px 0;
+        color: #667eea;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .notification-content p {
+        margin: 0 0 5px 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .notification-time {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 5px;
+      }
+
+      .notification-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .notification-actions button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .notification-actions button:hover {
+        background: #5a67d8;
+      }
+
+      .no-notifications {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+      }
+
+      .no-notifications i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+        color: rgba(102, 126, 234, 0.3);
+      }
+
+      .no-notifications p {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+      }
+
+      .no-notifications small {
+        color: #94a3b8;
+        font-size: 12px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Load and display notifications
+  async loadNotifications() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_notifications', limit: 10 })
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data && result.data.length > 0) {
+        this.displayNotifications(result.data);
+      } else {
+        this.displayEmptyNotifications();
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      this.displayEmptyNotifications();
+    }
+  }
+
+  displayNotifications(notifications) {
+    const notificationsContainer = document.getElementById('clientNotifications');
+    const notificationsList = document.getElementById('notificationsList');
+
+    if (!notificationsContainer || !notificationsList) return;
+
+    notificationsList.innerHTML = notifications.map(notification => `
+      <div class="notification-item ${!notification.is_read ? 'unread' : ''}" onclick="markNotificationRead(${notification.id})">
+        <div class="notification-content">
+          <h4>${notification.title}</h4>
+          <p>${notification.message}</p>
+          <div class="notification-time">
+            <i class="fas fa-clock"></i> ${new Date(notification.created_at).toLocaleDateString()}
+          </div>
+        </div>
+        <div class="notification-actions">
+          <button onclick="markNotificationRead(${notification.id})">
+            <i class="fas fa-check"></i> Mark Read
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    notificationsContainer.style.display = 'block';
+  }
+
+  displayEmptyNotifications() {
+    const notificationsContainer = document.getElementById('clientNotifications');
+    const notificationsList = document.getElementById('notificationsList');
+
+    if (!notificationsContainer || !notificationsList) return;
+
+    notificationsList.innerHTML = `
+      <div class="no-notifications">
+        <i class="fas fa-bell-slash"></i>
+        <p>No notifications</p>
+        <small>You'll see notifications here when there are updates.</small>
+      </div>
+    `;
+
+    notificationsContainer.style.display = 'block';
+  }
+
+  // Mark notification as read
+  async markNotificationRead(notificationId) {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark_notification_read',
+          notification_id: notificationId
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Refresh notifications
+        this.loadNotifications();
+        this.showToast('Notification marked as read', 'success');
+      } else {
+        this.showToast('Failed to mark notification as read', 'error');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      this.showToast('Error updating notification', 'error');
+    }
+  }
+
+  // Mark all notifications as read
+  async markAllNotificationsRead() {
+    try {
+      const response = await fetch('../api/vet_api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'mark_all_notifications_read' })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Refresh notifications
+        this.loadNotifications();
+        this.showToast('All notifications marked as read', 'success');
+      } else {
+        this.showToast('Failed to mark all notifications as read', 'error');
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      this.showToast('Error updating notifications', 'error');
+    }
+  }
 }
+
+// Make tryNextImage available globally
+window.tryNextImage = function(img, originalImage, pipeSeparatedPaths) {
+  if (window.clientDashboard) {
+    window.clientDashboard.tryNextImage(img, originalImage, pipeSeparatedPaths);
+  }
+};
 
 // Global functions for client dashboard (called from HTML)
 function showClientBookingModal() {
@@ -3190,6 +4581,30 @@ function addClientPet() {
 function refreshClientServices() {
   if (window.clientDashboard) {
     window.clientDashboard.refreshServices();
+  }
+}
+
+function viewCart() {
+  if (window.clientDashboard) {
+    window.clientDashboard.viewCart();
+  }
+}
+
+function loadClientProducts() {
+  if (window.clientDashboard) {
+    window.clientDashboard.loadClientProducts();
+  }
+}
+
+function showOrdersModal() {
+  if (window.clientDashboard) {
+    window.clientDashboard.showOrdersModal();
+  }
+}
+
+function closeOrdersModal() {
+  if (window.clientDashboard) {
+    window.clientDashboard.closeOrdersModal();
   }
 }
 

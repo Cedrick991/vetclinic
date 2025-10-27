@@ -146,7 +146,7 @@ try {
             break;
 
         case 'get_products':
-            $response = getProducts();
+            $response = getProducts($input);
             break;
 
         case 'add_product':
@@ -265,6 +265,10 @@ try {
             $response = buyCart($db, $input);
             break;
 
+        case 'clear_cart':
+            $response = clearCart($db, $input);
+            break;
+
         case 'update_profile':
             $response = updateProfile($db, $input);
             break;
@@ -275,6 +279,10 @@ try {
 
         case 'upload_profile_picture':
             $response = uploadProfilePicture($db, $input);
+            break;
+
+        case 'upload_pet_profile_picture':
+            $response = uploadPetProfilePicture($db, $input);
             break;
 
         case 'get_csrf_token':
@@ -1059,7 +1067,7 @@ function getPets() {
         $userId = $_SESSION['user_id'];
 
         if ($_SESSION['user_type'] === 'client') {
-            $pets = $db->fetchAll('SELECT * FROM pets WHERE owner_id = ? AND is_active = 1', [$userId]);
+            $pets = $db->fetchAll('SELECT p.*, u.first_name, u.last_name FROM pets p JOIN users u ON p.owner_id = u.id WHERE p.owner_id = ? AND p.is_active = 1', [$userId]);
         } else {
             $pets = $db->fetchAll('SELECT p.*, u.first_name, u.last_name FROM pets p JOIN users u ON p.owner_id = u.id WHERE p.is_active = 1');
         }
@@ -1171,11 +1179,19 @@ function getAppointments() {
     }
 }
 
-function getProducts() {
+function getProducts($input = null) {
     try {
         $db = getDB();
+
+        // Add cache-busting timestamp if requested
+        $cacheBuster = $input['cache_buster'] ?? null;
+        if ($cacheBuster === 'true') {
+            // Add a comment to force query plan refresh
+            $db->execute('SELECT 1 /* cache_buster: ' . time() . ' */');
+        }
+
         $products = $db->fetchAll('SELECT * FROM products WHERE is_active = 1 ORDER BY name');
-        return ['success' => true, 'data' => $products];
+        return ['success' => true, 'data' => $products, 'timestamp' => time()];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Failed to load products'];
     }
@@ -1194,6 +1210,7 @@ function addPet($db, $input) {
     $gender = trim($input['gender'] ?? '');
     $weight = floatval($input['weight'] ?? 0);
     $color = trim($input['color'] ?? '');
+    $profileImage = trim($input['profile_image'] ?? '');
 
     if (!$petName || !$species || !$gender) {
         return ['success' => false, 'message' => 'Pet name, species, and gender are required'];
@@ -1214,8 +1231,8 @@ function addPet($db, $input) {
         }
 
         $db->execute(
-            'INSERT INTO pets (owner_id, name, species, breed, birthdate, age, gender, weight, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [$_SESSION['user_id'], $petName, $species, $breed, $birthdate, $age, $gender, $weight, $color]
+            'INSERT INTO pets (owner_id, name, species, breed, birthdate, age, gender, weight, color, profile_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [$_SESSION['user_id'], $petName, $species, $breed, $birthdate, $age, $gender, $weight, $color, $profileImage]
         );
 
         $petId = $db->lastInsertId();
@@ -1824,6 +1841,13 @@ function getCart($db, $input) {
     }
 
     try {
+        // First, clean up any cart items that reference non-existent or inactive products
+        $db->execute('
+            DELETE FROM cart
+            WHERE user_id = ?
+            AND product_id NOT IN (SELECT id FROM products WHERE is_active = 1)
+        ', [$_SESSION['user_id']]);
+
         // Get cart items with product details
         $cartItems = $db->fetchAll('
             SELECT c.*, p.name, p.description, p.category, p.price, p.image, p.stock
@@ -2145,7 +2169,15 @@ function buyCart($db, $input) {
     $total = floatval($input['total'] ?? 0);
     $paymentMethod = trim($input['payment_method'] ?? '');
 
+    error_log("buyCart called with: " . json_encode([
+        'item_count' => count($items),
+        'total' => $total,
+        'payment_method' => $paymentMethod,
+        'items' => $items
+    ]));
+
     if (empty($items) || $total <= 0) {
+        error_log("buyCart: Invalid cart data - items: " . count($items) . ", total: " . $total);
         return ['success' => false, 'message' => 'Invalid cart data'];
     }
 
@@ -2175,22 +2207,34 @@ function buyCart($db, $input) {
         $orderId = $db->lastInsertId();
 
         // Add order items and update stock
+        $validItems = [];
+        $skippedItems = [];
+
         foreach ($items as $item) {
-            $productId = intval($item['id']);
+            $productId = intval($item['product_id'] ?? $item['id']);
             $quantity = intval($item['quantity']);
             $price = floatval($item['price']);
+
+            error_log("Processing cart item: Product ID {$productId}, Name: " . ($item['name'] ?? 'Unknown') . ", Quantity: {$quantity}, Price: {$price}");
 
             // Check if product exists and is in stock
             $product = $db->fetch('SELECT * FROM products WHERE id = ? AND is_active = 1', [$productId]);
             if (!$product) {
-                throw new Exception('Product not found: ' . $productId);
+                // Log the missing product but continue with other items
+                error_log("Product not found during checkout: ID {$productId}, item: " . json_encode($item));
+                $skippedItems[] = [
+                    'product_id' => $productId,
+                    'product_name' => $item['name'] ?? 'Unknown Product',
+                    'reason' => 'Product not found or inactive'
+                ];
+                continue; // Skip this item and continue with others
             }
 
             if ($product['stock'] < $quantity) {
-                throw new Exception('Insufficient stock for product: ' . $product['name']);
+                throw new Exception('Insufficient stock for product: ' . $product['name'] . ' (Available: ' . $product['stock'] . ', Requested: ' . $quantity . ')');
             }
 
-            // Add order item
+            // Add valid item to order
             $db->execute(
                 'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
                 [$orderId, $productId, $quantity, $price]
@@ -2201,16 +2245,53 @@ function buyCart($db, $input) {
                 'UPDATE products SET stock = stock - ? WHERE id = ?',
                 [$quantity, $productId]
             );
+
+            $validItems[] = [
+                'product_id' => $productId,
+                'product_name' => $product['name'],
+                'quantity' => $quantity,
+                'price' => $price
+            ];
+        }
+
+        // Check if we have any valid items
+        if (empty($validItems)) {
+            $errorDetails = 'No valid items found in cart. ';
+            if (!empty($skippedItems)) {
+                $errorDetails .= 'Skipped items: ' . count($skippedItems) . ' (';
+                foreach ($skippedItems as $skipped) {
+                    $errorDetails .= $skipped['product_name'] . ' - ' . $skipped['reason'] . ', ';
+                }
+                $errorDetails = rtrim($errorDetails, ', ') . ')';
+            } else {
+                $errorDetails .= 'Cart appears to be empty or contains invalid products.';
+            }
+            error_log("buyCart validation failed: " . $errorDetails);
+            throw new Exception($errorDetails);
         }
 
         // Commit transaction
         $db->execute('COMMIT');
 
+        // Calculate final total from valid items
+        $finalTotal = 0;
+        foreach ($validItems as $item) {
+            $finalTotal += $item['quantity'] * $item['price'];
+        }
+
+        $message = 'Cart purchase completed successfully!';
+        if (!empty($skippedItems)) {
+            $message .= ' Note: ' . count($skippedItems) . ' item(s) were skipped because they are no longer available.';
+        }
+
         return [
             'success' => true,
-            'message' => 'Cart purchase completed successfully!',
+            'message' => $message,
             'order_id' => $orderId,
-            'payment_method' => $paymentMethod
+            'payment_method' => $paymentMethod,
+            'final_total' => $finalTotal,
+            'valid_items_count' => count($validItems),
+            'skipped_items' => $skippedItems
         ];
     } catch (Exception $e) {
         // Rollback transaction on error
@@ -2404,6 +2485,23 @@ function updateOrderStatus($db, $input) {
         ];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Failed to update order status: ' . $e->getMessage()];
+    }
+}
+
+function clearCart($db, $input) {
+    if (!isset($_SESSION['user_id'])) {
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    try {
+        $db->execute('DELETE FROM cart WHERE user_id = ?', [$_SESSION['user_id']]);
+
+        return [
+            'success' => true,
+            'message' => 'Cart cleared successfully'
+        ];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Failed to clear cart: ' . $e->getMessage()];
     }
 }
 
@@ -2636,6 +2734,237 @@ function uploadProfilePicture($db, $input) {
     }
 }
 
+function uploadPetProfilePicture($db, $input) {
+    error_log("uploadPetProfilePicture called with input: " . json_encode($input)); // Debug log
+
+    if (!isset($_SESSION['user_id'])) {
+        error_log("User not logged in"); // Debug log
+        return ['success' => false, 'message' => 'Not logged in'];
+    }
+
+    $petId = intval($input['pet_id'] ?? 0);
+    $imageData = $input['image_data'] ?? '';
+    $imageName = $input['image_name'] ?? 'pet_' . $petId . '.jpg';
+
+    error_log("Pet ID: " . $petId); // Debug log
+    error_log("Image name: " . $imageName); // Debug log
+    error_log("Image data length: " . strlen($imageData)); // Debug log
+
+    if (!$imageData) {
+        error_log("No image data provided"); // Debug log
+        return ['success' => false, 'message' => 'No image data provided'];
+    }
+
+    try {
+        // If pet_id is 0, just save the image and return the path
+        if ($petId == 0) {
+            // Create uploads directory if it doesn't exist
+            $uploadDir = __DIR__ . '/../assets/images/profiles/';
+            error_log("Upload directory: " . $uploadDir); // Debug log
+
+            if (!is_dir($uploadDir)) {
+                error_log("Creating upload directory"); // Debug log
+                mkdir($uploadDir, 0755, true);
+                chmod($uploadDir, 0755);
+            }
+
+            // Decode base64 image data - handle multiple formats
+            $imageData = preg_replace('/^data:image\/(jpeg|png|gif|webp);base64,/', '', $imageData);
+            $imageData = str_replace(' ', '+', $imageData);
+            $imageBinary = base64_decode($imageData);
+
+            if (!$imageBinary) {
+                error_log("Invalid image data after decoding"); // Debug log
+                return ['success' => false, 'message' => 'Invalid image data'];
+            }
+
+            // Get original file extension or default to jpg
+            $originalName = $imageName ?? 'temp_pet_image.jpg';
+            $fileExtension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+            // If no extension or unsupported format, use jpg
+            if (empty($fileExtension) || !in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                $fileExtension = 'jpg';
+            }
+
+            // Generate unique filename with correct extension
+            $fileName = 'temp_pet_' . time() . '.' . $fileExtension;
+            $filePath = $uploadDir . $fileName;
+
+            // Save image
+            if (file_put_contents($filePath, $imageBinary) === false) {
+                error_log("Failed to save image to file"); // Debug log
+                return ['success' => false, 'message' => 'Failed to save image'];
+            }
+
+            // Set proper permissions for web server access
+            chmod($filePath, 0644);
+
+            // Verify file was saved correctly
+            if (!file_exists($filePath) || filesize($filePath) === 0) {
+                error_log("File was not saved correctly"); // Debug log
+                return ['success' => false, 'message' => 'Failed to save image file'];
+            }
+
+            // Verify the saved file is a valid image by checking its headers
+            $fileHandle = fopen($filePath, 'rb');
+            if ($fileHandle) {
+                $header = fread($fileHandle, 8);
+                fclose($fileHandle);
+
+                // Check for common image format headers
+                $isValidImage = false;
+                if (strpos($header, "\xFF\xD8\xFF") === 0) { // JPEG
+                    $isValidImage = true;
+                } elseif (strpos($header, "\x89PNG\r\n\x1a\n") === 0) { // PNG
+                    $isValidImage = true;
+                } elseif (strpos($header, "GIF87a") === 0 || strpos($header, "GIF89a") === 0) { // GIF
+                    $isValidImage = true;
+                } elseif (strpos($header, "RIFF") === 0 && strpos($header, "WEBP") !== false) { // WebP
+                    $isValidImage = true;
+                }
+
+                if (!$isValidImage) {
+                    error_log("Invalid image file header: " . bin2hex($header)); // Debug log
+                    // Remove the invalid file
+                    unlink($filePath);
+                    return ['success' => false, 'message' => 'Invalid image format'];
+                }
+            }
+
+            // Return the image path for later use
+            $relativePath = 'assets/images/profiles/' . $fileName;
+            error_log("Image saved successfully: " . $relativePath); // Debug log
+
+            return [
+                'success' => true,
+                'message' => 'Image uploaded successfully!',
+                'image_path' => $relativePath,
+                'temp_upload' => true
+            ];
+        }
+
+        // Check if pet exists and belongs to user
+        $pet = $db->fetch('SELECT * FROM pets WHERE id = ? AND owner_id = ?', [$petId, $_SESSION['user_id']]);
+        if (!$pet) {
+            error_log("Pet not found or not owned by user"); // Debug log
+            return ['success' => false, 'message' => 'Pet not found or not owned by you'];
+        }
+
+        // Create uploads directory if it doesn't exist
+        $uploadDir = __DIR__ . '/../assets/images/profiles/';
+        error_log("Upload directory: " . $uploadDir); // Debug log
+
+        if (!is_dir($uploadDir)) {
+            error_log("Creating upload directory"); // Debug log
+            mkdir($uploadDir, 0755, true);
+            chmod($uploadDir, 0755);
+        }
+
+        // Decode base64 image data - handle multiple formats
+        $imageData = preg_replace('/^data:image\/(jpeg|png|gif|webp);base64,/', '', $imageData);
+        $imageData = str_replace(' ', '+', $imageData);
+        $imageBinary = base64_decode($imageData);
+
+        error_log("Decoded image binary length: " . strlen($imageBinary)); // Debug log
+        error_log("Base64 data length before decode: " . strlen($imageData)); // Debug log
+
+        if (!$imageBinary) {
+            error_log("Invalid image data after decoding"); // Debug log
+            error_log("Base64 data sample: " . substr($imageData, 0, 100)); // Debug log
+            return ['success' => false, 'message' => 'Invalid image data'];
+        }
+
+        // Verify the decoded data looks like a valid image
+        if (strlen($imageBinary) < 100) {
+            error_log("Image data too small: " . strlen($imageBinary)); // Debug log
+            return ['success' => false, 'message' => 'Image data too small'];
+        }
+
+        // Get original file extension or default to jpg
+        $originalName = $imageName ?? 'pet_' . $petId . '.jpg';
+        $fileExtension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+        // If no extension or unsupported format, use jpg
+        if (empty($fileExtension) || !in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+            $fileExtension = 'jpg';
+        }
+
+        // Generate unique filename with correct extension
+        $fileName = 'pet_' . $petId . '_' . time() . '.' . $fileExtension;
+        $filePath = $uploadDir . $fileName;
+
+        error_log("Saving to file: " . $filePath); // Debug log
+        error_log("Original format: " . $fileExtension); // Debug log
+        error_log("Image binary size: " . strlen($imageBinary)); // Debug log
+
+        // Save image
+        if (file_put_contents($filePath, $imageBinary) === false) {
+            error_log("Failed to save image to file"); // Debug log
+            return ['success' => false, 'message' => 'Failed to save image'];
+        }
+
+        // Set proper permissions for web server access
+        chmod($filePath, 0644);
+
+        // Verify file was saved correctly
+        if (!file_exists($filePath) || filesize($filePath) === 0) {
+            error_log("File was not saved correctly"); // Debug log
+            return ['success' => false, 'message' => 'Failed to save image file'];
+        }
+
+        // Verify the saved file is a valid image by checking its headers
+        $fileHandle = fopen($filePath, 'rb');
+        if ($fileHandle) {
+            $header = fread($fileHandle, 8);
+            fclose($fileHandle);
+
+            // Check for common image format headers
+            $isValidImage = false;
+            if (strpos($header, "\xFF\xD8\xFF") === 0) { // JPEG
+                $isValidImage = true;
+                error_log("Valid JPEG image detected"); // Debug log
+            } elseif (strpos($header, "\x89PNG\r\n\x1a\n") === 0) { // PNG
+                $isValidImage = true;
+                error_log("Valid PNG image detected"); // Debug log
+            } elseif (strpos($header, "GIF87a") === 0 || strpos($header, "GIF89a") === 0) { // GIF
+                $isValidImage = true;
+                error_log("Valid GIF image detected"); // Debug log
+            } elseif (strpos($header, "RIFF") === 0 && strpos($header, "WEBP") !== false) { // WebP
+                $isValidImage = true;
+                error_log("Valid WebP image detected"); // Debug log
+            }
+
+            if (!$isValidImage) {
+                error_log("Invalid image file header: " . bin2hex($header)); // Debug log
+                // Remove the invalid file
+                unlink($filePath);
+                return ['success' => false, 'message' => 'Invalid image format'];
+            }
+        }
+
+        // Update pet profile with image path
+        $relativePath = 'assets/images/profiles/' . $fileName;
+        error_log("Updating database with path: " . $relativePath); // Debug log
+
+        $db->execute(
+            'UPDATE pets SET profile_image = ? WHERE id = ?',
+            [$relativePath, $petId]
+        );
+
+        error_log("Database update completed successfully"); // Debug log
+
+        return [
+            'success' => true,
+            'message' => 'Pet profile picture updated successfully!',
+            'image_path' => $relativePath
+        ];
+    } catch (Exception $e) {
+        error_log("Exception in uploadPetProfilePicture: " . $e->getMessage()); // Debug log
+        return ['success' => false, 'message' => 'Failed to upload pet profile picture: ' . $e->getMessage()];
+    }
+}
+
 // Product management functions
 function addProduct($db, $input) {
     if (!isset($_SESSION['user_id'])) {
@@ -2685,11 +3014,24 @@ function addProduct($db, $input) {
 
         $productId = $db->lastInsertId();
 
+        // Notify all active clients about the new product
+        $clientUsers = $db->fetchAll('SELECT id FROM users WHERE user_type = "client" AND is_active = 1');
+        $notificationCount = 0;
+        foreach ($clientUsers as $client) {
+            if (isNotificationEnabled($db, $client['id'], 'product_new')) {
+                createNotification($db, $client['id'], 'product_new', 'New Product Available',
+                    "A new product \"{$name}\" has been added to the store.", 'normal',
+                    ['product_id' => $productId, 'product_name' => $name, 'category' => $category]);
+                $notificationCount++;
+            }
+        }
+
         return [
             'success' => true,
             'message' => 'Product added successfully!',
             'product_id' => $productId,
-            'image_uploaded' => !empty($imagePath)
+            'image_uploaded' => !empty($imagePath),
+            'notifications_sent' => count($clientUsers)
         ];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Failed to add product: ' . $e->getMessage()];
@@ -3266,6 +3608,7 @@ function updatePet($db, $input) {
     $gender = trim($input['gender'] ?? '');
     $weight = floatval($input['weight'] ?? 0);
     $color = trim($input['color'] ?? '');
+    $profileImage = trim($input['profile_image'] ?? '');
 
     if (!$petId) {
         return ['success' => false, 'message' => 'Pet ID is required'];
@@ -3297,8 +3640,8 @@ function updatePet($db, $input) {
 
         // Update pet
         $db->execute(
-            'UPDATE pets SET name = ?, species = ?, breed = ?, birthdate = ?, age = ?, gender = ?, weight = ?, color = ? WHERE id = ?',
-            [$name, $species, $breed, $birthdate, $age, $gender, $weight, $color, $petId]
+            'UPDATE pets SET name = ?, species = ?, breed = ?, birthdate = ?, age = ?, gender = ?, weight = ?, color = ?, profile_image = ? WHERE id = ?',
+            [$name, $species, $breed, $birthdate, $age, $gender, $weight, $color, $profileImage, $petId]
         );
 
         return [

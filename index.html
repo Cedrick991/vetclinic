@@ -139,8 +139,18 @@
     <h2>CONTACT US</h2>
     <div class="contact-info">
       <div class="contact-details">
-        <div class="contact-item"><div class="icon">📧</div><p>tattaoveterinaryclinic@gmail.com</p></div>
-        <div class="contact-item"><div class="icon facebook"><strong>f</strong></div><p>Tattao Veterinary Clinic</p></div>
+        <a href="mailto:tattaoveterinaryclinic@gmail.com" style="text-decoration: none; color: inherit;">
+          <div class="contact-item">
+            <div class="icon">📧</div>
+            <p>tattaoveterinaryclinic@gmail.com</p>
+          </div>
+        </a>
+        <a href="https://www.facebook.com/share/16H1LSHgNL/" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+          <div class="contact-item">
+            <div class="icon facebook"><strong>f</strong></div>
+            <p>Tattao Veterinary Clinic</p>
+          </div>
+        </a>
         <div class="contact-item"><div class="icon">📞</div><p>0917 519 4639</p></div>
         <div class="contact-item"><div class="icon">📞</div><p>0975 339 7908</p></div>
         <div class="contact-item"><div class="icon">📍</div><p>ZONE 2 NATIONAL HIGHWAY, ALIMANAO,<br>PENABLANCA, CAGAYAN</p></div>
@@ -164,39 +174,6 @@
     </div>
           </section>
 
-  <!-- Schedule Section -->
-  <section class="schedule">
-    <div class="hours">
-      <div class="day-box">MONDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box">TUESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box">WEDNESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box">THURSDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box">FRIDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box">SATURDAY<br><span>9:00 AM TO 6:00 PM</span></div>
-      <div class="day-box closed">SUNDAY<br><span>CLOSED</span></div>
-    </div>
-
-    <div class="schedule-container">
-      <div class="schedule-left">
-        <img src="assets/images/logoo.jpg" alt="Clinic Logo">
-        
-        <div class="footer-social">
-          <a href="https://www.facebook.com/share/16H1LSHgNL/" target="_blank" rel="noopener noreferrer" title="Visit our Facebook page">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-          </a>
-          <a href="mailto:tattaoveterinaryclinic@gmail.com" title="Send us an email">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-      
-    </div>
-     </div>
-   </section>
 
   <!-- Store Section -->
   <section class="store-section" id="store">
@@ -253,6 +230,20 @@
       </div>
     </section>
 
+    <!-- Schedule Section -->
+    <section class="schedule">
+      <h2>CLINIC HOURS</h2>
+      <div class="hours">
+        <div class="day-box">MONDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box">TUESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box">WEDNESDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box">THURSDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box">FRIDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box">SATURDAY<br><span>9:00 AM TO 6:00 PM</span></div>
+        <div class="day-box closed">SUNDAY<br><span>CLOSED</span></div>
+      </div>
+    </section>
+
     <!-- Separator Line -->
     <div class="section-separator"></div>
 
@@ -273,7 +264,7 @@
             </div>
             <h3 class="vet-name">Dr. Sheryl Mangulad</h3>
             <p class="vet-bio">
-              Friendly and approachable, she combines her strong medical knowledge and genuine empathy for both pets and owners. She specializes in providing gentle care, making every visit a positive and reassuring experience.
+              Clinic Veterinarian
             </p>
           </div>
 
@@ -286,7 +277,7 @@
             </div>
             <h3 class="vet-name">Dr. Judith Tattao</h3>
             <p class="vet-bio">
-              A skilled veterinarian known for her professionalism, attention to detail, and compassionate care. With expertise in diagnostics and preventive care, she is dedicated to guiding pet owners in keeping their animals healthy and thriving.
+              Clinic Veterinarian
             </p>
           </div>
         </div>
@@ -994,6 +985,92 @@
       color: white;
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
+
+    /* Schedule section title */
+    .schedule h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    /* Toast notification positioning */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #2E5BAA, #1E3F7A);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      z-index: 10001;
+      font-size: 14px;
+      font-weight: 500;
+      max-width: calc(100vw - 40px);
+      word-wrap: break-word;
+      display: none;
+      animation: slideUp 0.4s ease-out;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      display: flex;
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .toast.warning {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+    }
+
+    .toast.info {
+      background: linear-gradient(135deg, #17a2b8, #138496);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Mobile toast adjustments */
+    @media (max-width: 768px) {
+      .toast {
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 30px);
+        padding: 12px 20px;
+        font-size: 13px;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .toast {
+        bottom: 10px;
+        padding: 10px 15px;
+        font-size: 12px;
+        max-width: calc(100vw - 20px);
+        gap: 6px;
+      }
+    }
     
     /* Modal Icons */
     .modal-icon {
@@ -1309,17 +1386,6 @@
       position: relative;
     }
 
-    .section-separator::before {
-      content: '🐾';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, hsl(230, 55%, 45%) 0%, hsl(250, 50%, 55%) 100%);
-      padding: 0 1rem;
-      font-size: 1.5rem;
-      opacity: 0.6;
-    }
 
     /* Vets Section */
     .vets-section {
